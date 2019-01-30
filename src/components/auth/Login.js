@@ -4,8 +4,6 @@ import { Redirect } from "react-router-dom";
 
 import { Container, Button, Dimmer, Loader, Header, Grid, Form, Segment, Input, Divider, Message, Icon } from 'semantic-ui-react'
 
-import Social from './Social';
-
 @inject("store")
 @observer
 export default class Login extends Component {
@@ -142,8 +140,6 @@ export default class Login extends Component {
 								<div>
 									<Button color='violet' fluid size='small' onClick={this.handelLogin.bind(this)}>SIGN IN</Button>
 								</div>
-								<Divider horizontal>Or</Divider>
-								<Social />
 							</Segment>
 						</Form>
 						<Message>

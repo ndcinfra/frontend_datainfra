@@ -7,11 +7,14 @@ import validator from 'validator';
 
 import * as AuthAPI from '../lib/api/auth';
 import * as UserAPI from '../lib/api/user';
+import * as S3API from '../lib/api/s3';
 
 import storage from '../lib/storage';
 import redirect from '../lib/redirect';
 import social from '../lib/social';
 import hello from 'hellojs';
+import request from 'superagent';
+
 
 export default class AppState {
   @observable authenticated;
@@ -19,7 +22,6 @@ export default class AppState {
   @observable items;
   @observable item;
   @observable testval;
-
   //
   @observable displayname;
   @observable email;
@@ -37,6 +39,8 @@ export default class AppState {
   @observable profileEmail;
   @observable profileDisplayname;
   @observable profileProvider;
+
+  @observable imgUrl;
 
   constructor() {
     this.authenticated = false;
@@ -74,8 +78,17 @@ export default class AppState {
       gravatar: '',
       balance: '0',
       gravatar: '',
+      permission: '',
     }
+
+    this.imgUrl = '';
+
   }
+
+  @action setImgUrl(value) {
+    this.imgUrl = value;
+  }
+  
 
   @action setProfileEmail(value) {
     this.originProfileEmail = value;
@@ -113,13 +126,14 @@ export default class AppState {
     //this.setClearMessage();
   }
 
-  @action setAuthenticated(auth, UID, displayname, balance, gravater) {
+  @action setAuthenticated(auth, UID, displayname, balance, gravater, permission) {
     //console.log("setAuth: ", UID, displayname);
     this.authenticated = auth;
     this.loggedInUserInfo.UID = UID;
     this.loggedInUserInfo.displayname = displayname;
     this.loggedInUserInfo.balance = balance;
     this.loggedInUserInfo.gravatar = gravater;
+    this.loggedInUserInfo.permission = permission;
   }
 
   @action setInitLoggedInUserInfo() {
@@ -131,6 +145,7 @@ export default class AppState {
     this.loggedInUserInfo.displayname = '';
     this.loggedInUserInfo.balance = '0';
     this.loggedInUserInfo.gravatar = '';
+    this.loggedInUserInfo.permission = '';
 
     //this.setClearMessage();
   }
@@ -149,6 +164,45 @@ export default class AppState {
   @action setErrorFlashMessage(msg) {
     this.errorFlash = msg;
     this.setLoading('off');
+  }
+
+
+  // setImgUrl
+  async GetImgUrl(acceptedFiles) {
+    var file = new FormData();
+    file.append('file',acceptedFiles[0])
+
+    console.log(file);
+
+    let respData = null;
+    try {
+      respData = await S3API.getImgUrl(file);
+
+      console.log("reponse: ", respData);
+      let result = JSON.parse(respData.text);
+      console.log("result: ", result.data);
+        //setImgUrl(result.data);
+      this.setImgUrl(result.data);
+
+    }catch(err){
+      console.log("getImgUrl err: ", err);
+    }
+
+    /*
+    var req=request
+              .post('http://localhost:8080/v1/s3/uploadImage')
+              .send(file);
+
+    req.end(function(err,response){
+        console.log("upload done!!!!!");
+        console.log("err: ", err);
+        console.log("reponse: ", response);
+        let result = JSON.parse(response.text);
+        console.log("result: ", result.data);
+        //setImgUrl(result.data);
+        this.setImgUrl = result.data;
+    });
+    */
   }
 
   // Signup
@@ -289,7 +343,7 @@ export default class AppState {
         await this.setInitLoggedInUserInfo()
       } else {
 
-        //console.log('check auth: ', auth.data.data.uid);
+        console.log('check auth: ', auth.data.data);
 
         await this.setAuthenticated(
           true,

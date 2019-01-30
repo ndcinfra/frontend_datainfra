@@ -79,6 +79,7 @@ export default class TopBar extends Component {
 		const { authenticated, loggedInUserInfo } = this.store;
 
 		var Viewpane = null;
+		var Resourcepane = null;
 		const { activeItem } = this.state;
 
 		
@@ -97,6 +98,12 @@ export default class TopBar extends Component {
 					</Menu.Item>
 				</Menu.Menu>
 			)
+
+
+			Resourcepane = (
+				<Menu.Item name='resource' active={activeItem === 'resource'} onClick={this.handleItemClick} />
+			)
+
 		}else{
 			Viewpane = (
 				<Menu.Menu position='right'>
@@ -104,6 +111,7 @@ export default class TopBar extends Component {
 					<Menu.Item name='signup' active={activeItem === 'signup'} onClick={this.handleItemClick} />
 				</Menu.Menu>
 			)
+
 		}
 
 		
@@ -111,7 +119,7 @@ export default class TopBar extends Component {
 			<div>
 				<Menu size='tiny' pointing borderless={true} fixed='top'>
 					<Menu.Item name='home' active={activeItem === 'home'} onClick={this.handleItemClick} />
-					
+					{Resourcepane}
 					{Viewpane}
 				</Menu>
 			</div>

@@ -12,6 +12,7 @@ import NotFound from "./NotFound";
 import Home from "./Home";
 import { Login, Logout, Signup } from './auth/index';
 import {ConfirmEmail, InvalidConfirmEmail, ForgotPassword, ResetPassword, Profile } from './user/index';
+import {Resource} from './resource/index';
 
 @withRouter
 @inject("store")
@@ -45,6 +46,8 @@ export default class App extends Component {
 						<Route path="/forgotPassword" component={ForgotPassword} />
 						<Route path="/resetPassword/:token" component={ResetPassword} />
 						<Route path="/profile" component={Profile} />
+
+						<Route path="/resource" component={Resource} />
 
 						<Route component={NotFound}/> 
 					</Switch>

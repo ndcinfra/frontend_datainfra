@@ -43,13 +43,14 @@
     "style-loader": "^0.18.2",
     "url-loader": "^1.1.1",
     "webpack": "^3.5.6",
-    "webpack-dev-server":"~3.1.14"
+    "webpack-dev-server": "^2.4.5"
   },
   "dependencies": {
     "axios": "^0.16.2",
     "css-declaration-sorter": "^2.0.0",
     "css-mqpacker": "^6.0.1",
     "faker": "^4.1.0",
+    "form-data": "^2.3.3",
     "hellojs": "^1.17.1",
     "lazy-route": "^1.0.7",
     "mobx": "^3.2.2",
@@ -61,12 +62,14 @@
     "pushstate-server": "^3.0.1",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
+    "react-dropzone": "^8.0.3",
     "react-load-script": "0.0.6",
     "react-router-dom": "latest",
     "react-router-last-location": "^1.1.0",
     "react-slick": "^0.23.2",
     "rfx-core": "^1.5.3",
     "semantic-ui-react": "^0.82.5",
+    "superagent": "^4.1.0",
     "tabulator-tables": "^4.0.5",
     "validator": "^10.8.0",
     "whatwg-fetch": "^2.0.3"

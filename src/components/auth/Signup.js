@@ -5,8 +5,6 @@ import { withLastLocation } from 'react-router-last-location';
 
 import { Container, Button, Header, Dimmer, Message, Grid, Form, Segment, Input, Divider, Label, Loader } from 'semantic-ui-react'
 
-import Social from './Social';
-
 @withRouter
 @inject("store")
 @observer
@@ -122,8 +120,6 @@ export default class Signup extends Component {
 								<div>
 									<Button color='violet' fluid size='small' onClick={this.handelSignup.bind(this)}>SIGN UP</Button>
 								</div>
-								<Divider horizontal>Or</Divider>
-								<Social />
 							</Segment>
                         </Form>
                         <Message>

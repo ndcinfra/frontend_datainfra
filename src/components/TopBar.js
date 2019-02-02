@@ -99,9 +99,15 @@ export default class TopBar extends Component {
 				</Menu.Menu>
 			)
 
-
 			Resourcepane = (
-				<Menu.Item name='resource' active={activeItem === 'resource'} onClick={this.handleItemClick} />
+				<Menu.Item name='resource' active={activeItem === 'resource'} onClick={this.handleItemClick}>
+					<Dropdown item text='Resource' size='mini' >
+						<Dropdown.Menu>
+							<Dropdown.Item name='resource/register' onClick={this.handleItemClick.bind(this)}>Register</Dropdown.Item>
+							<Dropdown.Item name='resource/list' onClick={this.handleItemClick.bind(this)}>List</Dropdown.Item>
+						</Dropdown.Menu>
+					</Dropdown>
+				</Menu.Item>
 			)
 
 		}else{
@@ -114,7 +120,6 @@ export default class TopBar extends Component {
 
 		}
 
-		
 		return (
 			<div>
 				<Menu size='tiny' pointing borderless={true} fixed='top'>

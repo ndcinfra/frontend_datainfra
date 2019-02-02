@@ -1,10 +1,10 @@
 
 export default (function() {
-    const forumUrl = 'http://localhost:4567/';
+    const forumUrl = 'http://localhost:3000/';
     return {
       set: (history, lastLocation) => {
-          //console.log('redirect: ', document.referrer);
-          //console.log('redirect: ', lastLocation);
+          console.log('redirect: ', document.referrer);
+          console.log('redirect: ', lastLocation);
 
         if( (document.referrer !== '' ) && (document.referrer === forumUrl) ){
             history.push('/');

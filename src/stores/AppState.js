@@ -233,8 +233,7 @@ export default class AppState {
       let respData = null;
       try {
         // call backend
-        respData = await AuthAPI.localRegister({ ...this.userInfo
-        });
+        respData = await AuthAPI.localRegister({ ...this.userInfo});
 
         // set init userinfo
         this.setInitUserInfo();
@@ -327,7 +326,7 @@ export default class AppState {
     let cookieInfo = null;
     cookieInfo = storage.get('___GOM___');
 
-    console.log("cookie: ", cookieInfo);
+    //console.log("cookie: ", cookieInfo);
 
     if (cookieInfo) {
       let auth = null;
@@ -352,6 +351,8 @@ export default class AppState {
           auth.data.data.balance.toString(),
           auth.data.data.picture
         );
+
+        console.log('authenticated: ', this.authenticated);
       }
     } else {
       console.log('no gom');
@@ -767,6 +768,50 @@ export default class AppState {
 
     }
   }
+
+
+  // this is to payment history.
+  async GetResourceAll(history) {
+    //console.log('billingState');
+    await this.checkAuth(); // TODO: ??
+
+    if (!this.authenticated) {
+        this.setErrorFlashMessage('Need login first');
+        history.push('/login');
+
+    } else {
+        //console.log('fetchHistory');
+            var table = new Tabulator("#tabulator-1", {
+                height: 511, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+                layout: "fitColumns", //fit columns to width of table (optional)
+                responsiveLayout: true,
+                placeholder: "No Data Available", //display message to user on empty table
+                columns: [ //Define Table Columns
+                    {
+                        title: "No",
+                        //formatter: "rownum",
+                        field: "id",
+                        align: "center",
+                        width: 100,
+                    },
+                    {
+                        title: "Image URL",
+                        field: "imgurl",
+                        align: "left",
+                        //formatter: "image"
+                        formatter: function(cell, formatterParams) {
+                          console.log(cell.getValue());
+                          return '<img src="'+cell.getValue()+'" height="150" width="150"/>';
+                        }
+                    },
+                ],
+
+            });
+
+            table.setData('http://localhost:8080/v1/resource/listAll', {}, "GET");
+
+    }
+}
 
 
   // ------------------------------------------------------------------------------------------------------------

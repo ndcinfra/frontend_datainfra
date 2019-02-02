@@ -1,33 +1,47 @@
 import React, { Component } from 'react';
 import { inject, observer } from "mobx-react";
-import { Link, withRouter } from "react-router-dom";
+import { Redirect, withRouter } from "react-router-dom";
 
 import { Icon, Container, Button, Header, Dimmer, Message, Grid, Form, Segment, Input, Divider, Label, Loader} from 'semantic-ui-react'
 
 import classNames from 'classnames'
 import Dropzone from 'react-dropzone'
-import request from 'superagent';
 
-@withRouter
 @inject("store")
 @observer
-class Resource extends Component {
+class Register extends Component {
     
     constructor(props) {
         super(props);
         this.store = this.props.store.appState;
-        console.log("constructor imgUrl: ", this.store.imgUrl);
-        this.store.checkAuth();
+        console.log('constructor');
+
+        //for checking auth whe reload
+        //this.store.checkAuth();
+        
+        // direct input & reload
+        if (this.store.authenticated !== true) {
+			const {history} = this.props;
+			//this.store.setSuccessFlashMessage('You need logged in.');
+            history.push('/login');
+		}
     }
 
     componentDidMount() {
         console.log('componentDidMount');
-        
+
+        //this.authenticate();
+        console.log("register.js: ", this.store.authenticated);
     }
 
     componentDidUpdate(){
-        console.log('componentDidUpdate');s
+        console.log('resource rigister componentDidUpdate');
     }
+
+    componentWillUnmount() {
+        console.log('componentWillUnmount');
+    }
+
     
     onDrop = (acceptedFiles, rejectedFiles) => {
         // Do something with files
@@ -36,7 +50,7 @@ class Resource extends Component {
       }
       
     render() {
-        const { userInfo, imgUrl, error, loading } = this.store;
+        const { authenticated, userInfo, imgUrl, error, loading } = this.store;
         
         const ErrorView = (
             <Message error visible size='tiny'>{error}</Message>
@@ -97,14 +111,14 @@ class Resource extends Component {
                 
                 <Grid textAlign='center' style={{ height: '100%' }} verticalAlign='middle' >
                     <Grid.Column style={{ maxWidth: 700 }}>
-                        <Header as='h2' textAlign='center'>Register a Resource</Header>
+                        <Header as='h2' textAlign='center'>Register a Resources</Header>
 						<Form size='large'>
                             <Segment>
 								<Form.Field>
 									<Input 
 										icon='user' 
 										iconPosition='left' 
-										placeholder='test' 
+										placeholder={authenticated}
 										name='displayname'
 										value={userInfo.displayname} 
                             			onChange={this.handleInputDisplayName}
@@ -150,11 +164,13 @@ class Resource extends Component {
 							</Segment>
                         </Form>
 					</Grid.Column>
-				</Grid>
+                </Grid>
                 
             </Container>
+
+            
         );
     }
 }
 
-export default Resource;
+export default Register;

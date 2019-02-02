@@ -12,7 +12,7 @@ import NotFound from "./NotFound";
 import Home from "./Home";
 import { Login, Logout, Signup } from './auth/index';
 import {ConfirmEmail, InvalidConfirmEmail, ForgotPassword, ResetPassword, Profile } from './user/index';
-import {Resource} from './resource/index';
+import {Register, List} from './resource/index';
 
 @withRouter
 @inject("store")
@@ -22,13 +22,27 @@ export default class App extends Component {
 		super(props);
 		this.store = this.props.store;
 	}
+	
 	componentDidMount() {
 		//this.authenticate();
+		console.log("app.js componentDidMount")
 	}
-	authenticate(e) {
+
+	authenticate = async (e) =>{
 		if (e) e.preventDefault();
 		//this.store.appState.authenticate();
-		this.store.appState.checkAuth();
+		await this.store.appState.checkAuth();
+		console.log("app.js: ", this.store.appState.authenticated);
+
+		/*
+		if (this.store.authenticated === true) {
+			const {history} = this.props;
+			this.store.setSuccessFlashMessage('You already logged in.');
+			history.push('/');
+		}
+		
+		window.location.href = '/auth/login?expired';
+		*/
 	}
 	render() {
 
@@ -47,7 +61,8 @@ export default class App extends Component {
 						<Route path="/resetPassword/:token" component={ResetPassword} />
 						<Route path="/profile" component={Profile} />
 
-						<Route path="/resource" component={Resource} />
+						<Route path="/resource/register" {...this.store.appState.authenticated} component={Register} />
+						<Route path="/resource/list" component={List} />
 
 						<Route component={NotFound}/> 
 					</Switch>

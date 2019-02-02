@@ -17,7 +17,7 @@ export default function Protected(Children) {
 				<div className="authComponent">
 					{authenticated
 						? <Children {...this.props} />
-						: !authenticating && !authenticated
+						: !authenticated
 								? <Redirect
 										to={{
 											pathname: "/login",

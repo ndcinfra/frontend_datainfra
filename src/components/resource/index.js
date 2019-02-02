@@ -1,1 +1,2 @@
-export { default as Resource } from './Resource';
+export { default as Register } from './Register';
+export { default as List } from './List';

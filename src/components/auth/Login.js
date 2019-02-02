@@ -4,6 +4,8 @@ import { Redirect } from "react-router-dom";
 
 import { Container, Button, Dimmer, Loader, Header, Grid, Form, Segment, Input, Divider, Message, Icon } from 'semantic-ui-react'
 
+import redirect from '../../lib/redirect';
+
 @inject("store")
 @observer
 export default class Login extends Component {
@@ -22,12 +24,12 @@ export default class Login extends Component {
 		console.log('login componentDidMount');
     }
     
-   
     componentDidUpdate(){
 		console.log('login componentDidUpdate');
 		
 		if (this.store.authenticated === true) {
-			const {history} = this.props;
+			const {history,lastLocation} = this.props;
+			//console.log("login lastlocation: ", lastLocation);
 			this.store.setSuccessFlashMessage('You already logged in.');
 			history.push('/');
 		}

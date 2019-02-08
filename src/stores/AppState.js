@@ -781,35 +781,110 @@ export default class AppState {
 
     } else {
         //console.log('fetchHistory');
-            var table = new Tabulator("#tabulator-1", {
-                height: 511, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
-                layout: "fitColumns", //fit columns to width of table (optional)
-                responsiveLayout: true,
-                placeholder: "No Data Available", //display message to user on empty table
-                columns: [ //Define Table Columns
-                    {
-                        title: "No",
-                        //formatter: "rownum",
-                        field: "id",
-                        align: "center",
-                        width: 100,
-                    },
-                    {
-                        title: "Image URL",
-                        field: "imgurl",
-                        align: "left",
-                        //formatter: "image"
-                        formatter: function(cell, formatterParams) {
-                          console.log(cell.getValue());
-                          return '<img src="'+cell.getValue()+'" height="150" width="150"/>';
-                        }
-                    },
-                ],
 
-            });
+        //Custom filter example
+        
+        /*
+        function customFilter(data){
+          return data.car && data.rating < 3;
+        }
+        */
 
-            table.setData('http://localhost:8080/v1/resource/listAll', {}, "GET");
+        //Trigger setFilter function with correct parameters
+        function updateFilter(){
+          //var filter = $("#filter-field").val() == "function" ? customFilter : $("#filter-field").val();
+          var filter = $("#filter-field").val();
 
+          if($("#filter-field").val() == "function" ){
+              $("#filter-type").prop("disabled", true);
+              $("#filter-value").prop("disabled", true);
+          }else{
+              $("#filter-type").prop("disabled", false);
+              $("#filter-value").prop("disabled", false);
+          }
+
+          table.setFilter(filter, $("#filter-type").val(), $("#filter-value").val());
+        }
+
+        //Update filters on value change
+        $("#filter-field, #filter-type").change(updateFilter);
+        $("#filter-value").keyup(updateFilter);
+        
+        //Clear filters on "Clear Filters" button click
+        $("#filter-clear").click(function(){
+          $("#filter-field").val("");
+          $("#filter-type").val("=");
+          $("#filter-value").val("");
+
+          table.clearFilter();
+        });
+
+        //csv
+        //trigger download of data.csv file
+        $("#download-csv").click(function(){
+          table.download("csv", "data.csv");
+        });
+
+        //custom formatter definition
+        var editIcon = function(cell, formatterParams, onRendered){ //plain text value
+          return "<i className='fas fa-edit'>Edit</i>";
+        };
+
+        var table = new Tabulator("#tabulator-1", {
+            //height: 511, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+            autoResize:true, 
+            resizableRows:true,
+            layout: "fitColumns", //fit columns to width of table (optional)
+            responsiveLayout: true,
+            placeholder: "No Data Available", //display message to user on empty table
+            columns: [ //Define Table Columns
+                {
+                    title: "No",
+                    //formatter: "rownum",
+                    field: "id",
+                    align: "center",
+                    width: 100,
+                },
+                {
+                    title: "Character",
+                    //formatter: "rownum",
+                    field: "character",
+                    align: "center",
+                    width: 200,
+                    headerFilter:true,
+                },
+                {
+                    title: "Image URL",
+                    field: "imgurl",
+                    width: 150,
+                    align: "left",
+                    //formatter: "image"
+                    formatter: function(cell, formatterParams) {
+                      console.log(cell.getValue());
+                      return '<img src="'+cell.getValue()+'" height="150" width="150"/>';
+                    }
+                },
+                //column definition in the columns array
+                {
+                  title: "Edit / Delete",
+                  formatter:editIcon, 
+                  align:"center", 
+                  cellClick:function(e, cell){
+                    alert("Printing row data for: " + cell.getRow().getData().name)
+                    // call ajax and set detail data and modal open
+                  }
+                },
+
+                //{title:"Example", field:"example", formatter:"buttonTick"},
+                //{title:"Example", field:"example", formatter:"handle"},
+            ],
+
+        });
+
+        table.setData('http://localhost:8080/v1/resource/listAll', {}, "GET");
+
+
+        
     }
 }
 

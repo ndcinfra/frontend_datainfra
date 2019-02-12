@@ -39,6 +39,10 @@ export default class Signup extends Component {
         this.store.userInfo.password = value;
     }
 
+    handleInputConfirmPassword = (e, { value }) => {
+        this.store.userInfo.confirmPassword = value;
+    }
+
     handleInputDisplayName = (e, { value }) => {
         this.store.userInfo.displayname = value;
 	}
@@ -110,6 +114,17 @@ export default class Signup extends Component {
 										name='Password'
 										value={userInfo.password} 
                             			onChange={this.handleInputPassword}
+									/>
+                                </Form.Field>
+                                <Form.Field>
+									<Input 
+										icon='lock' 
+										iconPosition='left' 
+										placeholder='Confirm Password' 
+										type='password' 
+										name='confirmPassword'
+										value={userInfo.confirmPassword} 
+                            			onChange={this.handleInputConfirmPassword}
 									/>
                                 </Form.Field>
                                 <Form.Field>

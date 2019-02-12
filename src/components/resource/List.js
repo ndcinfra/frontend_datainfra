@@ -8,12 +8,10 @@ import { Dimmer, Loader, Segment, Container,Modal, Button, Header, Image } from 
 @inject("store")
 @observer
 class List extends Component {
-    state = { open: false }
+    //state = { open: false }
+    //show = dimmer => () => this.setState({ dimmer, open: true })
+    //close = () => this.setState({ open: false })
 
-    show = dimmer => () => this.setState({ dimmer, open: true })
-    close = () => this.setState({ open: false })
-
-    
     constructor(props) {
         super(props);
         this.store = this.props.store.appState;
@@ -24,44 +22,58 @@ class List extends Component {
         this.store.GetResourceAll(history);        
     }
 
+    show = () => this.store.setModal(true) 
+    close = () => this.store.setModal(false) 
+
+
+	handeShow(e){
+		e.preventDefault();
+		this.store.setModal(true);
+    }
+    
+
+	handeClose(e){
+		e.preventDefault();
+		this.store.setModal(false);
+	}
+
     render() {
-        const { open, dimmer } = this.state
+        // const { open, dimmer, modalOpened } = this.state
+        const { modalOpened } = this.store
 
         const modal = (
-            <div >
-                    <Button onClick={this.show(true)}>Default</Button>
-                    <Button onClick={this.show('inverted')}>Inverted</Button>
-                    <Button onClick={this.show('blurring')}>Blurring</Button>
-            
-                    <Modal style={{position: 'static'}} dimmer={dimmer} open={open} onClose={this.close} >
-                        <Modal.Header>Select a Photo</Modal.Header>
-                        <Modal.Content image>
-                            <Image wrapped size='medium' src=''></Image>
-                            <Modal.Description>
-                            <Header>Default Profile Image</Header>
-                            <p>We've found the following gravatar image associated with your e-mail address.</p>
-                            <p>Is it okay to use this photo?</p>
-                            </Modal.Description>
-                        </Modal.Content>
-                        <Modal.Actions>
-                            <Button color='black' onClick={this.close}>
-                            Nope
-                            </Button>
-                            <Button
-                            positive
-                            icon='checkmark'
-                            labelPosition='right'
-                            content="Yep, that's me"
-                            onClick={this.close}
-                            />
-                        </Modal.Actions>
-                    </Modal>
-                </div>
+            <div>
+                <Button onClick={this.handeShow.bind(this)}>Default</Button>
+        
+                <Modal style={{position: 'static'}} open={modalOpened} onClose={this.handeClose.bind(this)} >
+                    <Modal.Header>Select a Photo</Modal.Header>
+                    <Modal.Content image>
+                        <Image wrapped size='medium' src=''></Image>
+                        <Modal.Description>
+                        <Header>Default Profile Image</Header>
+                        <p>We've found the following gravatar image associated with your e-mail address.</p>
+                        <p>Is it okay to use this photo?</p>
+                        </Modal.Description>
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Button color='black' onClick={this.close}>
+                        Nope
+                        </Button>
+                        <Button
+                        positive
+                        icon='checkmark'
+                        labelPosition='right'
+                        content="Yep, that's me"
+                        onClick={this.close}
+                        />
+                    </Modal.Actions>
+                </Modal>
+            </div>
         );
         
         return (
             <div>
-            <Container style={{ marginTop: '5em' }}>
+            <Container style={{ marginTop: '5em', width: '95%' }}>
                 List of resource
                 
                 
@@ -108,10 +120,10 @@ class List extends Component {
                 */}
                 <div id="tabulator-1"></div>
 
-                
-
             </Container>
-            {modal}
+                {/*
+                {modal}
+                */}
             </div>
         );
     }

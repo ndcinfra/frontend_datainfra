@@ -32,7 +32,7 @@ export default class App extends Component {
 		if (e) e.preventDefault();
 		//this.store.appState.authenticate();
 		await this.store.appState.checkAuth();
-		console.log("app.js: ", this.store.appState.authenticated);
+		// console.log("app.js: ", this.store.appState.authenticated);
 
 		/*
 		if (this.store.authenticated === true) {

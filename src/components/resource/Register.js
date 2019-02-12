@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from "mobx-react";
 import { Redirect, withRouter } from "react-router-dom";
 
-import { Icon, Container, Button, Header, Dimmer, Message, Grid, Form, Segment, Input, Divider, Label, Loader} from 'semantic-ui-react'
+import { Menu, Icon, Container, Button, Header, Dimmer, Message, Grid, Form, Segment, Input, Divider, Label, Loader} from 'semantic-ui-react'
 
 import classNames from 'classnames'
 import Dropzone from 'react-dropzone'
@@ -47,7 +47,7 @@ class Register extends Component {
         // Do something with files
         this.store.GetImgUrl(acceptedFiles);
 
-      }
+    }
       
     render() {
         const { authenticated, userInfo, imgUrl, error, loading } = this.store;
@@ -95,35 +95,96 @@ class Register extends Component {
         };
         
         const thumbs = (
-            <div style={thumb}>
-            <div style={thumbInner}>
-                <img
-                src={imgUrl}
-                style={img}
-                />
-            </div>
-            </div>
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img
+                    src={imgUrl}
+                    style={img}
+                    />
+                </div>
+                </div>
+            </aside>
         );
 
+        const chracters = [
+            { key: '이세하', text: '이세하, ..., ... ', value: '이세하, ..., ... ' },
+            { key: '이슬비', text: '이슬비, ..., ... ', value: '이슬비, ..., ... ' },
+          ]
+        
+
         return (
+            
+
             <Container text style={{ marginTop: '5em' }}>
+            
+            
+
                 { loading === 'on' ? loaderView : null  }
                 
-                <Grid textAlign='center' style={{ height: '100%' }} verticalAlign='middle' >
+                <Grid style={{ height: '100%' }} verticalAlign='middle' >
                     <Grid.Column style={{ maxWidth: 700 }}>
-                        <Header as='h2' textAlign='center'>Register a Resources</Header>
+                        <Header as='h2' textAlign='center'>Register a Resource</Header>
 						<Form size='large'>
                             <Segment>
-								<Form.Field>
+                                <Form.Field>
+                                    <label>Sheet</label>
 									<Input 
-										icon='user' 
-										iconPosition='left' 
-										placeholder={authenticated}
+										placeholder='Input sheet name'
 										name='displayname'
 										value={userInfo.displayname} 
                             			onChange={this.handleInputDisplayName}
 									/>
                                 </Form.Field>
+
+                                <Form.Group widths='equal'>
+                                    <Form.Field>
+                                        <label>Category #1</label>
+                                        <Input 
+                                            placeholder='Input category #1'
+                                            name='displayname'
+                                            value={userInfo.displayname} 
+                                            onChange={this.handleInputDisplayName}
+                                        />
+                                    </Form.Field>
+                                    <Form.Field>
+                                        <label>Category #2</label>
+                                        <Input 
+                                            placeholder='Input category #2s'
+                                            name='displayname'
+                                            value={userInfo.displayname} 
+                                            onChange={this.handleInputDisplayName}
+                                        />
+                                    </Form.Field>
+                                </Form.Group>
+
+                                <Form.Group widths='equal'>
+                                    <Form.Field>
+                                        <label>Category #3</label>
+                                        <Input 
+                                            placeholder='Input category #3'
+                                            name='displayname'
+                                            value={userInfo.displayname} 
+                                            onChange={this.handleInputDisplayName}
+                                        />
+                                    </Form.Field>
+                                    <Form.Field>
+                                        <label>Category #4</label>
+                                        <Input 
+                                            placeholder='Input category #4'
+                                            name='displayname'
+                                            value={userInfo.displayname} 
+                                            onChange={this.handleInputDisplayName}
+                                        />
+                                    </Form.Field>
+                                </Form.Group>
+                                <Form.Group widths='equal'>
+                                    <Form.Field>
+                                        <label>Character</label>
+                                        <Form.Select options={chracters} placeholder='Character' />
+                                    </Form.Field>
+                                </Form.Group>
+                                
                                 <Form.Field>
                                     <div>
                                         { error !== null ? ErrorView : null }
@@ -137,7 +198,7 @@ class Register extends Component {
                                                 {...getRootProps()}
                                                 className={classNames('dropzone', {'dropzone--isActive': isDragActive})}
                                                 >
-                                                <Segment placeholder>
+                                                <Segment> {/* delete placeholder */}
                                                     <Header icon>
                                                     <Icon name='file image outline' />
                                                     <input {...getInputProps()} />
@@ -154,21 +215,19 @@ class Register extends Component {
                                     }}
                                 </Dropzone>
                                 
-                                <aside style={thumbsContainer}>
-                                    {thumbs}
-                                </aside>
-
+                                { imgUrl !== '' ? thumbs : null }
+                                <hr/>
 								<div>
 									<Button color='violet' fluid size='small'>Register</Button>
-								</div>
+                                </div>
+                                
 							</Segment>
                         </Form>
 					</Grid.Column>
                 </Grid>
                 
             </Container>
-
-            
+                
         );
     }
 }

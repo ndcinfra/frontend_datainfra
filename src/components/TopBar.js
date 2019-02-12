@@ -100,14 +100,16 @@ export default class TopBar extends Component {
 			)
 
 			Resourcepane = (
-				<Menu.Item name='resource' active={activeItem === 'resource'} onClick={this.handleItemClick}>
-					<Dropdown item text='Resource' size='mini' >
-						<Dropdown.Menu>
-							<Dropdown.Item name='resource/register' onClick={this.handleItemClick.bind(this)}>Register</Dropdown.Item>
-							<Dropdown.Item name='resource/list' onClick={this.handleItemClick.bind(this)}>List</Dropdown.Item>
-						</Dropdown.Menu>
-					</Dropdown>
-				</Menu.Item>
+				<Menu.Menu>
+					<Menu.Item name='resource' active={activeItem === 'resource'} onClick={this.handleItemClick}>
+						<Dropdown item text='Resource' size='mini' >
+							<Dropdown.Menu>
+								<Dropdown.Item name='resource/register' onClick={this.handleItemClick.bind(this)}>Register</Dropdown.Item>
+								<Dropdown.Item name='resource/list' onClick={this.handleItemClick.bind(this)}>List</Dropdown.Item>
+							</Dropdown.Menu>
+						</Dropdown>
+					</Menu.Item>
+				</Menu.Menu>
 			)
 
 		}else{

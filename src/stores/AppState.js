@@ -13,20 +13,22 @@ import storage from '../lib/storage';
 import redirect from '../lib/redirect';
 import social from '../lib/social';
 import hello from 'hellojs';
-import request from 'superagent';
+// import request from 'superagent';
 
 
 export default class AppState {
   @observable authenticated;
-  @observable authenticating;
-  @observable items;
-  @observable item;
-  @observable testval;
+  //@observable authenticating;
+  //@observable items;
+  //@observable item;
+  //@observable testval;
   //
+
   @observable displayname;
   @observable email;
   @observable password;
-  //@observable confirmPassword;
+  @observable confirmPassword;
+
   @observable userInfo;
   @observable loggedInUserInfo;
   @observable error;
@@ -41,19 +43,21 @@ export default class AppState {
   @observable profileProvider;
 
   @observable imgUrl;
+  @observable modalOpened;
 
   constructor() {
     this.authenticated = false;
-    this.authenticating = false;
-    this.items = [];
-    this.item = {};
-    this.testval = "Cobbled together by ";
+    //this.authenticating = false;
+    //this.items = [];
+    //this.item = {};
+    //this.testval = "Cobbled together by ";
 
     //
     this.displayname = '';
     this.email = '';
     this.password = '';
-    //this.confirmPassword = '';
+    this.confirmPassword = '';
+
     this.error = null;
     this.loading = 'off';
     this.errorFlash = null;
@@ -65,13 +69,15 @@ export default class AppState {
     this.profileDisplayname = null;
     this.profileProvider = null;
 
-    //for signup and login
+    // for signup and login
     this.userInfo = {
       displayname: '',
       email: '',
-      password: ''
-    }
+      password: '',
+      confirmPassword: ''
+    } 
 
+    // loggedInuserInfo 
     this.loggedInUserInfo = {
       UID: '',
       displayname: '',
@@ -82,14 +88,18 @@ export default class AppState {
     }
 
     this.imgUrl = '';
+    this.modalOpened = false;
 
+  }
+
+  @action setModal(value) {
+    this.modalOpened = value;
   }
 
   @action setImgUrl(value) {
     this.imgUrl = value;
   }
   
-
   @action setProfileEmail(value) {
     this.originProfileEmail = value;
     this.profileEmail = value;
@@ -100,16 +110,11 @@ export default class AppState {
     this.profileDisplayname = value;
   }
 
-  @action setProfileProvider(value) {
-    this.profileProvider = value;
-  }
-
   @action setLoading(value) {
     this.loading = value;
   }
 
   @action setError(msg) {
-
     if (msg != null) {
       this.error = msg;
       this.setLoading('off');
@@ -122,13 +127,14 @@ export default class AppState {
     this.userInfo.displayname = '';
     this.userInfo.email = '';
     this.userInfo.password = '';
-    //this.userInfo.confirmPassword = '';
-    //this.setClearMessage();
+    this.userInfo.confirmPassword = '';
+
+    this.setClearMessage();
   }
 
   @action setAuthenticated(auth, UID, displayname, balance, gravater, permission) {
-    //console.log("setAuth: ", UID, displayname);
     this.authenticated = auth;
+    
     this.loggedInUserInfo.UID = UID;
     this.loggedInUserInfo.displayname = displayname;
     this.loggedInUserInfo.balance = balance;
@@ -137,6 +143,7 @@ export default class AppState {
   }
 
   @action setInitLoggedInUserInfo() {
+    // remove cookie
     storage.remove('___GOM___');
 
     this.authenticated = false;
@@ -172,47 +179,28 @@ export default class AppState {
     var file = new FormData();
     file.append('file',acceptedFiles[0])
 
-    console.log(file);
+    //console.log(file);
 
     let respData = null;
     try {
       respData = await S3API.getImgUrl(file);
 
-      console.log("reponse: ", respData);
+      //console.log("reponse: ", respData);
       let result = JSON.parse(respData.text);
-      console.log("result: ", result.data);
-        //setImgUrl(result.data);
+      //console.log("result: ", result.data);
+      //setImgUrl(result.data);
       this.setImgUrl(result.data);
 
     }catch(err){
       console.log("getImgUrl err: ", err);
     }
-
-    /*
-    var req=request
-              .post('http://localhost:8080/v1/s3/uploadImage')
-              .send(file);
-
-    req.end(function(err,response){
-        console.log("upload done!!!!!");
-        console.log("err: ", err);
-        console.log("reponse: ", response);
-        let result = JSON.parse(response.text);
-        console.log("result: ", result.data);
-        //setImgUrl(result.data);
-        this.setImgUrl = result.data;
-    });
-    */
   }
 
   // Signup
   async Signup(history, lastLocation) {
 
     if (
-      !(validator.isLength(this.userInfo.displayname, {
-        min: 4,
-        max: 16
-      })) ||
+      !(validator.isLength(this.userInfo.displayname, { min: 4, max: 16 })) ||
       (validator.contains(this.userInfo.displayname, ' ')) ||
       !(validator.isAlphanumeric(this.userInfo.displayname))
     ) {
@@ -224,6 +212,13 @@ export default class AppState {
         max: undefined
       })) || (validator.contains(this.userInfo.password, ' '))) {
       this.setError('The password must be at least 8 characters long without space.');
+    } else if (!(validator.isLength(this.userInfo.confirmPassword, {
+        min: 8,
+        max: undefined
+      })) || (validator.contains(this.userInfo.confirmPassword, ' '))) {
+      this.setError('The Confirm Password must be at least 8 characters long without space.');
+    } else if ( this.userInfo.password !== this.userInfo.confirmPassword ) {
+      this.setError('Confirm Password does not match.');
     } else {
       this.setError(null);
     }
@@ -361,7 +356,7 @@ export default class AppState {
   }
 
 
-  // socialAuth
+  // socialAuth ... not used
   async socialAuth(provider, history, lastLocation) {
 
     social[provider]().then((auth) => {
@@ -407,7 +402,7 @@ export default class AppState {
     });
   }
 
-
+  // email confirm ... not used
   async confirmEmail(confirm_token, history) {
     let data = null;
     try {
@@ -415,8 +410,6 @@ export default class AppState {
     } catch (err) {
       this.errorFlash = err.response.data.message;
     }
-
-    //console.log(data);
 
     if (!data) {
       this.setErrorFlashMessage('token is invalid or has expired. try resend again.');
@@ -429,6 +422,7 @@ export default class AppState {
     }
   }
 
+  // resend email confirm ... not used
   async resendConfirmEmail() {
 
     if (!validator.isEmail(this.userInfo.email)) {
@@ -455,12 +449,8 @@ export default class AppState {
     }
   }
 
+  // logout
   async logout(history, goto) {
-    // check auth\
-    // do not need call api
-    // let { data } = await AuthAPI.logout();
-
-    //await this.checkAuth();
 
     await this.setInitUserInfo();
 
@@ -474,9 +464,9 @@ export default class AppState {
       history.push(goto);
     }
 
-
   }
 
+  // forgot password
   async forgotPassword() {
     if (!validator.isEmail(this.userInfo.email)) {
       this.setErrorFlashMessage('Please input a valid email address.');
@@ -504,16 +494,12 @@ export default class AppState {
     let data = null;
     try {
       data = await UserAPI.isValidResetPasswordToken(token);
-      //console.log(data);
     } catch (err) {
-      //console.log(err);
-      //this.errorFlash = err.response.data.message;
       this.setErrorFlashMessage(err.response.data.message);
       history.push('/forgotPassword');
     }
 
     if (data) {
-      //this.successFlash = 'Reset Token is valid.'
       await this.setInitLoggedInUserInfo(); //first remove cookie
       await this.checkAuth();
       this.setSuccessFlashMessage('Reset Token is valid. Change password.');
@@ -544,15 +530,11 @@ export default class AppState {
         data = await UserAPI.resetPassword(resetToken, this.userInfo.password);
         this.setInitUserInfo();
       } catch (err) {
-        //console.log(err);
-        //this.errorFlash = err.response.data.message;
         this.setErrorFlashMessage(err.response.data.message);
       }
 
       if (data) {
-        //this.successFlash = 'Password is changed. please SIGN IN.'
         this.setSuccessFlashMessage('Password is changed. Please SIGN IN.');
-        //console.log(history);
         history.push('/login');
       }
     }
@@ -560,45 +542,10 @@ export default class AppState {
 
 
   async getProfile(history) {
-    //this.setInitUserInfo();
-    /*
-    await this.checkAuth();
-
-    if (!this.loggedInUserInfo.UID) {
-      this.setErrorFlashMessage('Need login first');
-
-      // clear storage
-      await this.setInitLoggedInUserInfo(); //first remove cookie
-      //await this.checkAuth();
-
-      //go to login
-      history.push('/login');
-    } else {
-
-      let profile = null;
-      try {
-        profile = await UserAPI.getProfile(this.loggedInUserInfo.UID);
-      } catch (err) {
-        this.setErrorFlashMessage(err.response.data.message);
-      }
-
-      if (profile) {
-        //console.log(profile.data.data)
-        this.setProfileEmail(profile.data.data.email);
-        this.setProfileDisplayname(profile.data.data.displayname);
-        this.setProfileProvider(profile.data.data.provider);
-        this.setLoading('off');
-
-      } else {
-        this.setErrorFlashMessages('Something wrong to get profile.');
-      }
-    }
-    */
-
     let cookieInfo = null;
     cookieInfo = storage.get('___GOM___');
 
-    console.log("cookie: ", cookieInfo);
+    // console.log("cookie: ", cookieInfo);
 
     if (cookieInfo) {
       let profile = null;
@@ -609,8 +556,6 @@ export default class AppState {
       }
 
       if (profile) {
-        console.log(profile.data.data)
-
         this.setProfileEmail(profile.data.data.email);
         this.setProfileDisplayname(profile.data.data.displayname);
         this.setProfileProvider(profile.data.data.provider);
@@ -621,8 +566,6 @@ export default class AppState {
       }
       
     } else {
-      console.log('need login first.');
-      //history.push('/login');
       await this.setInitLoggedInUserInfo();
     }
   }
@@ -643,10 +586,8 @@ export default class AppState {
         (validator.contains(this.profileDisplayname, ' ')) ||
         !(validator.isAlphanumeric(this.profileDisplayname))
       ) {
-        //this.setError('A displayname has 4~16 letters/numbers without space.');
         this.setErrorFlashMessage('A displayname has 4~16 letters/numbers without space.')
       } else if (!validator.isEmail(this.profileEmail)) {
-        //this.setError('Please input a valid email address.');
         this.setErrorFlashMessage('Please input a valid email address.')
       } else {
         this.setErrorFlashMessage(null);
@@ -658,8 +599,6 @@ export default class AppState {
         let cookieInfo = null;
         cookieInfo = storage.get('___GOM___');
 
-        console.log("cookie: ", cookieInfo);
-
         if (cookieInfo) {
           let data = null;
           try {
@@ -670,32 +609,14 @@ export default class AppState {
 
           if (data) {
             await this.setInitLoggedInUserInfo(); //first remove cookie
-            //await this.checkAuth();
             this.setSuccessFlashMessage('Profile is changed. please re-sign in.');
             history.push('/login');
           }
         }else{
-          console.log('need login first.');
           await this.setInitLoggedInUserInfo();
           this.setErrorFlashMessage('need login first.');
           history.push('/login');
         }
-
-        /*
-        let data = null;
-        try {
-          data = await UserAPI.updateProfile(this.loggedInUserInfo.UID, this.profileDisplayname, this.profileEmail);
-        } catch (err) {
-          this.setErrorFlashMessage(err.response.data.message);
-        }
-
-        if (data) {
-          await this.setInitLoggedInUserInfo(); //first remove cookie
-          //await this.checkAuth();
-          this.setSuccessFlashMessage('Profile is changed. please re-sign in.');
-          history.push('/login');
-        }
-        */
 
       }
     }
@@ -749,23 +670,6 @@ export default class AppState {
         this.setErrorFlashMessage('need login first.');
         history.push('/login');
       }
-
-      /*
-      let data = null;
-      try {
-        data = await UserAPI.updatePassword(this.loggedInUserInfo.UID, newpassword);
-      } catch (err) {
-        this.setError(err.response.data.message);
-      }
-
-      if (data) {
-        await this.setInitLoggedInUserInfo(); //first remove cookie
-        //await this.checkAuth();
-        this.setSuccessFlashMessage('Password is changed. please re-sign in.');
-        history.push('/login');
-      }
-      */
-
     }
   }
 
@@ -780,15 +684,6 @@ export default class AppState {
         history.push('/login');
 
     } else {
-        //console.log('fetchHistory');
-
-        //Custom filter example
-        
-        /*
-        function customFilter(data){
-          return data.car && data.rating < 3;
-        }
-        */
 
         //Trigger setFilter function with correct parameters
         function updateFilter(){
@@ -843,20 +738,60 @@ export default class AppState {
                     //formatter: "rownum",
                     field: "id",
                     align: "center",
-                    width: 100,
+                    width: 70,
+                },
+                {
+                    title: "Sheet",
+                    //formatter: "rownum",
+                    field: "sheet",
+                    align: "center",
+                    //width: 200,
+                    headerFilter:true,
+                },
+                {
+                    title: "Category#1",
+                    //formatter: "rownum",
+                    field: "category1",
+                    align: "center",
+                    //width: 200,
+                    headerFilter:true,
+                },
+                {
+                    title: "Category#2",
+                    //formatter: "rownum",
+                    field: "category2",
+                    align: "center",
+                    //width: 200,
+                    headerFilter:true,
+                },
+                {
+                    title: "Category#3",
+                    //formatter: "rownum",
+                    field: "category3",
+                    align: "center",
+                    //width: 200,
+                    headerFilter:true,
+                },
+                {
+                    title: "Category#4",
+                    //formatter: "rownum",
+                    field: "category4",
+                    align: "center",
+                    //width: 200,
+                    headerFilter:true,
                 },
                 {
                     title: "Character",
                     //formatter: "rownum",
                     field: "character",
                     align: "center",
-                    width: 200,
+                    //width: 200,
                     headerFilter:true,
                 },
                 {
                     title: "Image URL",
                     field: "imgurl",
-                    width: 150,
+                    //width: 150,
                     align: "left",
                     //formatter: "image"
                     formatter: function(cell, formatterParams) {
@@ -866,71 +801,42 @@ export default class AppState {
                 },
                 //column definition in the columns array
                 {
-                  title: "Edit / Delete",
+                  title: "Edit/Delete",
                   formatter:editIcon, 
                   align:"center", 
+                  widthGrow:1,
+                  /*
                   cellClick:function(e, cell){
-                    alert("Printing row data for: " + cell.getRow().getData().name)
-                    // call ajax and set detail data and modal open
+                    alert("Printing row data for: " + cell.getRow().getData().id);
+                    // call ajax and set detail data and redirect to detail page
+                    //this.modalOpened = true;
+                    //history.push('/login');
+                    //setModal(true);
+
                   }
+                  */
                 },
 
                 //{title:"Example", field:"example", formatter:"buttonTick"},
                 //{title:"Example", field:"example", formatter:"handle"},
             ],
-
+            
+            /*
+            rowClick:function(e, row){ //trigger a modal window when a row is clicked
+              console.log('click row');
+              //$('#req-modal').modal('show');
+              //$("#req-modal").tabulator("setData", jsonURL1);
+      
+              //console.log ("its working");
+            },
+            */
+           
         });
 
         table.setData('http://localhost:8080/v1/resource/listAll', {}, "GET");
 
-
-        
     }
-}
-
-
-  // ------------------------------------------------------------------------------------------------------------
-  // not use below
-  async fetchData(pathname, id) {
-    console.log('id: ', id)
-    var url = "";
-
-    if (id == null) {
-      url = "https://jsonplaceholder.typicode.com/posts"
-    } else {
-      url = "https://jsonplaceholder.typicode.com/posts/" + id
-    }
-
-    let {
-      data
-    } = await axios.get(url);
-    console.log(data);
-    data.length > 0 ? this.setData(data) : this.setSingle(data);
   }
 
-  @action setData(data) {
-    this.items = data;
-  }
 
-  @action setSingle(data) {
-    this.item = data;
-  }
-
-  @action clearItems() {
-    this.items = [];
-    this.item = {};
-  }
-
-  @action authenticate() {
-    /*...
-    return new Promise((resolve, reject) => {
-      this.authenticating = true;
-      setTimeout(() => {
-        this.authenticated = !this.authenticated;
-        this.authenticating = false;
-        resolve(this.authenticated);
-      }, 0);
-    });
-    */
-  }
 }

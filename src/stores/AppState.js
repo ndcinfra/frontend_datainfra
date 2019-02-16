@@ -42,7 +42,9 @@ export default class AppState {
   @observable profileDisplayname;
   @observable profileProvider;
 
-  @observable imgUrl;
+  // image url
+  @observable Seha;
+  @observable Sylvi;
   @observable modalOpened;
 
   constructor() {
@@ -87,18 +89,27 @@ export default class AppState {
       permission: '',
     }
 
-    this.imgUrl = '';
+    this.Seha = '';
+    this.Sylvi = '';
+
     this.modalOpened = false;
 
+  }
+
+  @action setImgUrl(chracter, value) {
+    switch (chracter){
+      case 'Seha':
+        this.Seha = value;
+        break;
+      case 'Sylvi':this.Sylvi = value;
+        break;
+    }
   }
 
   @action setModal(value) {
     this.modalOpened = value;
   }
 
-  @action setImgUrl(value) {
-    this.imgUrl = value;
-  }
   
   @action setProfileEmail(value) {
     this.originProfileEmail = value;
@@ -175,21 +186,17 @@ export default class AppState {
 
 
   // setImgUrl
-  async GetImgUrl(acceptedFiles) {
+  async GetImgUrl(character, acceptedFiles) {
     var file = new FormData();
     file.append('file',acceptedFiles[0])
-
-    //console.log(file);
+    
 
     let respData = null;
     try {
       respData = await S3API.getImgUrl(file);
-
-      //console.log("reponse: ", respData);
       let result = JSON.parse(respData.text);
-      //console.log("result: ", result.data);
-      //setImgUrl(result.data);
-      this.setImgUrl(result.data);
+
+      this.setImgUrl(character, result.data);
 
     }catch(err){
       console.log("getImgUrl err: ", err);

@@ -29,39 +29,31 @@ class Register extends Component {
 
     componentDidMount() {
         console.log('componentDidMount');
-
-        //this.authenticate();
-        console.log("register.js: ", this.store.authenticated);
     }
 
     componentDidUpdate(){
-        console.log('resource rigister componentDidUpdate');
+        console.log('resource componentDidUpdate');
     }
 
     componentWillUnmount() {
         console.log('componentWillUnmount');
     }
 
-    
-    onDrop = (acceptedFiles, rejectedFiles) => {
+    // have to add a new character when have a new character
+    SehaDrop = (acceptedFiles, rejectedFiles) => {
         // Do something with files
-        this.store.GetImgUrl(acceptedFiles);
+        this.store.GetImgUrl("Seha", acceptedFiles);
+    }
+
+    SylviDrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("Sylvi", acceptedFiles);
 
     }
+    
       
     render() {
-        const { authenticated, userInfo, imgUrl, error, loading } = this.store;
-        
-        const ErrorView = (
-            <Message error visible size='tiny'>{error}</Message>
-        );
-
-        const loaderView = (
-            <Dimmer active inverted>
-                <Loader size='huge'></Loader>
-            </Dimmer>
-        )
-
+        {/* css for image thumb */}
         const thumbsContainer = {
             display: 'flex',
             flexDirection: 'row',
@@ -76,8 +68,8 @@ class Register extends Component {
             border: '1px solid #eaeaea',
             marginBottom: 8,
             marginRight: 8,
-            width: 300,
-            height: 300,
+            width: 200,
+            height: 200,
             padding: 4,
             boxSizing: 'border-box'
         };
@@ -94,63 +86,57 @@ class Register extends Component {
             height: '100%'
         };
         
-        const thumbs = (
+        const { authenticated, userInfo, Seha,Sylvi, error, loading } = this.store;
+        
+        const ErrorView = (
+            <Message error visible size='tiny'>{error}</Message>
+        );
+
+        const loaderView = (
+            <Dimmer active inverted>
+                <Loader size='huge'></Loader>
+            </Dimmer>
+        )
+        
+        const Sehathumbs = (
             <aside style={thumbsContainer}>
                 <div style={thumb}>
                 <div style={thumbInner}>
-                    <img
-                    src={imgUrl}
-                    style={img}
-                    />
+                    <img src={Seha} style={img} />
                 </div>
                 </div>
             </aside>
         );
 
-        const chracters = [
-            { key: '이세하', text: '이세하, ..., ... ', value: '이세하, ..., ... ' },
-            { key: '이슬비', text: '이슬비, ..., ... ', value: '이슬비, ..., ... ' },
-          ]
-        
+        const Sylvithumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={Sylvi} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
+
+        const Yuri = React.createRef();
+        const Misteltein = React.createRef();
+
 
         return (
-            
-
-            <Container text style={{ marginTop: '5em' }}>
-            
-            
+            <Container  style={{ marginTop: '5em', width: '90%'  }}>
 
                 { loading === 'on' ? loaderView : null  }
                 
                 <Grid style={{ height: '100%' }} verticalAlign='middle' >
-                    <Grid.Column style={{ maxWidth: 700 }}>
+                    <Grid.Column>
                         <Header as='h2' textAlign='center'>Register a Resource</Header>
 						<Form size='large'>
                             <Segment>
-                                <Form.Field>
-                                    <label>Sheet</label>
-									<Input 
-										placeholder='Input sheet name'
-										name='displayname'
-										value={userInfo.displayname} 
-                            			onChange={this.handleInputDisplayName}
-									/>
-                                </Form.Field>
-
                                 <Form.Group widths='equal'>
                                     <Form.Field>
-                                        <label>Category #1</label>
+                                        <label>Sheet</label>
                                         <Input 
-                                            placeholder='Input category #1'
-                                            name='displayname'
-                                            value={userInfo.displayname} 
-                                            onChange={this.handleInputDisplayName}
-                                        />
-                                    </Form.Field>
-                                    <Form.Field>
-                                        <label>Category #2</label>
-                                        <Input 
-                                            placeholder='Input category #2s'
+                                            placeholder='Input sheet name'
                                             name='displayname'
                                             value={userInfo.displayname} 
                                             onChange={this.handleInputDisplayName}
@@ -160,37 +146,95 @@ class Register extends Component {
 
                                 <Form.Group widths='equal'>
                                     <Form.Field>
-                                        <label>Category #3</label>
+                                        <label>Memo</label>
                                         <Input 
-                                            placeholder='Input category #3'
-                                            name='displayname'
-                                            value={userInfo.displayname} 
-                                            onChange={this.handleInputDisplayName}
-                                        />
-                                    </Form.Field>
-                                    <Form.Field>
-                                        <label>Category #4</label>
-                                        <Input 
-                                            placeholder='Input category #4'
-                                            name='displayname'
+                                            placeholder='memo'
+                                            name='memo'
                                             value={userInfo.displayname} 
                                             onChange={this.handleInputDisplayName}
                                         />
                                     </Form.Field>
                                 </Form.Group>
+
                                 <Form.Group widths='equal'>
                                     <Form.Field>
-                                        <label>Character</label>
-                                        <Form.Select options={chracters} placeholder='Character' />
+                                        <label>Seha</label>
+                                        <Dropzone
+                                            onDrop={this.SehaDrop}
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+
+                                        { Seha !== '' ? Sehathumbs : null }
+
                                     </Form.Field>
+
+                                    <Form.Field>
+                                        <label>Sylvi</label>
+                                        <Dropzone
+                                            onDrop={this.SylviDrop}
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                        { Sylvi !== '' ? Sylvithumbs : null }
+                                    </Form.Field>
+                                    
+                                    <Form.Field>
+                                        <label>Yuri</label>
+                                        {/* Yuri */}
+                                        <Dropzone
+                                            ref={Yuri}
+                                            onDrop={this.onDrop}
+                                            disableClick
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                <input {...getInputProps()} />
+                                                    <p>Drop files here</p>
+
+                                                    <button type="button" onClick={() => Yuri.current.open()}>
+                                                    Open File Dialog
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                    </Form.Field>
+
+                                    <Form.Field>
+                                        <label>Misteltein</label>
+                                        {/* seha */}
+                                        <Dropzone
+                                            ref={Misteltein}
+                                            onDrop={this.onDrop}
+                                            disableClick
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                <input {...getInputProps()} />
+                                                    <p>Drop files here</p>
+
+                                                    <button type="button" onClick={() => Misteltein.current.open()}>
+                                                    Open File Dialog
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                    </Form.Field>
+                                    
                                 </Form.Group>
                                 
-                                <Form.Field>
-                                    <div>
-                                        { error !== null ? ErrorView : null }
-                                    </div>
-                                </Form.Field>
                                 
+                                {/* original dropzone 
                                 <Dropzone onDrop={this.onDrop}>
                                     {({getRootProps, getInputProps, isDragActive}) => {
                                         return (
@@ -198,14 +242,14 @@ class Register extends Component {
                                                 {...getRootProps()}
                                                 className={classNames('dropzone', {'dropzone--isActive': isDragActive})}
                                                 >
-                                                <Segment> {/* delete placeholder */}
+                                                <Segment>
                                                     <Header icon>
                                                     <Icon name='file image outline' />
                                                     <input {...getInputProps()} />
                                                         {
                                                             isDragActive ?
                                                             <p>Drop files here...</p> :
-                                                            <p>Try dropping some files here, or click to select files to upload.</p>
+                                                            <p>Try dropping a image files here, or click to select files to upload.</p>
                                                         }
                                                     </Header>
                                                 </Segment>
@@ -214,9 +258,17 @@ class Register extends Component {
                                         )
                                     }}
                                 </Dropzone>
+                                */}
+
+                                <Form.Field>
+                                    <div>
+                                        { error !== null ? ErrorView : null }
+                                    </div>
+                                </Form.Field>
+                                           
                                 
-                                { imgUrl !== '' ? thumbs : null }
                                 <hr/>
+
 								<div>
 									<Button color='violet' fluid size='small'>Register</Button>
                                 </div>

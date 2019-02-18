@@ -8,6 +8,7 @@ import validator from 'validator';
 import * as AuthAPI from '../lib/api/auth';
 import * as UserAPI from '../lib/api/user';
 import * as S3API from '../lib/api/s3';
+import * as ResourceAPI from '../lib/api/resource';
 
 import storage from '../lib/storage';
 import redirect from '../lib/redirect';
@@ -42,9 +43,24 @@ export default class AppState {
   @observable profileDisplayname;
   @observable profileProvider;
 
-  // image url
+  // reources
+  @observable reources;
+  /*
   @observable Seha;
   @observable Sylvi;
+  @observable Yuri;
+  @observable Misteltein;
+  @observable J;
+  @observable Harpy;
+  @observable Levia;
+  @observable Nata;
+  @observable Tina;
+  @observable Violet;
+  @observable Wolfgang;
+  @observable Soma;
+  @observable Luna;
+  */
+
   @observable modalOpened;
 
   constructor() {
@@ -89,9 +105,24 @@ export default class AppState {
       permission: '',
     }
 
-    this.Seha = '';
-    this.Sylvi = '';
-
+    this.reources = {
+      sheet: '',
+      memo: '',
+      seha: '',
+      sylvi: '',
+      yuri: '',
+      misteltein: '',
+      jay: '',
+      harpy: '',
+      levia: '',
+      nata: '',
+      tina: '',
+      violet: '',
+      wolfgang: '',
+      soma: '',
+      luna: '',
+    }
+    
     this.modalOpened = false;
 
   }
@@ -99,9 +130,43 @@ export default class AppState {
   @action setImgUrl(chracter, value) {
     switch (chracter){
       case 'Seha':
-        this.Seha = value;
+        this.reources.seha = value;
         break;
-      case 'Sylvi':this.Sylvi = value;
+      case 'Sylvi':
+        this.reources.sylvi = value;
+        break;
+      case 'Yuri':
+        this.reources.yuri = value;
+        break;
+      case 'Misteltein':
+        this.reources.misteltein = value;
+        break;
+      case 'Jay':
+        this.reources.jay = value;
+        break;
+      case 'Harpy':
+        this.reources.harpy = value;
+        break;
+      case 'Levia':
+        this.reources.levia = value;
+        break;
+      case 'Nata':
+        this.reources.nata = value;
+        break;
+      case 'Tina':
+        this.reources.tina = value;
+        break;
+      case 'Violet':
+        this.reources.violet = value;
+        break;
+      case 'Wolfgang':
+        this.reources.wolfgang = value;
+        break;
+      case 'Soma':
+        this.reources.soma = value;
+        break;
+      case 'Luna':
+        this.reources.luna = value;
         break;
     }
   }
@@ -203,6 +268,45 @@ export default class AppState {
     }
   }
 
+  // RegisterResource
+  async RegisterResource(history, lastLocation) {
+    console.log("RegisterResource");
+    console.log("resource: ", {...this.reources});
+
+    if (validator.isEmpty(this.reources.sheet)) {
+      this.setError('You have to inout sheet');
+    }else if (validator.isEmpty(this.reources.memo)) {
+      this.setError('You have to inout memo');
+    }else{
+      this.setError(null);
+    }
+
+    if (!this.error) {
+      //let data = null;
+      let respData = null;
+      try {
+        // call backend
+        respData = await ResourceAPI.resourceRegister(this.reources);
+        //console.log(respData)
+        this.setLoading('off');
+        // redirect to list
+        history.push('/resource/list');
+
+      } catch (err) {
+        console.log(err)
+        /*
+        if (err.response.data) {
+          this.setError(err.response.data.message);
+        } else {
+          this.setError(err);
+        }
+        */
+
+      }
+    }
+
+  }
+
   // Signup
   async Signup(history, lastLocation) {
 
@@ -261,7 +365,6 @@ export default class AppState {
 
       }
     }
-
   }
 
   // localLogin
@@ -736,8 +839,8 @@ export default class AppState {
             //height: 511, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
             autoResize:true, 
             resizableRows:true,
-            layout: "fitColumns", //fit columns to width of table (optional)
-            responsiveLayout: true,
+            layout: "fitDataFill", //fit columns to width of table (optional, fitColumns)
+            //responsiveLayout: true,
             placeholder: "No Data Available", //display message to user on empty table
             columns: [ //Define Table Columns
                 {
@@ -756,55 +859,194 @@ export default class AppState {
                     headerFilter:true,
                 },
                 {
-                    title: "Category#1",
+                    title: "Memo",
                     //formatter: "rownum",
-                    field: "category1",
+                    field: "memo",
                     align: "center",
                     //width: 200,
                     headerFilter:true,
                 },
                 {
-                    title: "Category#2",
+                    title: "Seha",
                     //formatter: "rownum",
-                    field: "category2",
+                    field: "seha",
                     align: "center",
                     //width: 200,
-                    headerFilter:true,
-                },
-                {
-                    title: "Category#3",
-                    //formatter: "rownum",
-                    field: "category3",
-                    align: "center",
-                    //width: 200,
-                    headerFilter:true,
-                },
-                {
-                    title: "Category#4",
-                    //formatter: "rownum",
-                    field: "category4",
-                    align: "center",
-                    //width: 200,
-                    headerFilter:true,
-                },
-                {
-                    title: "Character",
-                    //formatter: "rownum",
-                    field: "character",
-                    align: "center",
-                    //width: 200,
-                    headerFilter:true,
-                },
-                {
-                    title: "Image URL",
-                    field: "imgurl",
-                    //width: 150,
-                    align: "left",
-                    //formatter: "image"
                     formatter: function(cell, formatterParams) {
-                      console.log(cell.getValue());
-                      return '<img src="'+cell.getValue()+'" height="150" width="150"/>';
+                      if (cell.getValue() != ''){
+                        return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                      }else{
+                        return
+                      }
                     }
+                },
+                {
+                    title: "Sylvi",
+                    //formatter: "rownum",
+                    field: "sylvi",
+                    align: "center",
+                    //width: 200,
+                    formatter: function(cell, formatterParams) {
+                      if (cell.getValue() != ''){
+                        return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                      }else{
+                        return
+                      }
+                    }
+                },
+                {
+                    title: "Yuri",
+                    //formatter: "rownum",
+                    field: "yuri",
+                    align: "center",
+                    //width: 200,
+                    formatter: function(cell, formatterParams) {
+                      if (cell.getValue() != ''){
+                        return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                      }else{
+                        return
+                      }
+                    }
+                },
+                {
+                    title: "Misteltein",
+                    //formatter: "rownum",
+                    field: "misteltein",
+                    align: "center",
+                    //width: 200,
+                    formatter: function(cell, formatterParams) {
+                      if (cell.getValue() != ''){
+                        return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                      }else{
+                        return
+                      }
+                    }
+                },
+                {
+                  title: "J",
+                  //formatter: "rownum",
+                  field: "jay",
+                  align: "center",
+                  //width: 200,
+                  formatter: function(cell, formatterParams) {
+                    if (cell.getValue() != ''){
+                      return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                    }else{
+                      return
+                    }
+                  }
+                },
+                {
+                  title: "Harpy",
+                  //formatter: "rownum",
+                  field: "harpy",
+                  align: "center",
+                  //width: 200,
+                  formatter: function(cell, formatterParams) {
+                    if (cell.getValue() != ''){
+                      return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                    }else{
+                      return
+                    }
+                  }
+                },
+                {
+                  title: "Levia",
+                  //formatter: "rownum",
+                  field: "levia",
+                  align: "center",
+                  //width: 200,
+                  formatter: function(cell, formatterParams) {
+                    if (cell.getValue() != ''){
+                      return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                    }else{
+                      return
+                    }
+                  }
+                },
+                {
+                  title: "Nata",
+                  //formatter: "rownum",
+                  field: "nata",
+                  align: "center",
+                  //width: 200,
+                  formatter: function(cell, formatterParams) {
+                    if (cell.getValue() != ''){
+                      return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                    }else{
+                      return
+                    }
+                  }
+                },
+                {
+                  title: "Tina",
+                  //formatter: "rownum",
+                  field: "tina",
+                  align: "center",
+                  //width: 200,
+                  formatter: function(cell, formatterParams) {
+                    if (cell.getValue() != ''){
+                      return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                    }else{
+                      return
+                    }
+                  }
+                },
+                {
+                  title: "Violet",
+                  //formatter: "rownum",
+                  field: "violet",
+                  align: "center",
+                  //width: 200,
+                  formatter: function(cell, formatterParams) {
+                    if (cell.getValue() != ''){
+                      return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                    }else{
+                      return
+                    }
+                  }
+                },
+                {
+                  title: "Wolfgang",
+                  //formatter: "rownum",
+                  field: "wolfgang",
+                  align: "center",
+                  //width: 200,
+                  formatter: function(cell, formatterParams) {
+                    if (cell.getValue() != ''){
+                      return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                    }else{
+                      return
+                    }
+                  }
+                },
+                {
+                  title: "Soma",
+                  //formatter: "rownum",
+                  field: "soma",
+                  align: "center",
+                  //width: 200,
+                  formatter: function(cell, formatterParams) {
+                    if (cell.getValue() != ''){
+                      return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                    }else{
+                      return
+                    }
+                  }
+                },
+                {
+                  title: "Luna",
+                  //formatter: "rownum",
+                  field: "luna",
+                  align: "center",
+                  //width: 200,
+                  formatter: function(cell, formatterParams) {
+                    if (cell.getValue() != ''){
+                      return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                    }else{
+                      return
+                    }
+                  }
                 },
                 //column definition in the columns array
                 {
@@ -828,15 +1070,12 @@ export default class AppState {
                 //{title:"Example", field:"example", formatter:"handle"},
             ],
             
-            /*
+            
             rowClick:function(e, row){ //trigger a modal window when a row is clicked
-              console.log('click row');
-              //$('#req-modal').modal('show');
-              //$("#req-modal").tabulator("setData", jsonURL1);
-      
-              //console.log ("its working");
+              console.log('click row: ', row._row.data.id);
+              //redirect to detail
             },
-            */
+            
            
         });
 

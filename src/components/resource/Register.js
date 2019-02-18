@@ -18,6 +18,8 @@ class Register extends Component {
 
         //for checking auth whe reload
         //this.store.checkAuth();
+
+        //TODO: clear resource
         
         // direct input & reload
         if (this.store.authenticated !== true) {
@@ -39,7 +41,24 @@ class Register extends Component {
         console.log('componentWillUnmount');
     }
 
+    // TODO: find !!! more efficent way. !
     // have to add a new character when have a new character
+    /*
+        Seha       string `orm:"size(2000);null" json:"seha"`
+	    Sylvi      string `orm:"size(2000);null" json:"sylvi"`    
+        Yuri       string `orm:"size(2000);null" json:"yuri"`
+        Misteltein string `orm:"size(2000);null" json:"misteltein"`
+        Jay          string `orm:"size(2000);null" json:"j"`
+        Harpy      string `orm:"size(2000);null" json:"harpy"`
+        Levia      string `orm:"size(2000);null" json:"levia"`
+        Nata       string `orm:"size(2000);null" json:"nata"`
+        Tina       string `orm:"size(2000);null" json:"tina"`
+        Violet     string `orm:"size(2000);null" json:"violet"`
+        Wolfgang   string `orm:"size(2000);null" json:"wolfgang"`
+        Soma       string `orm:"size(2000);null" json:"soma"`
+        Luna       string `orm:"size(2000);null" json:"luna"`
+        */
+
     SehaDrop = (acceptedFiles, rejectedFiles) => {
         // Do something with files
         this.store.GetImgUrl("Seha", acceptedFiles);
@@ -48,10 +67,79 @@ class Register extends Component {
     SylviDrop = (acceptedFiles, rejectedFiles) => {
         // Do something with files
         this.store.GetImgUrl("Sylvi", acceptedFiles);
+    }
 
+    YuriDrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("Yuri", acceptedFiles);
+    }
+
+    MistelteinDrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("Misteltein", acceptedFiles);
+    }
+
+    JayDrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("Jay", acceptedFiles);
+    }
+
+    HarpyDrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("Harpy", acceptedFiles);
+    }
+
+    LeviaDrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("Levia", acceptedFiles);
+    }
+
+    NataDrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("Nata", acceptedFiles);
+    }
+
+    TinaDrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("Tina", acceptedFiles);
+    }
+
+    VioletDrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("Violet", acceptedFiles);
     }
     
-      
+    WolfgangDrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("Wolfgang", acceptedFiles);
+    }
+
+    SomaDrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("Soma", acceptedFiles);
+    }
+
+    LunaDrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("Luna", acceptedFiles);
+    }
+
+    handelRegister(e){
+		e.preventDefault();
+        this.store.setLoading('on');
+
+        const {history, lastLocation} = this.props;
+        this.store.RegisterResource(history, lastLocation);
+    }
+
+    handleInputSheet = (e, { value }) => {
+        this.store.reources.sheet = value;
+    }
+
+    handleInputMemo = (e, { value }) => {
+        this.store.reources.memo = value;
+    }
+
     render() {
         {/* css for image thumb */}
         const thumbsContainer = {
@@ -86,8 +174,9 @@ class Register extends Component {
             height: '100%'
         };
         
-        const { authenticated, userInfo, Seha,Sylvi, error, loading } = this.store;
-        
+        const { authenticated, userInfo, error, loading } = this.store;
+        const {reources} = this.store;
+
         const ErrorView = (
             <Message error visible size='tiny'>{error}</Message>
         );
@@ -102,7 +191,7 @@ class Register extends Component {
             <aside style={thumbsContainer}>
                 <div style={thumb}>
                 <div style={thumbInner}>
-                    <img src={Seha} style={img} />
+                    <img src={reources.seha} style={img} />
                 </div>
                 </div>
             </aside>
@@ -112,15 +201,121 @@ class Register extends Component {
             <aside style={thumbsContainer}>
                 <div style={thumb}>
                 <div style={thumbInner}>
-                    <img src={Sylvi} style={img} />
+                    <img src={reources.sylvi} style={img} />
                 </div>
                 </div>
             </aside>
         );
 
-        const Yuri = React.createRef();
-        const Misteltein = React.createRef();
+        const Yurithumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={reources.yuri} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
 
+        const Mistelteinthumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={reources.misteltein} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
+
+        const Jaythumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={reources.jay} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
+        
+        const Harpythumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={reources.harpy} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
+        
+        const Leviathumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={reources.levia} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
+
+        const Natathumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={reources.nata} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
+
+        const Tinathumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={reources.tina} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
+
+        const Violetthumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={reources.violet} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
+
+        const Wolfgangthumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={reources.wolfgang} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
+
+        const Somathumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={reources.soma} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
+
+        const Lunathumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={reources.luna} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
 
         return (
             <Container  style={{ marginTop: '5em', width: '90%'  }}>
@@ -136,10 +331,10 @@ class Register extends Component {
                                     <Form.Field>
                                         <label>Sheet</label>
                                         <Input 
-                                            placeholder='Input sheet name'
-                                            name='displayname'
-                                            value={userInfo.displayname} 
-                                            onChange={this.handleInputDisplayName}
+                                            placeholder='Input sheet'
+                                            name='sheet'
+                                            value={reources.sheet} 
+                                            onChange={this.handleInputSheet}
                                         />
                                     </Form.Field>
                                 </Form.Group>
@@ -148,10 +343,10 @@ class Register extends Component {
                                     <Form.Field>
                                         <label>Memo</label>
                                         <Input 
-                                            placeholder='memo'
+                                            placeholder='Input memo'
                                             name='memo'
-                                            value={userInfo.displayname} 
-                                            onChange={this.handleInputDisplayName}
+                                            value={reources.memo} 
+                                            onChange={this.handleInputMemo}
                                         />
                                     </Form.Field>
                                 </Form.Group>
@@ -170,7 +365,7 @@ class Register extends Component {
                                             )}
                                         </Dropzone>
 
-                                        { Seha !== '' ? Sehathumbs : null }
+                                        { reources.seha !== '' ? Sehathumbs : null }
 
                                     </Form.Field>
 
@@ -186,54 +381,182 @@ class Register extends Component {
                                                 </div>
                                             )}
                                         </Dropzone>
-                                        { Sylvi !== '' ? Sylvithumbs : null }
+                                        { reources.sylvi !== '' ? Sylvithumbs : null }
                                     </Form.Field>
                                     
                                     <Form.Field>
                                         <label>Yuri</label>
-                                        {/* Yuri */}
                                         <Dropzone
-                                            ref={Yuri}
-                                            onDrop={this.onDrop}
-                                            disableClick
+                                            onDrop={this.YuriDrop}
                                             >
                                             {({getRootProps, getInputProps}) => (
                                                 <div {...getRootProps()}>
-                                                <input {...getInputProps()} />
-                                                    <p>Drop files here</p>
-
-                                                    <button type="button" onClick={() => Yuri.current.open()}>
-                                                    Open File Dialog
-                                                    </button>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
                                                 </div>
                                             )}
                                         </Dropzone>
+                                        { reources.yuri !== '' ? Yurithumbs : null }
                                     </Form.Field>
 
                                     <Form.Field>
                                         <label>Misteltein</label>
-                                        {/* seha */}
                                         <Dropzone
-                                            ref={Misteltein}
-                                            onDrop={this.onDrop}
-                                            disableClick
+                                            onDrop={this.MistelteinDrop}
                                             >
                                             {({getRootProps, getInputProps}) => (
                                                 <div {...getRootProps()}>
-                                                <input {...getInputProps()} />
-                                                    <p>Drop files here</p>
-
-                                                    <button type="button" onClick={() => Misteltein.current.open()}>
-                                                    Open File Dialog
-                                                    </button>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
                                                 </div>
                                             )}
                                         </Dropzone>
+                                        { reources.misteltein !== '' ? Mistelteinthumbs : null }
+                                    </Form.Field>
+                                </Form.Group>
+
+                                <Form.Group widths='equal'>
+                                    <Form.Field>
+                                        <label>J</label>
+                                        <Dropzone
+                                            onDrop={this.JayDrop}
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                        { reources.jay !== '' ? Jaythumbs : null }
+                                    </Form.Field>
+
+                                    <Form.Field>
+                                        <label>Harpy</label>
+                                        <Dropzone
+                                            onDrop={this.HarpyDrop}
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                        { reources.harpy !== '' ? Harpythumbs : null }
                                     </Form.Field>
                                     
+                                    <Form.Field>
+                                        <label>Levia</label>
+                                        <Dropzone
+                                            onDrop={this.LeviaDrop}
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                        { reources.levia !== '' ? Leviathumbs : null }
+                                    </Form.Field>
+
+                                    <Form.Field>
+                                        <label>Nata</label>
+                                        <Dropzone
+                                            onDrop={this.NataDrop}
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                        { reources.nata !== '' ? Natathumbs : null }
+                                    </Form.Field>
+
                                 </Form.Group>
-                                
-                                
+
+                                <Form.Group widths='equal'>
+                                    <Form.Field>
+                                        <label>Tina</label>
+                                        <Dropzone
+                                            onDrop={this.TinaDrop}
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                        { reources.tina !== '' ? Tinathumbs : null }
+                                    </Form.Field>
+
+                                    <Form.Field>
+                                        <label>Violet</label>
+                                        <Dropzone
+                                            onDrop={this.VioletDrop}
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                        { reources.violet !== '' ? Violetthumbs : null }
+                                    </Form.Field>
+
+                                    <Form.Field>
+                                        <label>Wolfgang</label>
+                                        <Dropzone
+                                            onDrop={this.WolfgangDrop}
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                        { reources.wolfgang !== '' ? Wolfgangthumbs : null }
+                                    </Form.Field>
+
+                                    <Form.Field>
+                                        <label>Soma</label>
+                                        <Dropzone
+                                            onDrop={this.SomaDrop}
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                        { reources.soma !== '' ? Somathumbs : null }
+                                    </Form.Field>
+                                </Form.Group>
+
+                                <Form.Group widths='equal'>
+                                    <Form.Field>
+                                        <label>Luna</label>
+                                        <Dropzone
+                                            onDrop={this.LunaDrop}
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                        { reources.luna !== '' ? Lunathumbs : null }
+                                    </Form.Field>
+                                </Form.Group>
+
                                 {/* original dropzone 
                                 <Dropzone onDrop={this.onDrop}>
                                     {({getRootProps, getInputProps, isDragActive}) => {
@@ -270,7 +593,7 @@ class Register extends Component {
                                 <hr/>
 
 								<div>
-									<Button color='violet' fluid size='small'>Register</Button>
+									<Button color='violet' fluid size='small' onClick={this.handelRegister.bind(this)}>Register</Button>
                                 </div>
                                 
 							</Segment>

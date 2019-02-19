@@ -56,12 +56,12 @@ export default class Home extends Component {
 		
 		return (
 			<div className="page home">
-					
+					{/*
 					<div>
 						{ errorFlashView }
 						{ successFlashView }
 					</div>
-				
+					*/}
 				<main>
 					<div className="section-header">
 						<h3><font color="green">Naddic Games</font></h3>

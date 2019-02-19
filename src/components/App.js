@@ -32,6 +32,7 @@ export default class App extends Component {
 		if (e) e.preventDefault();
 		//this.store.appState.authenticate();
 		await this.store.appState.checkAuth();
+		
 		// console.log("app.js: ", this.store.appState.authenticated);
 
 		/*
@@ -61,9 +62,9 @@ export default class App extends Component {
 						<Route path="/resetPassword/:token" component={ResetPassword} />
 						<Route path="/profile" component={Profile} />
 
-						<Route path="/resource/register" {...this.store.appState.authenticated} component={Register} />
-						<Route path="/resource/list" component={List} />
-						<Route path="/resource/detail" component={Detail} />
+						<Route path="/resource/register" {...this.store.appState.authenticated} component={Register} /> 
+						<Route path="/resource/list" {...this.store.appState.authenticated}  component={List} />
+						<Route path="/resource/detail" {...this.store.appState.authenticated} component={Detail} />
 
 						<Route component={NotFound}/> 
 					</Switch>

@@ -138,12 +138,17 @@ class Detail extends Component {
 		e.preventDefault();
         this.store.setLoading('on');
 
-        const {history, lastLocation} = this.props;
+        const {history} = this.props;
         this.store.UpdateResource(history);
     }
 
     handelDelete(e){
-		e.preventDefault();
+        e.preventDefault();
+        this.store.setLoading('on');
+
+        const {history} = this.props;
+        this.store.setModal(false);
+        this.store.DeleteResource(history);
     }
 
     handleInputSheet = (e, { value }) => {
@@ -200,7 +205,7 @@ class Detail extends Component {
             height: '100%'
         };
         
-        const { authenticated, userInfo, error, loading } = this.store;
+        const { authenticated, loggedInUserInfo, error, loading } = this.store;
         const {resources} = this.store;
 
         const ErrorView = (
@@ -223,7 +228,8 @@ class Detail extends Component {
                     </div>
                     
                 </aside>
-                <Button color='blue' size='mini'onClick={()=>{this.store.resources.seha=''}} >Clear</Button>
+                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.seha=''}} >Clear</Button> : null }
+                
             </div>
         );
 
@@ -237,7 +243,8 @@ class Detail extends Component {
                     </div>
                     
                 </aside>
-                <Button color='blue' size='mini'onClick={()=>{this.store.resources.sylvi=''}} >Clear</Button>
+                
+                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.sylvi=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -250,7 +257,7 @@ class Detail extends Component {
                         </div>
                     </div>
                 </aside>
-                <Button color='blue' size='mini'onClick={()=>{this.store.resources.yuri=''}} >Clear</Button>
+                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.yuri=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -263,7 +270,8 @@ class Detail extends Component {
                         </div>
                     </div>
                 </aside>
-                <Button color='blue' size='mini'onClick={()=>{this.store.resources.misteltein=''}} >Clear</Button>
+                
+                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.misteltein=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -276,7 +284,8 @@ class Detail extends Component {
                         </div>
                     </div>
                 </aside>
-                <Button color='blue' size='mini'onClick={()=>{this.store.resources.jay=''}} >Clear</Button>
+                
+                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.jay=''}} >Clear</Button> : null }
             </div>
         );
         
@@ -289,7 +298,8 @@ class Detail extends Component {
                         </div>
                     </div>
                 </aside>
-                <Button color='blue' size='mini'onClick={()=>{this.store.resources.harpy=''}} >Clear</Button>
+                
+                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.harpy=''}} >Clear</Button> : null }
             </div>
         );
         
@@ -302,7 +312,7 @@ class Detail extends Component {
                         </div>
                     </div>
                 </aside>
-                <Button color='blue' size='mini'onClick={()=>{this.store.resources.levia=''}} >Clear</Button>
+                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.levia=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -315,7 +325,8 @@ class Detail extends Component {
                         </div>
                     </div>
                 </aside>
-                <Button color='blue' size='mini'onClick={()=>{this.store.resources.nata=''}} >Clear</Button>
+                
+                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.nata=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -328,7 +339,8 @@ class Detail extends Component {
                         </div>
                     </div>
                 </aside>
-                <Button color='blue' size='mini'onClick={()=>{this.store.resources.tina=''}} >Clear</Button>
+                
+                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.tina=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -341,7 +353,8 @@ class Detail extends Component {
                         </div>
                     </div>
                 </aside>
-                <Button color='blue' size='mini'onClick={()=>{this.store.resources.violet=''}} >Clear</Button>
+                
+                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.violet=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -354,7 +367,8 @@ class Detail extends Component {
                         </div>
                     </div>
                 </aside>
-                <Button color='blue' size='mini'onClick={()=>{this.store.resources.wolfgang=''}} >Clear</Button>
+                
+                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.wolfgang=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -367,7 +381,8 @@ class Detail extends Component {
                         </div>
                     </div>
                 </aside>
-                <Button color='blue' size='mini'onClick={()=>{this.store.resources.soma=''}} >Clear</Button>
+                
+                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.soma=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -380,7 +395,8 @@ class Detail extends Component {
                         </div>
                     </div>
                 </aside>
-                <Button color='blue' size='mini'onClick={()=>{this.store.resources.luna=''}} >Clear</Button>
+                
+                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.luna=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -388,8 +404,7 @@ class Detail extends Component {
 
         const modal = (
             <div>
-        
-                <Modal style={{position: 'static'}} open={modalOpened} onClose={this.handeClose.bind(this)} >
+                <Modal size='tiny' style={{position: 'static'}} open={modalOpened} onClose={this.handeClose.bind(this)} >
                     <Modal.Header>Delete</Modal.Header>
                     <Modal.Content>
                         <Modal.Description>
@@ -398,10 +413,18 @@ class Detail extends Component {
                     </Modal.Content>
                     <Modal.Actions>
                         <Button color='black' onClick={this.close}>Nope</Button>
-                        <Button positive icon='checkmark' labelPosition='right' content="Yep" onClick={this.close} />
+                        <Button positive icon='checkmark' labelPosition='right' content="Yep" onClick={this.handelDelete.bind(this)} />
                     </Modal.Actions>
-                </Modal>s
+                </Modal>
             </div>
+        );
+
+        const buttons = (
+            <Form.Group unstackable widths={2}>
+                <Button color='violet' fluid size='small' onClick={this.handelUpdate.bind(this)}>Update</Button>
+                
+                <Button color='red' fluid size='small' onClick={this.handleShow.bind(this)}>Delete</Button>
+            </Form.Group>
         );
 
         return (
@@ -679,11 +702,8 @@ class Detail extends Component {
 
                                 { loading === 'on' ? loaderView : null  }
 
-								<Form.Group unstackable widths={2}>
-                                    <Button color='violet' fluid size='small' onClick={this.handelUpdate.bind(this)}>Update</Button>
-                                    
-                                    <Button color='red' fluid size='small' onClick={this.handleShow.bind(this)}>Delete</Button>
-                                </Form.Group>
+                                { loggedInUserInfo === 'radmin' ? buttons : null }
+								
                                 
 							</Segment>
                         </Form>

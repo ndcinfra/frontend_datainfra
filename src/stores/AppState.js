@@ -190,6 +190,10 @@ export default class AppState {
     this.profileDisplayname = value;
   }
 
+  @action setProfileProvider(value) {
+    this.profileProvider = value;
+  }
+  
   @action setLoading(value) {
     this.loading = value;
   }
@@ -212,7 +216,7 @@ export default class AppState {
     this.setClearMessage();
   }
 
-  @action setAuthenticated(auth, UID, displayname, balance, gravater, permission) {
+  @action setAuthenticated(auth, UID, displayname, balance, gravater,permission) {
     this.authenticated = auth;
     
     this.loggedInUserInfo.UID = UID;
@@ -392,6 +396,31 @@ export default class AppState {
     }
   }
 
+  async DeleteResource(history) {
+    //let data = null;
+    let respData = null;
+    try {
+      // call backend
+      respData = await ResourceAPI.deleteResource(this.resourcesId);
+      //console.log(respData)
+      this.setLoading('off');
+      // redirect to list
+      history.push('/resource/list');
+
+    } catch (err) {
+      //console.log(err);
+      this.setError(err);
+      /*
+      if (err.response.data) {
+        this.setError(err.response.data.message);
+      } else {
+        this.setError(err);
+      }
+      */
+
+    }
+  }
+
   // Signup
   async Signup(history, lastLocation) {
 
@@ -539,7 +568,8 @@ export default class AppState {
           auth.data.data.uid,
           auth.data.data.displayname,
           auth.data.data.balance.toString(),
-          auth.data.data.picture
+          auth.data.data.picture,
+          auth.data.data.permission
         );
 
         console.log('authenticated: ', this.authenticated);

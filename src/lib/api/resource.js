@@ -1,4 +1,5 @@
 import axios from 'axios';
+//require('dotenv').config();
 
 export const registerResource = (resources) => axios.post('/v1/resource/resigster', {...resources});
 export const getResourceDetail = (id) => axios.post('/v1/resource/detail/'+id);

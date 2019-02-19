@@ -20,6 +20,7 @@ module.exports = {
         publicPath: "/",
         historyApiFallback: true,
         disableHostCheck: true,
+        
         proxy: {
             "/v1": "http://localhost:8080"
             /*
@@ -30,6 +31,7 @@ module.exports = {
             */
             
         },
+    
     },
     output: {
         path: path.join(__dirname, "dist"),

@@ -49,6 +49,7 @@
     "axios": "^0.16.2",
     "css-declaration-sorter": "^2.0.0",
     "css-mqpacker": "^6.0.1",
+    "dotenv": "^6.2.0",
     "faker": "^4.1.0",
     "form-data": "^2.3.3",
     "hellojs": "^1.17.1",

@@ -87,6 +87,7 @@ module.exports = {
             name: "vendor",
             minChunks: Infinity
         }),
+        /*
         new webpack.optimize.UglifyJsPlugin({
             minimize: true,
             compress: {
@@ -98,6 +99,7 @@ module.exports = {
                 comments: false
             }
         }),
+        */
         new ExtractTextPlugin("assets/styles.css"),
         new HtmlWebpackPlugin({
             hash: false,

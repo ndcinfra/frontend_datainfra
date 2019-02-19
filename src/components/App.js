@@ -12,7 +12,7 @@ import NotFound from "./NotFound";
 import Home from "./Home";
 import { Login, Logout, Signup } from './auth/index';
 import {ConfirmEmail, InvalidConfirmEmail, ForgotPassword, ResetPassword, Profile } from './user/index';
-import {Register, List} from './resource/index';
+import {Register, List, Detail} from './resource/index';
 
 @withRouter
 @inject("store")
@@ -63,6 +63,7 @@ export default class App extends Component {
 
 						<Route path="/resource/register" {...this.store.appState.authenticated} component={Register} />
 						<Route path="/resource/list" component={List} />
+						<Route path="/resource/detail" component={Detail} />
 
 						<Route component={NotFound}/> 
 					</Switch>

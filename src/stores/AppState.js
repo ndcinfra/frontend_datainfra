@@ -43,8 +43,9 @@ export default class AppState {
   @observable profileDisplayname;
   @observable profileProvider;
 
-  // reources
-  @observable reources;
+  // resources
+  @observable resources;
+  @observable resourcesId;
   /*
   @observable Seha;
   @observable Sylvi;
@@ -105,7 +106,8 @@ export default class AppState {
       permission: '',
     }
 
-    this.reources = {
+    this.resources = {
+      //id: '',
       sheet: '',
       memo: '',
       seha: '',
@@ -122,7 +124,9 @@ export default class AppState {
       soma: '',
       luna: '',
     }
-    
+
+    this.resourcesId = null;
+
     this.modalOpened = false;
 
   }
@@ -130,43 +134,43 @@ export default class AppState {
   @action setImgUrl(chracter, value) {
     switch (chracter){
       case 'Seha':
-        this.reources.seha = value;
+        this.resources.seha = value;
         break;
       case 'Sylvi':
-        this.reources.sylvi = value;
+        this.resources.sylvi = value;
         break;
       case 'Yuri':
-        this.reources.yuri = value;
+        this.resources.yuri = value;
         break;
       case 'Misteltein':
-        this.reources.misteltein = value;
+        this.resources.misteltein = value;
         break;
       case 'Jay':
-        this.reources.jay = value;
+        this.resources.jay = value;
         break;
       case 'Harpy':
-        this.reources.harpy = value;
+        this.resources.harpy = value;
         break;
       case 'Levia':
-        this.reources.levia = value;
+        this.resources.levia = value;
         break;
       case 'Nata':
-        this.reources.nata = value;
+        this.resources.nata = value;
         break;
       case 'Tina':
-        this.reources.tina = value;
+        this.resources.tina = value;
         break;
       case 'Violet':
-        this.reources.violet = value;
+        this.resources.violet = value;
         break;
       case 'Wolfgang':
-        this.reources.wolfgang = value;
+        this.resources.wolfgang = value;
         break;
       case 'Soma':
-        this.reources.soma = value;
+        this.resources.soma = value;
         break;
       case 'Luna':
-        this.reources.luna = value;
+        this.resources.luna = value;
         break;
     }
   }
@@ -249,6 +253,24 @@ export default class AppState {
     this.setLoading('off');
   }
 
+  @action clearResourceInfo() {
+    this.resources.sheet = '';
+    this.resources.memo = '';
+    this.resources.seha = '';
+    this.resources.sylvi = '';
+    this.resources.yuri = '';
+    this.resources.misteltein = '';
+    this.resources.jay = '';
+    this.resources.harpy = '';
+    this.resources.levia = '';
+    this.resources.tina = '';
+    this.resources.violet = '';
+    this.resources.wolfgang = '';
+    this.resources.soma = '';
+    this.resources.luna = '';
+    this.resourcesId = null;
+    
+  }
 
   // setImgUrl
   async GetImgUrl(character, acceptedFiles) {
@@ -270,12 +292,12 @@ export default class AppState {
 
   // RegisterResource
   async RegisterResource(history, lastLocation) {
-    console.log("RegisterResource");
-    console.log("resource: ", {...this.reources});
+    //console.log("RegisterResource");
+    //console.log("resource: ", {...this.resources});
 
-    if (validator.isEmpty(this.reources.sheet)) {
+    if (validator.isEmpty(this.resources.sheet)) {
       this.setError('You have to inout sheet');
-    }else if (validator.isEmpty(this.reources.memo)) {
+    }else if (validator.isEmpty(this.resources.memo)) {
       this.setError('You have to inout memo');
     }else{
       this.setError(null);
@@ -286,14 +308,15 @@ export default class AppState {
       let respData = null;
       try {
         // call backend
-        respData = await ResourceAPI.resourceRegister(this.reources);
+        respData = await ResourceAPI.registerResource(this.resources);
         //console.log(respData)
         this.setLoading('off');
         // redirect to list
         history.push('/resource/list');
 
       } catch (err) {
-        console.log(err)
+        //console.log(err);
+        this.setError(err);
         /*
         if (err.response.data) {
           this.setError(err.response.data.message);
@@ -305,6 +328,68 @@ export default class AppState {
       }
     }
 
+  }
+
+  // get resource detail ...
+  async GetResource(id) {
+    let respData = null;
+    try {
+      // call backend
+      respData = await ResourceAPI.getResourceDetail(id);
+      console.log(respData.data.data);
+
+      if (respData !== null) {
+        this.resources = {...respData.data.data}
+        this.resourcesId = respData.data.data.id;
+      }
+
+    } catch (err) {
+      //console.log(err);
+      this.setError(err);
+      /*
+      if (err.response.data) {
+        this.setError(err.response.data.message);
+      } else {
+        this.setError(err);
+      }
+      */
+
+    }
+  }
+
+  async UpdateResource(history) {
+    if (validator.isEmpty(this.resources.sheet)) {
+      this.setError('You have to inout sheet');
+    }else if (validator.isEmpty(this.resources.memo)) {
+      this.setError('You have to inout memo');
+    }else{
+      this.setError(null);
+    }
+
+    if (!this.error) {
+      //let data = null;
+      let respData = null;
+      try {
+        // call backend
+        respData = await ResourceAPI.updateResource(this.resourcesId,this.resources);
+        //console.log(respData)
+        this.setLoading('off');
+        // redirect to list
+        history.push('/resource/list');
+
+      } catch (err) {
+        //console.log(err);
+        this.setError(err);
+        /*
+        if (err.response.data) {
+          this.setError(err.response.data.message);
+        } else {
+          this.setError(err);
+        }
+        */
+
+      }
+    }
   }
 
   // Signup
@@ -1048,23 +1133,6 @@ export default class AppState {
                     }
                   }
                 },
-                //column definition in the columns array
-                {
-                  title: "Edit/Delete",
-                  formatter:editIcon, 
-                  align:"center", 
-                  widthGrow:1,
-                  /*
-                  cellClick:function(e, cell){
-                    alert("Printing row data for: " + cell.getRow().getData().id);
-                    // call ajax and set detail data and redirect to detail page
-                    //this.modalOpened = true;
-                    //history.push('/login');
-                    //setModal(true);
-
-                  }
-                  */
-                },
 
                 //{title:"Example", field:"example", formatter:"buttonTick"},
                 //{title:"Example", field:"example", formatter:"handle"},
@@ -1074,12 +1142,14 @@ export default class AppState {
             rowClick:function(e, row){ //trigger a modal window when a row is clicked
               console.log('click row: ', row._row.data.id);
               //redirect to detail
+
+              history.push('/resource/detail?id='+row._row.data.id);
             },
             
            
         });
 
-        table.setData('http://localhost:8080/v1/resource/listAll', {}, "GET");
+        table.setData('http://localhost:8080/v1/resource/list', {}, "GET");
 
     }
   }

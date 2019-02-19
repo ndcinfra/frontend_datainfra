@@ -66,7 +66,7 @@ export default class Home extends Component {
 					<div className="section-header">
 						<h3><font color="green">Naddic Games</font></h3>
 						<hr />
-						<h3>Data Infra</h3>
+						<h3>Infra</h3>
 						<hr />
 					</div>
 				</main>

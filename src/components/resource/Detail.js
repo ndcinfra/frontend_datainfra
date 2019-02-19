@@ -2,21 +2,20 @@ import React, { Component } from 'react';
 import { inject, observer } from "mobx-react";
 import { Redirect, withRouter } from "react-router-dom";
 
-import { Menu, Icon, Container, Button, Header, Dimmer, Message, Grid, Form, Segment, Input, Divider, Label, Loader} from 'semantic-ui-react'
+import { Modal, Image, Container, Button, Header, Dimmer, Message, Grid, Form, Segment, Input, Divider, Label, Loader} from 'semantic-ui-react'
 
 import classNames from 'classnames'
 import Dropzone from 'react-dropzone'
+import * as qs from 'query-string';
 
 @inject("store")
 @observer
-class Register extends Component {
+class Detail extends Component {
     
     constructor(props) {
         super(props);
         this.store = this.props.store.appState;
-        this.store.clearResourceInfo();
-        
-        console.log('constructor');
+        console.log('detail constructor');
 
         //for checking auth whe reload
         //this.store.checkAuth();
@@ -26,21 +25,30 @@ class Register extends Component {
         // direct input & reload
         if (this.store.authenticated !== true) {
 			const {history} = this.props;
-			//this.store.setSuccessFlashMessage('You need logged in.');
             history.push('/login');
 		}
     }
 
     componentDidMount() {
-        console.log('componentDidMount');
+        console.log('detail componentDidMount');
+
+        const parsed = qs.parse(this.props.location.search);
+        console.log(parsed.id);
+
+        if (parsed.id === '' || parsed.id === null) {
+            history.push('/resource/list');
+        }else{
+            //
+            this.store.GetResource(parsed.id);
+        }
     }
 
     componentDidUpdate(){
-        console.log('resource componentDidUpdate');
+        console.log('detail componentDidUpdate');
     }
 
     componentWillUnmount() {
-        console.log('componentWillUnmount');
+        console.log('detail componentWillUnmount');
     }
 
     // TODO: find !!! more efficent way. !
@@ -126,12 +134,16 @@ class Register extends Component {
         this.store.GetImgUrl("Luna", acceptedFiles);
     }
 
-    handelRegister(e){
+    handelUpdate(e){
 		e.preventDefault();
         this.store.setLoading('on');
 
         const {history, lastLocation} = this.props;
-        this.store.RegisterResource(history, lastLocation);
+        this.store.UpdateResource(history);
+    }
+
+    handelDelete(e){
+		e.preventDefault();
     }
 
     handleInputSheet = (e, { value }) => {
@@ -141,6 +153,18 @@ class Register extends Component {
     handleInputMemo = (e, { value }) => {
         this.store.resources.memo = value;
     }
+
+    show = () => this.store.setModal(true) 
+    close = () => this.store.setModal(false) 
+	handleShow(e){
+		e.preventDefault();
+		this.store.setModal(true);
+    }
+
+	handeClose(e){
+		e.preventDefault();
+		this.store.setModal(false);
+	}
 
     render() {
         {/* css for image thumb */}
@@ -190,143 +214,202 @@ class Register extends Component {
         )
         
         const Sehathumbs = (
-            <aside style={thumbsContainer}>
-                <div style={thumb}>
-                <div style={thumbInner}>
-                    <img src={resources.seha} style={img} />
-                </div>
-                </div>
-            </aside>
+            <div>
+                <aside style={thumbsContainer}>
+                    <div style={thumb}>
+                        <div style={thumbInner}>
+                            <img src={resources.seha} style={img} />
+                        </div>
+                    </div>
+                    
+                </aside>
+                <Button color='blue' size='mini'onClick={()=>{this.store.resources.seha=''}} >Clear</Button>
+            </div>
         );
 
         const Sylvithumbs = (
-            <aside style={thumbsContainer}>
-                <div style={thumb}>
-                <div style={thumbInner}>
-                    <img src={resources.sylvi} style={img} />
-                </div>
-                </div>
-            </aside>
+            <div>
+                <aside style={thumbsContainer}>
+                    <div style={thumb}>
+                        <div style={thumbInner}>
+                            <img src={resources.sylvi} style={img} />
+                        </div>
+                    </div>
+                    
+                </aside>
+                <Button color='blue' size='mini'onClick={()=>{this.store.resources.sylvi=''}} >Clear</Button>
+            </div>
         );
 
         const Yurithumbs = (
-            <aside style={thumbsContainer}>
-                <div style={thumb}>
-                <div style={thumbInner}>
-                    <img src={resources.yuri} style={img} />
-                </div>
-                </div>
-            </aside>
+            <div>
+                <aside style={thumbsContainer}>
+                    <div style={thumb}>
+                        <div style={thumbInner}>
+                            <img src={resources.yuri} style={img} />
+                        </div>
+                    </div>
+                </aside>
+                <Button color='blue' size='mini'onClick={()=>{this.store.resources.yuri=''}} >Clear</Button>
+            </div>
         );
 
         const Mistelteinthumbs = (
-            <aside style={thumbsContainer}>
-                <div style={thumb}>
-                <div style={thumbInner}>
-                    <img src={resources.misteltein} style={img} />
-                </div>
-                </div>
-            </aside>
+            <div>
+                <aside style={thumbsContainer}>
+                    <div style={thumb}>
+                        <div style={thumbInner}>
+                            <img src={resources.misteltein} style={img} />
+                        </div>
+                    </div>
+                </aside>
+                <Button color='blue' size='mini'onClick={()=>{this.store.resources.misteltein=''}} >Clear</Button>
+            </div>
         );
 
         const Jaythumbs = (
-            <aside style={thumbsContainer}>
-                <div style={thumb}>
-                <div style={thumbInner}>
-                    <img src={resources.jay} style={img} />
-                </div>
-                </div>
-            </aside>
+            <div>
+                <aside style={thumbsContainer}>
+                    <div style={thumb}>
+                        <div style={thumbInner}>
+                            <img src={resources.jay} style={img} />
+                        </div>
+                    </div>
+                </aside>
+                <Button color='blue' size='mini'onClick={()=>{this.store.resources.jay=''}} >Clear</Button>
+            </div>
         );
         
         const Harpythumbs = (
-            <aside style={thumbsContainer}>
-                <div style={thumb}>
-                <div style={thumbInner}>
-                    <img src={resources.harpy} style={img} />
-                </div>
-                </div>
-            </aside>
+            <div>
+                <aside style={thumbsContainer}>
+                    <div style={thumb}>
+                        <div style={thumbInner}>
+                            <img src={resources.harpy} style={img} />
+                        </div>
+                    </div>
+                </aside>
+                <Button color='blue' size='mini'onClick={()=>{this.store.resources.harpy=''}} >Clear</Button>
+            </div>
         );
         
         const Leviathumbs = (
-            <aside style={thumbsContainer}>
-                <div style={thumb}>
-                <div style={thumbInner}>
-                    <img src={resources.levia} style={img} />
-                </div>
-                </div>
-            </aside>
+            <div>
+                <aside style={thumbsContainer}>
+                    <div style={thumb}>
+                        <div style={thumbInner}>
+                            <img src={resources.levia} style={img} />
+                        </div>
+                    </div>
+                </aside>
+                <Button color='blue' size='mini'onClick={()=>{this.store.resources.levia=''}} >Clear</Button>
+            </div>
         );
 
         const Natathumbs = (
-            <aside style={thumbsContainer}>
-                <div style={thumb}>
-                <div style={thumbInner}>
-                    <img src={resources.nata} style={img} />
-                </div>
-                </div>
-            </aside>
+            <div>
+                <aside style={thumbsContainer}>
+                    <div style={thumb}>
+                        <div style={thumbInner}>
+                            <img src={resources.nata} style={img} />
+                        </div>
+                    </div>
+                </aside>
+                <Button color='blue' size='mini'onClick={()=>{this.store.resources.nata=''}} >Clear</Button>
+            </div>
         );
 
         const Tinathumbs = (
-            <aside style={thumbsContainer}>
-                <div style={thumb}>
-                <div style={thumbInner}>
-                    <img src={resources.tina} style={img} />
-                </div>
-                </div>
-            </aside>
+            <div>
+                <aside style={thumbsContainer}>
+                    <div style={thumb}>
+                        <div style={thumbInner}>
+                            <img src={resources.tina} style={img} />
+                        </div>
+                    </div>
+                </aside>
+                <Button color='blue' size='mini'onClick={()=>{this.store.resources.tina=''}} >Clear</Button>
+            </div>
         );
 
         const Violetthumbs = (
-            <aside style={thumbsContainer}>
-                <div style={thumb}>
-                <div style={thumbInner}>
-                    <img src={resources.violet} style={img} />
-                </div>
-                </div>
-            </aside>
+            <div>
+                <aside style={thumbsContainer}>
+                    <div style={thumb}>
+                        <div style={thumbInner}>
+                            <img src={resources.violet} style={img} />
+                        </div>
+                    </div>
+                </aside>
+                <Button color='blue' size='mini'onClick={()=>{this.store.resources.violet=''}} >Clear</Button>
+            </div>
         );
 
         const Wolfgangthumbs = (
-            <aside style={thumbsContainer}>
-                <div style={thumb}>
-                <div style={thumbInner}>
-                    <img src={resources.wolfgang} style={img} />
-                </div>
-                </div>
-            </aside>
+            <div>
+                <aside style={thumbsContainer}>
+                    <div style={thumb}>
+                        <div style={thumbInner}>
+                            <img src={resources.wolfgang} style={img} />
+                        </div>
+                    </div>
+                </aside>
+                <Button color='blue' size='mini'onClick={()=>{this.store.resources.wolfgang=''}} >Clear</Button>
+            </div>
         );
 
         const Somathumbs = (
-            <aside style={thumbsContainer}>
-                <div style={thumb}>
-                <div style={thumbInner}>
-                    <img src={resources.soma} style={img} />
-                </div>
-                </div>
-            </aside>
+            <div>
+                <aside style={thumbsContainer}>
+                    <div style={thumb}>
+                        <div style={thumbInner}>
+                            <img src={resources.soma} style={img} />
+                        </div>
+                    </div>
+                </aside>
+                <Button color='blue' size='mini'onClick={()=>{this.store.resources.soma=''}} >Clear</Button>
+            </div>
         );
 
         const Lunathumbs = (
-            <aside style={thumbsContainer}>
-                <div style={thumb}>
-                <div style={thumbInner}>
-                    <img src={resources.luna} style={img} />
-                </div>
-                </div>
-            </aside>
+            <div>
+                <aside style={thumbsContainer}>
+                    <div style={thumb}>
+                        <div style={thumbInner}>
+                            <img src={resources.luna} style={img} />
+                        </div>
+                    </div>
+                </aside>
+                <Button color='blue' size='mini'onClick={()=>{this.store.resources.luna=''}} >Clear</Button>
+            </div>
+        );
+
+        const { modalOpened } = this.store
+
+        const modal = (
+            <div>
+        
+                <Modal style={{position: 'static'}} open={modalOpened} onClose={this.handeClose.bind(this)} >
+                    <Modal.Header>Delete</Modal.Header>
+                    <Modal.Content>
+                        <Modal.Description>
+                            <Header>Really do you want to delete?</Header>
+                        </Modal.Description>
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Button color='black' onClick={this.close}>Nope</Button>
+                        <Button positive icon='checkmark' labelPosition='right' content="Yep" onClick={this.close} />
+                    </Modal.Actions>
+                </Modal>s
+            </div>
         );
 
         return (
             <Container  style={{ marginTop: '5em', width: '90%'  }}>
-
-                { loading === 'on' ? loaderView : null  }
                 
                 <Grid style={{ height: '100%' }} verticalAlign='middle' >
                     <Grid.Column>
-                        <Header as='h2' textAlign='center'>Register a Resource</Header>
+                        <Header as='h2' textAlign='center'>Detail a Resource</Header>
 						<Form size='large'>
                             <Segment>
                                 <Form.Group widths='equal'>
@@ -524,6 +607,7 @@ class Register extends Component {
                                             )}
                                         </Dropzone>
                                         { resources.wolfgang !== '' ? Wolfgangthumbs : null }
+                                        
                                     </Form.Field>
 
                                     <Form.Field>
@@ -591,22 +675,27 @@ class Register extends Component {
                                     </div>
                                 </Form.Field>
                                            
-                                
                                 <hr/>
 
-								<div>
-									<Button color='violet' fluid size='small' onClick={this.handelRegister.bind(this)}>Register</Button>
-                                </div>
+                                { loading === 'on' ? loaderView : null  }
+
+								<Form.Group unstackable widths={2}>
+                                    <Button color='violet' fluid size='small' onClick={this.handelUpdate.bind(this)}>Update</Button>
+                                    
+                                    <Button color='red' fluid size='small' onClick={this.handleShow.bind(this)}>Delete</Button>
+                                </Form.Group>
                                 
 							</Segment>
                         </Form>
 					</Grid.Column>
                 </Grid>
                 
+                {modal}
+
             </Container>
                 
         );
     }
 }
 
-export default Register;
+export default Detail;

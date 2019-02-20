@@ -99,6 +99,7 @@ module.exports = {
                 comments: false
             }
         }),
+        */
         new ExtractTextPlugin("assets/styles.css"),
         new HtmlWebpackPlugin({
             hash: false,

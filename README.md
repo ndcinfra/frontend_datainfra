@@ -1,4 +1,6 @@
-# React MobX React-Router 4
+###
+    /utils/contants 에사 backend api 확인   
 
-
-export BACKEND_API=http://localhost:8080
+    git pull  
+    npm run build  
+    sudo systemctl reload nginx  

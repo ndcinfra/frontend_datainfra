@@ -32,7 +32,7 @@ export default class App extends Component {
 		if (e) e.preventDefault();
 		//this.store.appState.authenticate();
 		await this.store.appState.checkAuth();
-		
+
 		// console.log("app.js: ", this.store.appState.authenticated);
 
 		/*
@@ -60,7 +60,7 @@ export default class App extends Component {
 						<Route path="/invalidConfirmEmail" component={InvalidConfirmEmail} />
 						<Route path="/forgotPassword" component={ForgotPassword} />
 						<Route path="/resetPassword/:token" component={ResetPassword} />
-						<Route path="/profile" component={Profile} />
+						<Route path="/profile" {...this.store.appState.authenticated} component={Profile} />
 
 						<Route path="/resource/register" {...this.store.appState.authenticated} component={Register} /> 
 						<Route path="/resource/list" {...this.store.appState.authenticated}  component={List} />

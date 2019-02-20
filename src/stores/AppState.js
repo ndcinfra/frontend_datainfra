@@ -124,8 +124,8 @@ export default class AppState {
       wolfgang: '',
       soma: '',
       luna: '',
-      maleA: '',
-      femaleA: ''
+      maleacc: '',
+      femaleacc: ''
     }
 
     this.resourcesId = null;
@@ -176,10 +176,10 @@ export default class AppState {
         this.resources.luna = value;
         break;
       case 'MaleA':
-        this.resources.maleA = value;
+        this.resources.maleacc = value;
         break;
       case 'FemaleA':
-        this.resources.femaleA = value;
+        this.resources.femaleacc = value;
         break;
     }
   }
@@ -281,6 +281,8 @@ export default class AppState {
     this.resources.wolfgang = '';
     this.resources.soma = '';
     this.resources.luna = '';
+    this.resources.maleacc = '';
+    this.resources.femaleacc = '';
     this.resourcesId = null;
     
   }
@@ -1176,7 +1178,7 @@ export default class AppState {
                 {
                   title: "Male Accessory",
                   //formatter: "rownum",
-                  field: "maleaccessory",
+                  field: "maleacc",
                   align: "center",
                   //width: 200,
                   formatter: function(cell, formatterParams) {
@@ -1191,7 +1193,7 @@ export default class AppState {
                 {
                   title: "Female Accessory",
                   //formatter: "rownum",
-                  field: "femaleaccessory",
+                  field: "femaleacc",
                   align: "center",
                   //width: 200,
                   formatter: function(cell, formatterParams) {

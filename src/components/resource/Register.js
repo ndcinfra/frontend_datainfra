@@ -333,7 +333,7 @@ class Register extends Component {
             <aside style={thumbsContainer}>
                 <div style={thumb}>
                 <div style={thumbInner}>
-                    <img src={resources.maleA} style={img} />
+                    <img src={resources.maleacc} style={img} />
                 </div>
                 </div>
             </aside>
@@ -343,7 +343,7 @@ class Register extends Component {
             <aside style={thumbsContainer}>
                 <div style={thumb}>
                 <div style={thumbInner}>
-                    <img src={resources.femaleA} style={img} />
+                    <img src={resources.femaleacc} style={img} />
                 </div>
                 </div>
             </aside>
@@ -600,7 +600,7 @@ class Register extends Component {
                                                 </div>
                                             )}
                                         </Dropzone>
-                                        { resources.maleA !== '' ? Malethumbs : null }
+                                        { resources.maleacc !== '' ? Malethumbs : null }
                                     </Form.Field>
 
                                     <Form.Field>
@@ -613,7 +613,7 @@ class Register extends Component {
                                                 </div>
                                             )}
                                         </Dropzone>
-                                        { resources.femaleA !== '' ? Femalethumbs : null }
+                                        { resources.femaleaccs !== '' ? Femalethumbs : null }
                                     </Form.Field>
                                 </Form.Group>
 

@@ -416,7 +416,7 @@ class Detail extends Component {
                 <aside style={thumbsContainer}>
                     <div style={thumb}>
                     <div style={thumbInner}>
-                        <img src={resources.maleA} style={img} />
+                        <img src={resources.maleacc} style={img} />
                     </div>
                     </div>
                 </aside>
@@ -430,7 +430,7 @@ class Detail extends Component {
             <aside style={thumbsContainer}>
                 <div style={thumb}>
                 <div style={thumbInner}>
-                    <img src={resources.femaleA} style={img} />
+                    <img src={resources.femaleacc} style={img} />
                 </div>
                 </div>
             </aside>
@@ -716,7 +716,7 @@ class Detail extends Component {
                                                 </div>
                                             )}
                                         </Dropzone>
-                                        { resources.maleA !== '' ? Malethumbs : null }
+                                        { resources.maleacc !== '' ? Malethumbs : null }
                                     </Form.Field>
 
                                     <Form.Field>
@@ -731,7 +731,7 @@ class Detail extends Component {
                                                 </div>
                                             )}
                                         </Dropzone>
-                                        { resources.femaleA !== '' ? Femalethumbs : null }
+                                        { resources.femaleacc !== '' ? Femalethumbs : null }
                                     </Form.Field>
 
                                 </Form.Group>

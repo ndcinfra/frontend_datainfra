@@ -15,7 +15,7 @@ import redirect from '../lib/redirect';
 import social from '../lib/social';
 import hello from 'hellojs';
 // import request from 'superagent';
-import {BACKEND_API} from '../../utils/constants';
+import {BACKEND_API} from '../utils/constants';
 
 
 export default class AppState {

@@ -228,7 +228,7 @@ class Detail extends Component {
                     </div>
                     
                 </aside>
-                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.seha=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.seha=''}} >Clear</Button> : null }
                 
             </div>
         );
@@ -244,7 +244,7 @@ class Detail extends Component {
                     
                 </aside>
                 
-                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.sylvi=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.sylvi=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -257,7 +257,7 @@ class Detail extends Component {
                         </div>
                     </div>
                 </aside>
-                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.yuri=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.yuri=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -271,7 +271,7 @@ class Detail extends Component {
                     </div>
                 </aside>
                 
-                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.misteltein=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.misteltein=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -285,7 +285,7 @@ class Detail extends Component {
                     </div>
                 </aside>
                 
-                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.jay=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.jay=''}} >Clear</Button> : null }
             </div>
         );
         
@@ -299,7 +299,7 @@ class Detail extends Component {
                     </div>
                 </aside>
                 
-                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.harpy=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.harpy=''}} >Clear</Button> : null }
             </div>
         );
         
@@ -312,7 +312,7 @@ class Detail extends Component {
                         </div>
                     </div>
                 </aside>
-                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.levia=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.levia=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -326,7 +326,7 @@ class Detail extends Component {
                     </div>
                 </aside>
                 
-                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.nata=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.nata=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -340,7 +340,7 @@ class Detail extends Component {
                     </div>
                 </aside>
                 
-                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.tina=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.tina=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -354,7 +354,7 @@ class Detail extends Component {
                     </div>
                 </aside>
                 
-                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.violet=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.violet=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -368,7 +368,7 @@ class Detail extends Component {
                     </div>
                 </aside>
                 
-                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.wolfgang=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.wolfgang=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -382,7 +382,7 @@ class Detail extends Component {
                     </div>
                 </aside>
                 
-                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.soma=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.soma=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -396,7 +396,7 @@ class Detail extends Component {
                     </div>
                 </aside>
                 
-                { loggedInUserInfo === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.luna=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.luna=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -702,7 +702,7 @@ class Detail extends Component {
 
                                 { loading === 'on' ? loaderView : null  }
 
-                                { loggedInUserInfo === 'radmin' ? buttons : null }
+                                { loggedInUserInfo.permission === 'radmin' ? buttons : null }
 								
                                 
 							</Segment>

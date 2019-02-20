@@ -15,6 +15,7 @@ import redirect from '../lib/redirect';
 import social from '../lib/social';
 import hello from 'hellojs';
 // import request from 'superagent';
+import {BACKEND_API} from '../../utils/constants';
 
 
 export default class AppState {
@@ -1179,7 +1180,7 @@ export default class AppState {
            
         });
 
-        table.setData('http://localhost:8080/v1/resource/list', {}, "GET");
+        table.setData(BACKEND_API+'/v1/resource/list', {}, "GET");
 
     }
   }

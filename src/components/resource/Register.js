@@ -606,7 +606,7 @@ class Register extends Component {
                                     <Form.Field>
                                         <label>Female Accessory</label>
                                         <Dropzone
-                                            onDrop={this.FemalADrop}
+                                            onDrop={this.FemaleADrop}
                                             >
                                             {({getRootProps, getInputProps}) => (
                                                 <div {...getRootProps()}>

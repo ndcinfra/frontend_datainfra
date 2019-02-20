@@ -421,7 +421,7 @@ class Detail extends Component {
                     </div>
                 </aside>
 
-                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.maleA=''}} >Clear</Button> : null }
+                { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.maleacc=''}} >Clear</Button> : null }
             </div>
         );
 
@@ -434,7 +434,7 @@ class Detail extends Component {
                 </div>
                 </div>
             </aside>
-            { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.femaleA=''}} >Clear</Button> : null }
+            { loggedInUserInfo.permission === 'radmin' ? <Button color='blue' size='mini'onClick={()=>{this.store.resources.femaleacc=''}} >Clear</Button> : null }
             </div>
         );
 

@@ -613,7 +613,7 @@ class Register extends Component {
                                                 </div>
                                             )}
                                         </Dropzone>
-                                        { resources.femaleaccs !== '' ? Femalethumbs : null }
+                                        { resources.femaleacc !== '' ? Femalethumbs : null }
                                     </Form.Field>
                                 </Form.Group>
 

@@ -1,5 +1,5 @@
 import axios from 'axios';
-//import {BACKEND_API} from '../../utils/constants';
+import {BACKEND_API} from '../../utils/constants';
 
 
 export const checkEmail = (email) => axios.get('/api/v1.0/auth/exists/email/' + email);

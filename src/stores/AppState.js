@@ -484,7 +484,7 @@ export default class AppState {
   // localLogin
   // async localLogin(history, lastLocation) {
   async Login(history, lastLocation) {
-    console.log("backend: ", process.env.BACKEND_API);
+    //console.log("backend: ", process.env.BACKEND_API);
 
     if (
       !(validator.isLength(this.userInfo.displayname, {

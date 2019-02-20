@@ -1173,6 +1173,36 @@ export default class AppState {
                   }
                 },
 
+                {
+                  title: "Male Accessory",
+                  //formatter: "rownum",
+                  field: "maleaccessory",
+                  align: "center",
+                  //width: 200,
+                  formatter: function(cell, formatterParams) {
+                    if (cell.getValue() != ''){
+                      return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                    }else{
+                      return
+                    }
+                  }
+                },
+
+                {
+                  title: "Female Accessory",
+                  //formatter: "rownum",
+                  field: "femaleaccessory",
+                  align: "center",
+                  //width: 200,
+                  formatter: function(cell, formatterParams) {
+                    if (cell.getValue() != ''){
+                      return '<img src="'+cell.getValue()+'" height="200" width="200"/>';
+                    }else{
+                      return
+                    }
+                  }
+                },
+
                 //{title:"Example", field:"example", formatter:"buttonTick"},
                 //{title:"Example", field:"example", formatter:"handle"},
             ],

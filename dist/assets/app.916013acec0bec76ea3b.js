@@ -449,6 +449,538 @@ module.exports = _typeof;
 
 /***/ }),
 
+/***/ "./node_modules/@semantic-ui-react/event-stack/lib/cjs/event-stack.development.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+var env = __webpack_require__("./node_modules/exenv/index.js");
+var PropTypes = __webpack_require__("./node_modules/prop-types/index.js");
+var React = __webpack_require__("./node_modules/react/index.js");
+
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
+  }
+}
+
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+function _inherits(subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function");
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) _setPrototypeOf(subClass, superClass);
+}
+
+function _getPrototypeOf(o) {
+  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  return _getPrototypeOf(o);
+}
+
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+
+  return _setPrototypeOf(o, p);
+}
+
+function _assertThisInitialized(self) {
+  if (self === void 0) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return self;
+}
+
+function _possibleConstructorReturn(self, call) {
+  if (call && (typeof call === "object" || typeof call === "function")) {
+    return call;
+  }
+
+  return _assertThisInitialized(self);
+}
+
+/**
+ * The current implementation was chosen by performance and compatibility reasons, feel free to play
+ * with benchmarks and submit PR with faster alternative. Each method contains links to benchmarks.
+ */
+var EventSet =
+/*#__PURE__*/
+function () {
+  /**
+   * @see https://jsperf.com/suir-eventset-constructor
+   */
+  function EventSet(eventHandlers) {
+    _classCallCheck(this, EventSet);
+
+    _defineProperty(this, "handlers", void 0);
+
+    this.handlers = eventHandlers.slice(0);
+  }
+  /**
+   * @see https://jsperf.com/suir-eventset-addhandlers
+   */
+
+
+  _createClass(EventSet, [{
+    key: "addHandlers",
+    value: function addHandlers(additionalHandlers) {
+      var newHandlers = this.handlers.slice(0);
+      var length = additionalHandlers.length; // Heads up!
+      // Previously we use Set there, it granted uniqueness of handlers, now dispatchEvent() is
+      // responsible for this.
+
+      for (var i = 0; i < length; i += 1) {
+        newHandlers.push(additionalHandlers[i]);
+      }
+
+      return new EventSet(newHandlers);
+    }
+    /**
+     * @see https://jsperf.com/suir-eventset-dispatchsingle
+     * @see https://jsperf.com/suir-eventset-dispatchmultiple2
+     */
+
+  }, {
+    key: "dispatchEvent",
+    value: function dispatchEvent(event, dispatchAll) {
+      var count = this.handlers.length - 1;
+
+      if (!dispatchAll) {
+        // Heads up!
+        // We don't use .pop() there because it will mutate the array.
+        var recentHandler = this.handlers[count];
+        recentHandler(event);
+        return;
+      }
+
+      for (var i = count; i >= 0; i -= 1) {
+        if (!this.handlers[i].called) {
+          this.handlers[i].called = true;
+          this.handlers[i](event);
+        }
+      }
+
+      for (var _i = count; _i >= 0; _i -= 1) {
+        this.handlers[_i].called = false;
+      }
+    }
+  }, {
+    key: "hasHandlers",
+    value: function hasHandlers() {
+      return this.handlers.length > 0;
+    }
+    /**
+     * @see https://jsperf.com/suir-eventset-removehandlers
+     */
+
+  }, {
+    key: "removeHandlers",
+    value: function removeHandlers(removalHandlers) {
+      var newHandlers = [];
+      var length = this.handlers.length;
+
+      for (var i = 0; i < length; i += 1) {
+        var handler = this.handlers[i];
+
+        if (removalHandlers.indexOf(handler) === -1) {
+          newHandlers.push(handler);
+        }
+      }
+
+      return new EventSet(newHandlers);
+    }
+  }]);
+
+  return EventSet;
+}();
+
+/**
+ * An IE11-compatible function.
+ *
+ * @see https://jsperf.com/suir-clone-map
+ */
+function cloneMap(map) {
+  var newMap = new Map();
+  map.forEach(function (value, key) {
+    newMap.set(key, value);
+  });
+  return newMap;
+}
+function normalizeHandlers(handlers) {
+  return Array.isArray(handlers) ? handlers : [handlers];
+}
+/**
+ * Normalizes `target` for EventStack, because `target` can be passed as `boolean` or `string`.
+ *
+ * @see https://jsperf.com/suir-normalize-target
+ */
+
+function normalizeTarget(target) {
+  if (target === 'document') return document;
+  if (target === 'window') return window;
+  return target || document;
+}
+
+var EventPool =
+/*#__PURE__*/
+function () {
+  function EventPool(poolName, handlerSets) {
+    _classCallCheck(this, EventPool);
+
+    _defineProperty(this, "handlerSets", void 0);
+
+    _defineProperty(this, "poolName", void 0);
+
+    this.handlerSets = handlerSets;
+    this.poolName = poolName;
+  }
+
+  _createClass(EventPool, [{
+    key: "addHandlers",
+    value: function addHandlers(eventType, eventHandlers) {
+      var handlerSets = cloneMap(this.handlerSets);
+
+      if (handlerSets.has(eventType)) {
+        var eventSet = handlerSets.get(eventType);
+        handlerSets.set(eventType, eventSet.addHandlers(eventHandlers));
+      } else {
+        handlerSets.set(eventType, new EventSet(eventHandlers));
+      }
+
+      return new EventPool(this.poolName, handlerSets);
+    }
+  }, {
+    key: "dispatchEvent",
+    value: function dispatchEvent(eventType, event) {
+      var handlerSet = this.handlerSets.get(eventType);
+      var shouldDispatchAll = this.poolName === 'default';
+
+      if (handlerSet) {
+        handlerSet.dispatchEvent(event, shouldDispatchAll);
+      }
+    }
+  }, {
+    key: "hasHandlers",
+    value: function hasHandlers() {
+      return this.handlerSets.size > 0;
+    }
+  }, {
+    key: "removeHandlers",
+    value: function removeHandlers(eventType, eventHandlers) {
+      var handlerSets = cloneMap(this.handlerSets);
+
+      if (!handlerSets.has(eventType)) {
+        return new EventPool(this.poolName, handlerSets);
+      }
+
+      var currentSet = handlerSets.get(eventType);
+      var nextSet = currentSet.removeHandlers(eventHandlers);
+
+      if (nextSet.hasHandlers()) {
+        handlerSets.set(eventType, nextSet);
+      } else {
+        handlerSets.delete(eventType);
+      }
+
+      return new EventPool(this.poolName, handlerSets);
+    }
+  }]);
+
+  return EventPool;
+}();
+
+_defineProperty(EventPool, "createByType", function (poolName, eventType, eventHandlers) {
+  var handlerSets = new Map();
+  handlerSets.set(eventType, new EventSet(eventHandlers));
+  return new EventPool(poolName, handlerSets);
+});
+
+var EventTarget =
+/*#__PURE__*/
+function () {
+  function EventTarget(target) {
+    _classCallCheck(this, EventTarget);
+
+    _defineProperty(this, "handlers", new Map());
+
+    _defineProperty(this, "pools", new Map());
+
+    _defineProperty(this, "target", void 0);
+
+    _defineProperty(this, "createEmitter", function (eventType, eventPools) {
+      return function (event) {
+        eventPools.forEach(function (pool) {
+          pool.dispatchEvent(eventType, event);
+        });
+      };
+    });
+
+    this.target = target;
+  }
+
+  _createClass(EventTarget, [{
+    key: "addHandlers",
+    value: function addHandlers(poolName, eventType, eventHandlers) {
+      this.removeTargetHandler(eventType);
+
+      if (this.pools.has(poolName)) {
+        var eventPool = this.pools.get(poolName);
+        this.pools.set(poolName, eventPool.addHandlers(eventType, eventHandlers));
+      } else {
+        this.pools.set(poolName, EventPool.createByType(poolName, eventType, eventHandlers));
+      }
+
+      this.addTargetHandler(eventType);
+    }
+  }, {
+    key: "hasHandlers",
+    value: function hasHandlers() {
+      return this.handlers.size > 0;
+    }
+  }, {
+    key: "removeHandlers",
+    value: function removeHandlers(poolName, eventType, eventHandlers) {
+      if (!this.pools.has(poolName)) {
+        return;
+      }
+
+      var pool = this.pools.get(poolName);
+      var newPool = pool.removeHandlers(eventType, eventHandlers);
+
+      if (newPool.hasHandlers()) {
+        this.pools.set(poolName, newPool);
+      } else {
+        this.pools.delete(poolName);
+      }
+
+      this.removeTargetHandler(eventType);
+
+      if (this.pools.size > 0) {
+        this.addTargetHandler(eventType);
+      }
+    }
+  }, {
+    key: "addTargetHandler",
+    value: function addTargetHandler(eventType) {
+      var handler = this.createEmitter(eventType, this.pools);
+      this.handlers.set(eventType, handler);
+      this.target.addEventListener(eventType, handler);
+    }
+  }, {
+    key: "removeTargetHandler",
+    value: function removeTargetHandler(eventType) {
+      if (this.handlers.has(eventType)) {
+        this.target.removeEventListener(eventType, this.handlers.get(eventType));
+        this.handlers.delete(eventType);
+      }
+    }
+  }]);
+
+  return EventTarget;
+}();
+
+var EventStack =
+/*#__PURE__*/
+function () {
+  function EventStack() {
+    var _this = this;
+
+    _classCallCheck(this, EventStack);
+
+    _defineProperty(this, "targets", new Map());
+
+    _defineProperty(this, "getTarget", function (target) {
+      var autoCreate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+      var normalized = normalizeTarget(target);
+
+      if (_this.targets.has(normalized)) {
+        return _this.targets.get(normalized);
+      }
+
+      if (!autoCreate) return null;
+      var eventTarget = new EventTarget(normalized);
+
+      _this.targets.set(normalized, eventTarget);
+
+      return eventTarget;
+    });
+
+    _defineProperty(this, "removeTarget", function (target) {
+      _this.targets.delete(normalizeTarget(target));
+    });
+  }
+
+  _createClass(EventStack, [{
+    key: "sub",
+    value: function sub(eventName, eventHandlers) {
+      var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      if (!env.canUseDOM) return;
+      var _options$target = options.target,
+          target = _options$target === void 0 ? document : _options$target,
+          _options$pool = options.pool,
+          pool = _options$pool === void 0 ? 'default' : _options$pool;
+      var eventTarget = this.getTarget(target);
+      eventTarget.addHandlers(pool, eventName, normalizeHandlers(eventHandlers));
+    }
+  }, {
+    key: "unsub",
+    value: function unsub(eventName, eventHandlers) {
+      var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      if (!env.canUseDOM) return;
+      var _options$target2 = options.target,
+          target = _options$target2 === void 0 ? document : _options$target2,
+          _options$pool2 = options.pool,
+          pool = _options$pool2 === void 0 ? 'default' : _options$pool2;
+      var eventTarget = this.getTarget(target, false);
+
+      if (eventTarget) {
+        eventTarget.removeHandlers(pool, eventName, normalizeHandlers(eventHandlers));
+        if (!eventTarget.hasHandlers()) this.removeTarget(target);
+      }
+    }
+  }]);
+
+  return EventStack;
+}();
+
+var instance = new EventStack();
+
+/**
+ * This component exposes the EventStack API as public and provides a declarative way to manage it.
+ */
+var EventStack$1 =
+/*#__PURE__*/
+function (_React$PureComponent) {
+  _inherits(EventStack, _React$PureComponent);
+
+  function EventStack() {
+    _classCallCheck(this, EventStack);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(EventStack).apply(this, arguments));
+  }
+
+  _createClass(EventStack, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.subscribe(this.props);
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate(prevProps) {
+      this.unsubscribe(prevProps);
+      this.subscribe(this.props);
+    }
+  }, {
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      this.unsubscribe(this.props);
+    }
+  }, {
+    key: "subscribe",
+    value: function subscribe(props) {
+      var name = props.name,
+          on = props.on,
+          pool = props.pool,
+          target = props.target;
+      instance.sub(name, on, {
+        pool: pool,
+        target: target
+      });
+    }
+  }, {
+    key: "unsubscribe",
+    value: function unsubscribe(props) {
+      var name = props.name,
+          on = props.on,
+          pool = props.pool,
+          target = props.target;
+      instance.unsub(name, on, {
+        pool: pool,
+        target: target
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return null;
+    }
+  }]);
+
+  return EventStack;
+}(React.PureComponent);
+
+_defineProperty(EventStack$1, "defaultProps", {
+  pool: 'default',
+  target: 'document'
+});
+EventStack$1.propTypes = {
+  /** An event name on which we will subscribe. */
+  name: PropTypes.string.isRequired,
+
+  /** An event handler or array of event handlers. */
+  on: PropTypes.oneOfType([PropTypes.func, PropTypes.arrayOf(PropTypes.func)]).isRequired,
+
+  /** A name of pool. */
+  pool: PropTypes.string,
+
+  /** A DOM element on which we will subscribe. */
+  target: PropTypes.oneOfType([PropTypes.oneOf(['document', 'window']), // Heads up!
+  // This condition for SSR safety.
+  PropTypes.instanceOf(env.canUseDOM ? HTMLElement : Object)])
+};
+
+exports.instance = instance;
+exports.default = EventStack$1;
+
+
+/***/ }),
+
 /***/ "./node_modules/@semantic-ui-react/event-stack/lib/cjs/event-stack.production.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -462,15 +994,16 @@ Object.defineProperty(exports,"__esModule",{value:!0});var env=__webpack_require
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
 
 
-
-if (true) {
+if (process.env.NODE_ENV === 'production') {
   module.exports = __webpack_require__("./node_modules/@semantic-ui-react/event-stack/lib/cjs/event-stack.production.js");
 } else {
-  module.exports = require('./cjs/event-stack.development.js');
+  module.exports = __webpack_require__("./node_modules/@semantic-ui-react/event-stack/lib/cjs/event-stack.development.js");
 }
 
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -492,7 +1025,7 @@ module.exports = __webpack_require__("./node_modules/axios/lib/axios.js");
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+/* WEBPACK VAR INJECTION */(function(process) {
 
 var utils = __webpack_require__("./node_modules/axios/lib/utils.js");
 var settle = __webpack_require__("./node_modules/axios/lib/core/settle.js");
@@ -518,7 +1051,7 @@ module.exports = function xhrAdapter(config) {
     // For IE 8/9 CORS support
     // Only supports POST and GET calls and doesn't returns the response headers.
     // DON'T do this for testing b/c XMLHttpRequest is mocked, not XDomainRequest.
-    if ("production" !== 'test' &&
+    if (process.env.NODE_ENV !== 'test' &&
         typeof window !== 'undefined' &&
         window.XDomainRequest && !('withCredentials' in request) &&
         !isURLSameOrigin(config.url)) {
@@ -673,6 +1206,7 @@ module.exports = function xhrAdapter(config) {
   });
 };
 
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -11955,7 +12489,7 @@ Emitter.prototype.hasListeners = function(event){
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -11970,8 +12504,8 @@ var _assign = __webpack_require__("./node_modules/object-assign/index.js");
 var emptyObject = __webpack_require__("./node_modules/fbjs/lib/emptyObject.js");
 var _invariant = __webpack_require__("./node_modules/fbjs/lib/invariant.js");
 
-if (false) {
-  var warning = require('fbjs/lib/warning');
+if (process.env.NODE_ENV !== 'production') {
+  var warning = __webpack_require__("./node_modules/fbjs/lib/warning.js");
 }
 
 var MIXINS_KEY = 'mixins';
@@ -11983,7 +12517,7 @@ function identity(fn) {
 }
 
 var ReactPropTypeLocationNames;
-if (false) {
+if (process.env.NODE_ENV !== 'production') {
   ReactPropTypeLocationNames = {
     prop: 'prop',
     context: 'context',
@@ -12301,7 +12835,7 @@ function factory(ReactComponent, isValidElement, ReactNoopUpdateQueue) {
       }
     },
     childContextTypes: function(Constructor, childContextTypes) {
-      if (false) {
+      if (process.env.NODE_ENV !== 'production') {
         validateTypeDef(Constructor, childContextTypes, 'childContext');
       }
       Constructor.childContextTypes = _assign(
@@ -12311,7 +12845,7 @@ function factory(ReactComponent, isValidElement, ReactNoopUpdateQueue) {
       );
     },
     contextTypes: function(Constructor, contextTypes) {
-      if (false) {
+      if (process.env.NODE_ENV !== 'production') {
         validateTypeDef(Constructor, contextTypes, 'context');
       }
       Constructor.contextTypes = _assign(
@@ -12335,7 +12869,7 @@ function factory(ReactComponent, isValidElement, ReactNoopUpdateQueue) {
       }
     },
     propTypes: function(Constructor, propTypes) {
-      if (false) {
+      if (process.env.NODE_ENV !== 'production') {
         validateTypeDef(Constructor, propTypes, 'prop');
       }
       Constructor.propTypes = _assign({}, Constructor.propTypes, propTypes);
@@ -12351,7 +12885,7 @@ function factory(ReactComponent, isValidElement, ReactNoopUpdateQueue) {
       if (typeDef.hasOwnProperty(propName)) {
         // use a warning instead of an _invariant so components
         // don't show up in prod but only in __DEV__
-        if (false) {
+        if (process.env.NODE_ENV !== 'production') {
           warning(
             typeof typeDef[propName] === 'function',
             '%s: %s type `%s` is invalid; it must be a function, usually from ' +
@@ -12399,7 +12933,7 @@ function factory(ReactComponent, isValidElement, ReactNoopUpdateQueue) {
    */
   function mixSpecIntoComponent(Constructor, spec) {
     if (!spec) {
-      if (false) {
+      if (process.env.NODE_ENV !== 'production') {
         var typeofSpec = typeof spec;
         var isMixinValid = typeofSpec === 'object' && spec !== null;
 
@@ -12497,7 +13031,7 @@ function factory(ReactComponent, isValidElement, ReactNoopUpdateQueue) {
             }
           } else {
             proto[name] = property;
-            if (false) {
+            if (process.env.NODE_ENV !== 'production') {
               // Add verbose displayName to the function, which helps when looking
               // at profiling tools.
               if (typeof property === 'function' && spec.displayName) {
@@ -12632,7 +13166,7 @@ function factory(ReactComponent, isValidElement, ReactNoopUpdateQueue) {
    */
   function bindAutoBindMethod(component, method) {
     var boundMethod = method.bind(component);
-    if (false) {
+    if (process.env.NODE_ENV !== 'production') {
       boundMethod.__reactBoundContext = component;
       boundMethod.__reactBoundMethod = method;
       boundMethod.__reactBoundArguments = null;
@@ -12729,7 +13263,7 @@ function factory(ReactComponent, isValidElement, ReactNoopUpdateQueue) {
      * @final
      */
     isMounted: function() {
-      if (false) {
+      if (process.env.NODE_ENV !== 'production') {
         warning(
           this.__didWarnIsMounted,
           '%s: isMounted is deprecated. Instead, make sure to clean up ' +
@@ -12768,7 +13302,7 @@ function factory(ReactComponent, isValidElement, ReactNoopUpdateQueue) {
       // This constructor gets overridden by mocks. The argument is used
       // by mocks to assert on what gets mounted.
 
-      if (false) {
+      if (process.env.NODE_ENV !== 'production') {
         warning(
           this instanceof Constructor,
           'Something is calling a React component directly. Use a factory or ' +
@@ -12792,7 +13326,7 @@ function factory(ReactComponent, isValidElement, ReactNoopUpdateQueue) {
       // getInitialState and componentWillMount methods for initialization.
 
       var initialState = this.getInitialState ? this.getInitialState() : null;
-      if (false) {
+      if (process.env.NODE_ENV !== 'production') {
         // We allow auto-mocks to proceed as if they're returning null.
         if (
           initialState === undefined &&
@@ -12826,7 +13360,7 @@ function factory(ReactComponent, isValidElement, ReactNoopUpdateQueue) {
       Constructor.defaultProps = Constructor.getDefaultProps();
     }
 
-    if (false) {
+    if (process.env.NODE_ENV !== 'production') {
       // This is a tag to indicate that the use of these method names is ok,
       // since it's used with createClass. If it's not, then it's likely a
       // mistake so we'll warn you to use the static property, property
@@ -12844,7 +13378,7 @@ function factory(ReactComponent, isValidElement, ReactNoopUpdateQueue) {
       'createClass(...): Class specification must implement a `render` method.'
     );
 
-    if (false) {
+    if (process.env.NODE_ENV !== 'production') {
       warning(
         !Constructor.prototype.componentShouldUpdate,
         '%s has a method called ' +
@@ -12882,6 +13416,7 @@ function factory(ReactComponent, isValidElement, ReactNoopUpdateQueue) {
 
 module.exports = factory;
 
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -13415,7 +13950,7 @@ module.exports = emptyFunction;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -13427,11 +13962,12 @@ module.exports = emptyFunction;
 
 var emptyObject = {};
 
-if (false) {
+if (process.env.NODE_ENV !== 'production') {
   Object.freeze(emptyObject);
 }
 
 module.exports = emptyObject;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -13439,7 +13975,7 @@ module.exports = emptyObject;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -13462,7 +13998,7 @@ module.exports = emptyObject;
 
 var validateFormat = function validateFormat(format) {};
 
-if (false) {
+if (process.env.NODE_ENV !== 'production') {
   validateFormat = function validateFormat(format) {
     if (format === undefined) {
       throw new Error('invariant requires an error message argument');
@@ -13492,6 +14028,7 @@ function invariant(condition, format, a, b, c, d, e, f) {
 }
 
 module.exports = invariant;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -13499,7 +14036,7 @@ module.exports = invariant;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -13520,7 +14057,7 @@ var emptyFunction = __webpack_require__("./node_modules/fbjs/lib/emptyFunction.j
 
 var warning = emptyFunction;
 
-if (false) {
+if (process.env.NODE_ENV !== 'production') {
   var printWarning = function printWarning(format) {
     for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
       args[_key - 1] = arguments[_key];
@@ -13561,6 +14098,7 @@ if (false) {
 }
 
 module.exports = warning;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -20132,7 +20670,7 @@ module.exports = KeyEscapeUtils;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -20200,7 +20738,7 @@ var fourArgumentPooler = function (a1, a2, a3, a4) {
 
 var standardReleaser = function (instance) {
   var Klass = this;
-  !(instance instanceof Klass) ?  false ? invariant(false, 'Trying to release an instance into a pool of a different type.') : _prodInvariant('25') : void 0;
+  !(instance instanceof Klass) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Trying to release an instance into a pool of a different type.') : _prodInvariant('25') : void 0;
   instance.destructor();
   if (Klass.instancePool.length < Klass.poolSize) {
     Klass.instancePool.push(instance);
@@ -20241,6 +20779,7 @@ var PooledClass = {
 };
 
 module.exports = PooledClass;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -20248,7 +20787,7 @@ module.exports = PooledClass;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -20274,10 +20813,10 @@ var createElement = ReactElement.createElement;
 var createFactory = ReactElement.createFactory;
 var cloneElement = ReactElement.cloneElement;
 
-if (false) {
-  var lowPriorityWarning = require('./lowPriorityWarning');
-  var canDefineProperty = require('./canDefineProperty');
-  var ReactElementValidator = require('./ReactElementValidator');
+if (process.env.NODE_ENV !== 'production') {
+  var lowPriorityWarning = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/lowPriorityWarning.js");
+  var canDefineProperty = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/canDefineProperty.js");
+  var ReactElementValidator = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/ReactElementValidator.js");
   var didWarnPropTypesDeprecated = false;
   createElement = ReactElementValidator.createElement;
   createFactory = ReactElementValidator.createFactory;
@@ -20289,7 +20828,7 @@ var createMixin = function (mixin) {
   return mixin;
 };
 
-if (false) {
+if (process.env.NODE_ENV !== 'production') {
   var warnedForSpread = false;
   var warnedForCreateMixin = false;
   __spread = function () {
@@ -20340,7 +20879,7 @@ var React = {
   __spread: __spread
 };
 
-if (false) {
+if (process.env.NODE_ENV !== 'production') {
   var warnedForCreateClass = false;
   if (canDefineProperty) {
     Object.defineProperty(React, 'PropTypes', {
@@ -20377,6 +20916,7 @@ if (false) {
 }
 
 module.exports = React;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -20384,7 +20924,7 @@ module.exports = React;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -20444,7 +20984,7 @@ ReactComponent.prototype.isReactComponent = {};
  * @protected
  */
 ReactComponent.prototype.setState = function (partialState, callback) {
-  !(typeof partialState === 'object' || typeof partialState === 'function' || partialState == null) ?  false ? invariant(false, 'setState(...): takes an object of state variables to update or a function which returns an object of state variables.') : _prodInvariant('85') : void 0;
+  !(typeof partialState === 'object' || typeof partialState === 'function' || partialState == null) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'setState(...): takes an object of state variables to update or a function which returns an object of state variables.') : _prodInvariant('85') : void 0;
   this.updater.enqueueSetState(this, partialState);
   if (callback) {
     this.updater.enqueueCallback(this, callback, 'setState');
@@ -20477,7 +21017,7 @@ ReactComponent.prototype.forceUpdate = function (callback) {
  * we would like to deprecate them, we're not going to move them over to this
  * modern base class. Instead, we define a getter that warns if it's accessed.
  */
-if (false) {
+if (process.env.NODE_ENV !== 'production') {
   var deprecatedAPIs = {
     isMounted: ['isMounted', 'Instead, make sure to clean up subscriptions and pending requests in ' + 'componentWillUnmount to prevent memory leaks.'],
     replaceState: ['replaceState', 'Refactor your code to use setState instead (see ' + 'https://github.com/facebook/react/issues/3236).']
@@ -20524,6 +21064,7 @@ module.exports = {
   Component: ReactComponent,
   PureComponent: ReactPureComponent
 };
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -20722,6 +21263,390 @@ module.exports = ReactChildren;
 
 /***/ }),
 
+/***/ "./node_modules/lazy-route/node_modules/react/lib/ReactComponentTreeHook.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * Copyright (c) 2016-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * 
+ */
+
+
+
+var _prodInvariant = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/reactProdInvariant.js");
+
+var ReactCurrentOwner = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/ReactCurrentOwner.js");
+
+var invariant = __webpack_require__("./node_modules/fbjs/lib/invariant.js");
+var warning = __webpack_require__("./node_modules/fbjs/lib/warning.js");
+
+function isNative(fn) {
+  // Based on isNative() from Lodash
+  var funcToString = Function.prototype.toString;
+  var hasOwnProperty = Object.prototype.hasOwnProperty;
+  var reIsNative = RegExp('^' + funcToString
+  // Take an example native function source for comparison
+  .call(hasOwnProperty
+  // Strip regex characters so we can use it for regex
+  ).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&'
+  // Remove hasOwnProperty from the template to make it generic
+  ).replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$');
+  try {
+    var source = funcToString.call(fn);
+    return reIsNative.test(source);
+  } catch (err) {
+    return false;
+  }
+}
+
+var canUseCollections =
+// Array.from
+typeof Array.from === 'function' &&
+// Map
+typeof Map === 'function' && isNative(Map) &&
+// Map.prototype.keys
+Map.prototype != null && typeof Map.prototype.keys === 'function' && isNative(Map.prototype.keys) &&
+// Set
+typeof Set === 'function' && isNative(Set) &&
+// Set.prototype.keys
+Set.prototype != null && typeof Set.prototype.keys === 'function' && isNative(Set.prototype.keys);
+
+var setItem;
+var getItem;
+var removeItem;
+var getItemIDs;
+var addRoot;
+var removeRoot;
+var getRootIDs;
+
+if (canUseCollections) {
+  var itemMap = new Map();
+  var rootIDSet = new Set();
+
+  setItem = function (id, item) {
+    itemMap.set(id, item);
+  };
+  getItem = function (id) {
+    return itemMap.get(id);
+  };
+  removeItem = function (id) {
+    itemMap['delete'](id);
+  };
+  getItemIDs = function () {
+    return Array.from(itemMap.keys());
+  };
+
+  addRoot = function (id) {
+    rootIDSet.add(id);
+  };
+  removeRoot = function (id) {
+    rootIDSet['delete'](id);
+  };
+  getRootIDs = function () {
+    return Array.from(rootIDSet.keys());
+  };
+} else {
+  var itemByKey = {};
+  var rootByKey = {};
+
+  // Use non-numeric keys to prevent V8 performance issues:
+  // https://github.com/facebook/react/pull/7232
+  var getKeyFromID = function (id) {
+    return '.' + id;
+  };
+  var getIDFromKey = function (key) {
+    return parseInt(key.substr(1), 10);
+  };
+
+  setItem = function (id, item) {
+    var key = getKeyFromID(id);
+    itemByKey[key] = item;
+  };
+  getItem = function (id) {
+    var key = getKeyFromID(id);
+    return itemByKey[key];
+  };
+  removeItem = function (id) {
+    var key = getKeyFromID(id);
+    delete itemByKey[key];
+  };
+  getItemIDs = function () {
+    return Object.keys(itemByKey).map(getIDFromKey);
+  };
+
+  addRoot = function (id) {
+    var key = getKeyFromID(id);
+    rootByKey[key] = true;
+  };
+  removeRoot = function (id) {
+    var key = getKeyFromID(id);
+    delete rootByKey[key];
+  };
+  getRootIDs = function () {
+    return Object.keys(rootByKey).map(getIDFromKey);
+  };
+}
+
+var unmountedIDs = [];
+
+function purgeDeep(id) {
+  var item = getItem(id);
+  if (item) {
+    var childIDs = item.childIDs;
+
+    removeItem(id);
+    childIDs.forEach(purgeDeep);
+  }
+}
+
+function describeComponentFrame(name, source, ownerName) {
+  return '\n    in ' + (name || 'Unknown') + (source ? ' (at ' + source.fileName.replace(/^.*[\\\/]/, '') + ':' + source.lineNumber + ')' : ownerName ? ' (created by ' + ownerName + ')' : '');
+}
+
+function getDisplayName(element) {
+  if (element == null) {
+    return '#empty';
+  } else if (typeof element === 'string' || typeof element === 'number') {
+    return '#text';
+  } else if (typeof element.type === 'string') {
+    return element.type;
+  } else {
+    return element.type.displayName || element.type.name || 'Unknown';
+  }
+}
+
+function describeID(id) {
+  var name = ReactComponentTreeHook.getDisplayName(id);
+  var element = ReactComponentTreeHook.getElement(id);
+  var ownerID = ReactComponentTreeHook.getOwnerID(id);
+  var ownerName;
+  if (ownerID) {
+    ownerName = ReactComponentTreeHook.getDisplayName(ownerID);
+  }
+  process.env.NODE_ENV !== 'production' ? warning(element, 'ReactComponentTreeHook: Missing React element for debugID %s when ' + 'building stack', id) : void 0;
+  return describeComponentFrame(name, element && element._source, ownerName);
+}
+
+var ReactComponentTreeHook = {
+  onSetChildren: function (id, nextChildIDs) {
+    var item = getItem(id);
+    !item ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Item must have been set') : _prodInvariant('144') : void 0;
+    item.childIDs = nextChildIDs;
+
+    for (var i = 0; i < nextChildIDs.length; i++) {
+      var nextChildID = nextChildIDs[i];
+      var nextChild = getItem(nextChildID);
+      !nextChild ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Expected hook events to fire for the child before its parent includes it in onSetChildren().') : _prodInvariant('140') : void 0;
+      !(nextChild.childIDs != null || typeof nextChild.element !== 'object' || nextChild.element == null) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Expected onSetChildren() to fire for a container child before its parent includes it in onSetChildren().') : _prodInvariant('141') : void 0;
+      !nextChild.isMounted ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Expected onMountComponent() to fire for the child before its parent includes it in onSetChildren().') : _prodInvariant('71') : void 0;
+      if (nextChild.parentID == null) {
+        nextChild.parentID = id;
+        // TODO: This shouldn't be necessary but mounting a new root during in
+        // componentWillMount currently causes not-yet-mounted components to
+        // be purged from our tree data so their parent id is missing.
+      }
+      !(nextChild.parentID === id) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Expected onBeforeMountComponent() parent and onSetChildren() to be consistent (%s has parents %s and %s).', nextChildID, nextChild.parentID, id) : _prodInvariant('142', nextChildID, nextChild.parentID, id) : void 0;
+    }
+  },
+  onBeforeMountComponent: function (id, element, parentID) {
+    var item = {
+      element: element,
+      parentID: parentID,
+      text: null,
+      childIDs: [],
+      isMounted: false,
+      updateCount: 0
+    };
+    setItem(id, item);
+  },
+  onBeforeUpdateComponent: function (id, element) {
+    var item = getItem(id);
+    if (!item || !item.isMounted) {
+      // We may end up here as a result of setState() in componentWillUnmount().
+      // In this case, ignore the element.
+      return;
+    }
+    item.element = element;
+  },
+  onMountComponent: function (id) {
+    var item = getItem(id);
+    !item ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Item must have been set') : _prodInvariant('144') : void 0;
+    item.isMounted = true;
+    var isRoot = item.parentID === 0;
+    if (isRoot) {
+      addRoot(id);
+    }
+  },
+  onUpdateComponent: function (id) {
+    var item = getItem(id);
+    if (!item || !item.isMounted) {
+      // We may end up here as a result of setState() in componentWillUnmount().
+      // In this case, ignore the element.
+      return;
+    }
+    item.updateCount++;
+  },
+  onUnmountComponent: function (id) {
+    var item = getItem(id);
+    if (item) {
+      // We need to check if it exists.
+      // `item` might not exist if it is inside an error boundary, and a sibling
+      // error boundary child threw while mounting. Then this instance never
+      // got a chance to mount, but it still gets an unmounting event during
+      // the error boundary cleanup.
+      item.isMounted = false;
+      var isRoot = item.parentID === 0;
+      if (isRoot) {
+        removeRoot(id);
+      }
+    }
+    unmountedIDs.push(id);
+  },
+  purgeUnmountedComponents: function () {
+    if (ReactComponentTreeHook._preventPurging) {
+      // Should only be used for testing.
+      return;
+    }
+
+    for (var i = 0; i < unmountedIDs.length; i++) {
+      var id = unmountedIDs[i];
+      purgeDeep(id);
+    }
+    unmountedIDs.length = 0;
+  },
+  isMounted: function (id) {
+    var item = getItem(id);
+    return item ? item.isMounted : false;
+  },
+  getCurrentStackAddendum: function (topElement) {
+    var info = '';
+    if (topElement) {
+      var name = getDisplayName(topElement);
+      var owner = topElement._owner;
+      info += describeComponentFrame(name, topElement._source, owner && owner.getName());
+    }
+
+    var currentOwner = ReactCurrentOwner.current;
+    var id = currentOwner && currentOwner._debugID;
+
+    info += ReactComponentTreeHook.getStackAddendumByID(id);
+    return info;
+  },
+  getStackAddendumByID: function (id) {
+    var info = '';
+    while (id) {
+      info += describeID(id);
+      id = ReactComponentTreeHook.getParentID(id);
+    }
+    return info;
+  },
+  getChildIDs: function (id) {
+    var item = getItem(id);
+    return item ? item.childIDs : [];
+  },
+  getDisplayName: function (id) {
+    var element = ReactComponentTreeHook.getElement(id);
+    if (!element) {
+      return null;
+    }
+    return getDisplayName(element);
+  },
+  getElement: function (id) {
+    var item = getItem(id);
+    return item ? item.element : null;
+  },
+  getOwnerID: function (id) {
+    var element = ReactComponentTreeHook.getElement(id);
+    if (!element || !element._owner) {
+      return null;
+    }
+    return element._owner._debugID;
+  },
+  getParentID: function (id) {
+    var item = getItem(id);
+    return item ? item.parentID : null;
+  },
+  getSource: function (id) {
+    var item = getItem(id);
+    var element = item ? item.element : null;
+    var source = element != null ? element._source : null;
+    return source;
+  },
+  getText: function (id) {
+    var element = ReactComponentTreeHook.getElement(id);
+    if (typeof element === 'string') {
+      return element;
+    } else if (typeof element === 'number') {
+      return '' + element;
+    } else {
+      return null;
+    }
+  },
+  getUpdateCount: function (id) {
+    var item = getItem(id);
+    return item ? item.updateCount : 0;
+  },
+
+
+  getRootIDs: getRootIDs,
+  getRegisteredIDs: getItemIDs,
+
+  pushNonStandardWarningStack: function (isCreatingElement, currentSource) {
+    if (typeof console.reactStack !== 'function') {
+      return;
+    }
+
+    var stack = [];
+    var currentOwner = ReactCurrentOwner.current;
+    var id = currentOwner && currentOwner._debugID;
+
+    try {
+      if (isCreatingElement) {
+        stack.push({
+          name: id ? ReactComponentTreeHook.getDisplayName(id) : null,
+          fileName: currentSource ? currentSource.fileName : null,
+          lineNumber: currentSource ? currentSource.lineNumber : null
+        });
+      }
+
+      while (id) {
+        var element = ReactComponentTreeHook.getElement(id);
+        var parentID = ReactComponentTreeHook.getParentID(id);
+        var ownerID = ReactComponentTreeHook.getOwnerID(id);
+        var ownerName = ownerID ? ReactComponentTreeHook.getDisplayName(ownerID) : null;
+        var source = element && element._source;
+        stack.push({
+          name: ownerName,
+          fileName: source ? source.fileName : null,
+          lineNumber: source ? source.lineNumber : null
+        });
+        id = parentID;
+      }
+    } catch (err) {
+      // Internal state is messed up.
+      // Stop building the stack (it's just a nice to have).
+    }
+
+    console.reactStack(stack);
+  },
+  popNonStandardWarningStack: function () {
+    if (typeof console.reactStackEnd !== 'function') {
+      return;
+    }
+    console.reactStackEnd();
+  }
+};
+
+module.exports = ReactComponentTreeHook;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
+
+/***/ }),
+
 /***/ "./node_modules/lazy-route/node_modules/react/lib/ReactCurrentOwner.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -20759,7 +21684,7 @@ module.exports = ReactCurrentOwner;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -20777,8 +21702,8 @@ var ReactElement = __webpack_require__("./node_modules/lazy-route/node_modules/r
  * @private
  */
 var createDOMFactory = ReactElement.createFactory;
-if (false) {
-  var ReactElementValidator = require('./ReactElementValidator');
+if (process.env.NODE_ENV !== 'production') {
+  var ReactElementValidator = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/ReactElementValidator.js");
   createDOMFactory = ReactElementValidator.createFactory;
 }
 
@@ -20925,6 +21850,7 @@ var ReactDOMFactories = {
 };
 
 module.exports = ReactDOMFactories;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -20932,7 +21858,7 @@ module.exports = ReactDOMFactories;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -20962,7 +21888,7 @@ var RESERVED_PROPS = {
 var specialPropKeyWarningShown, specialPropRefWarningShown;
 
 function hasValidRef(config) {
-  if (false) {
+  if (process.env.NODE_ENV !== 'production') {
     if (hasOwnProperty.call(config, 'ref')) {
       var getter = Object.getOwnPropertyDescriptor(config, 'ref').get;
       if (getter && getter.isReactWarning) {
@@ -20974,7 +21900,7 @@ function hasValidRef(config) {
 }
 
 function hasValidKey(config) {
-  if (false) {
+  if (process.env.NODE_ENV !== 'production') {
     if (hasOwnProperty.call(config, 'key')) {
       var getter = Object.getOwnPropertyDescriptor(config, 'key').get;
       if (getter && getter.isReactWarning) {
@@ -20989,7 +21915,7 @@ function defineKeyPropWarningGetter(props, displayName) {
   var warnAboutAccessingKey = function () {
     if (!specialPropKeyWarningShown) {
       specialPropKeyWarningShown = true;
-       false ? warning(false, '%s: `key` is not a prop. Trying to access it will result ' + 'in `undefined` being returned. If you need to access the same ' + 'value within the child component, you should pass it as a different ' + 'prop. (https://fb.me/react-special-props)', displayName) : void 0;
+      process.env.NODE_ENV !== 'production' ? warning(false, '%s: `key` is not a prop. Trying to access it will result ' + 'in `undefined` being returned. If you need to access the same ' + 'value within the child component, you should pass it as a different ' + 'prop. (https://fb.me/react-special-props)', displayName) : void 0;
     }
   };
   warnAboutAccessingKey.isReactWarning = true;
@@ -21003,7 +21929,7 @@ function defineRefPropWarningGetter(props, displayName) {
   var warnAboutAccessingRef = function () {
     if (!specialPropRefWarningShown) {
       specialPropRefWarningShown = true;
-       false ? warning(false, '%s: `ref` is not a prop. Trying to access it will result ' + 'in `undefined` being returned. If you need to access the same ' + 'value within the child component, you should pass it as a different ' + 'prop. (https://fb.me/react-special-props)', displayName) : void 0;
+      process.env.NODE_ENV !== 'production' ? warning(false, '%s: `ref` is not a prop. Trying to access it will result ' + 'in `undefined` being returned. If you need to access the same ' + 'value within the child component, you should pass it as a different ' + 'prop. (https://fb.me/react-special-props)', displayName) : void 0;
     }
   };
   warnAboutAccessingRef.isReactWarning = true;
@@ -21048,7 +21974,7 @@ var ReactElement = function (type, key, ref, self, source, owner, props) {
     _owner: owner
   };
 
-  if (false) {
+  if (process.env.NODE_ENV !== 'production') {
     // The validation flag is currently mutative. We put it on
     // an external backing store so that we can freeze the whole object.
     // This can be replaced with a WeakMap once they are implemented in
@@ -21138,7 +22064,7 @@ ReactElement.createElement = function (type, config, children) {
     for (var i = 0; i < childrenLength; i++) {
       childArray[i] = arguments[i + 2];
     }
-    if (false) {
+    if (process.env.NODE_ENV !== 'production') {
       if (Object.freeze) {
         Object.freeze(childArray);
       }
@@ -21155,7 +22081,7 @@ ReactElement.createElement = function (type, config, children) {
       }
     }
   }
-  if (false) {
+  if (process.env.NODE_ENV !== 'production') {
     if (key || ref) {
       if (typeof props.$$typeof === 'undefined' || props.$$typeof !== REACT_ELEMENT_TYPE) {
         var displayName = typeof type === 'function' ? type.displayName || type.name || 'Unknown' : type;
@@ -21270,6 +22196,7 @@ ReactElement.isValidElement = function (object) {
 };
 
 module.exports = ReactElement;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -21297,11 +22224,271 @@ module.exports = REACT_ELEMENT_TYPE;
 
 /***/ }),
 
+/***/ "./node_modules/lazy-route/node_modules/react/lib/ReactElementValidator.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * ReactElementValidator provides a wrapper around a element factory
+ * which validates the props passed to the element. This is intended to be
+ * used only in DEV and could be replaced by a static type checker for languages
+ * that support it.
+ */
+
+
+
+var ReactCurrentOwner = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/ReactCurrentOwner.js");
+var ReactComponentTreeHook = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/ReactComponentTreeHook.js");
+var ReactElement = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/ReactElement.js");
+
+var checkReactTypeSpec = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/checkReactTypeSpec.js");
+
+var canDefineProperty = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/canDefineProperty.js");
+var getIteratorFn = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/getIteratorFn.js");
+var warning = __webpack_require__("./node_modules/fbjs/lib/warning.js");
+var lowPriorityWarning = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/lowPriorityWarning.js");
+
+function getDeclarationErrorAddendum() {
+  if (ReactCurrentOwner.current) {
+    var name = ReactCurrentOwner.current.getName();
+    if (name) {
+      return ' Check the render method of `' + name + '`.';
+    }
+  }
+  return '';
+}
+
+function getSourceInfoErrorAddendum(elementProps) {
+  if (elementProps !== null && elementProps !== undefined && elementProps.__source !== undefined) {
+    var source = elementProps.__source;
+    var fileName = source.fileName.replace(/^.*[\\\/]/, '');
+    var lineNumber = source.lineNumber;
+    return ' Check your code at ' + fileName + ':' + lineNumber + '.';
+  }
+  return '';
+}
+
+/**
+ * Warn if there's no key explicitly set on dynamic arrays of children or
+ * object keys are not valid. This allows us to keep track of children between
+ * updates.
+ */
+var ownerHasKeyUseWarning = {};
+
+function getCurrentComponentErrorInfo(parentType) {
+  var info = getDeclarationErrorAddendum();
+
+  if (!info) {
+    var parentName = typeof parentType === 'string' ? parentType : parentType.displayName || parentType.name;
+    if (parentName) {
+      info = ' Check the top-level render call using <' + parentName + '>.';
+    }
+  }
+  return info;
+}
+
+/**
+ * Warn if the element doesn't have an explicit key assigned to it.
+ * This element is in an array. The array could grow and shrink or be
+ * reordered. All children that haven't already been validated are required to
+ * have a "key" property assigned to it. Error statuses are cached so a warning
+ * will only be shown once.
+ *
+ * @internal
+ * @param {ReactElement} element Element that requires a key.
+ * @param {*} parentType element's parent's type.
+ */
+function validateExplicitKey(element, parentType) {
+  if (!element._store || element._store.validated || element.key != null) {
+    return;
+  }
+  element._store.validated = true;
+
+  var memoizer = ownerHasKeyUseWarning.uniqueKey || (ownerHasKeyUseWarning.uniqueKey = {});
+
+  var currentComponentErrorInfo = getCurrentComponentErrorInfo(parentType);
+  if (memoizer[currentComponentErrorInfo]) {
+    return;
+  }
+  memoizer[currentComponentErrorInfo] = true;
+
+  // Usually the current owner is the offender, but if it accepts children as a
+  // property, it may be the creator of the child that's responsible for
+  // assigning it a key.
+  var childOwner = '';
+  if (element && element._owner && element._owner !== ReactCurrentOwner.current) {
+    // Give the component that originally created this child.
+    childOwner = ' It was passed a child from ' + element._owner.getName() + '.';
+  }
+
+  process.env.NODE_ENV !== 'production' ? warning(false, 'Each child in an array or iterator should have a unique "key" prop.' + '%s%s See https://fb.me/react-warning-keys for more information.%s', currentComponentErrorInfo, childOwner, ReactComponentTreeHook.getCurrentStackAddendum(element)) : void 0;
+}
+
+/**
+ * Ensure that every element either is passed in a static location, in an
+ * array with an explicit keys property defined, or in an object literal
+ * with valid key property.
+ *
+ * @internal
+ * @param {ReactNode} node Statically passed child of any type.
+ * @param {*} parentType node's parent's type.
+ */
+function validateChildKeys(node, parentType) {
+  if (typeof node !== 'object') {
+    return;
+  }
+  if (Array.isArray(node)) {
+    for (var i = 0; i < node.length; i++) {
+      var child = node[i];
+      if (ReactElement.isValidElement(child)) {
+        validateExplicitKey(child, parentType);
+      }
+    }
+  } else if (ReactElement.isValidElement(node)) {
+    // This element was passed in a valid location.
+    if (node._store) {
+      node._store.validated = true;
+    }
+  } else if (node) {
+    var iteratorFn = getIteratorFn(node);
+    // Entry iterators provide implicit keys.
+    if (iteratorFn) {
+      if (iteratorFn !== node.entries) {
+        var iterator = iteratorFn.call(node);
+        var step;
+        while (!(step = iterator.next()).done) {
+          if (ReactElement.isValidElement(step.value)) {
+            validateExplicitKey(step.value, parentType);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Given an element, validate that its props follow the propTypes definition,
+ * provided by the type.
+ *
+ * @param {ReactElement} element
+ */
+function validatePropTypes(element) {
+  var componentClass = element.type;
+  if (typeof componentClass !== 'function') {
+    return;
+  }
+  var name = componentClass.displayName || componentClass.name;
+  if (componentClass.propTypes) {
+    checkReactTypeSpec(componentClass.propTypes, element.props, 'prop', name, element, null);
+  }
+  if (typeof componentClass.getDefaultProps === 'function') {
+    process.env.NODE_ENV !== 'production' ? warning(componentClass.getDefaultProps.isReactClassApproved, 'getDefaultProps is only used on classic React.createClass ' + 'definitions. Use a static property named `defaultProps` instead.') : void 0;
+  }
+}
+
+var ReactElementValidator = {
+  createElement: function (type, props, children) {
+    var validType = typeof type === 'string' || typeof type === 'function';
+    // We warn in this case but don't throw. We expect the element creation to
+    // succeed and there will likely be errors in render.
+    if (!validType) {
+      if (typeof type !== 'function' && typeof type !== 'string') {
+        var info = '';
+        if (type === undefined || typeof type === 'object' && type !== null && Object.keys(type).length === 0) {
+          info += ' You likely forgot to export your component from the file ' + "it's defined in.";
+        }
+
+        var sourceInfo = getSourceInfoErrorAddendum(props);
+        if (sourceInfo) {
+          info += sourceInfo;
+        } else {
+          info += getDeclarationErrorAddendum();
+        }
+
+        info += ReactComponentTreeHook.getCurrentStackAddendum();
+
+        var currentSource = props !== null && props !== undefined && props.__source !== undefined ? props.__source : null;
+        ReactComponentTreeHook.pushNonStandardWarningStack(true, currentSource);
+        process.env.NODE_ENV !== 'production' ? warning(false, 'React.createElement: type is invalid -- expected a string (for ' + 'built-in components) or a class/function (for composite ' + 'components) but got: %s.%s', type == null ? type : typeof type, info) : void 0;
+        ReactComponentTreeHook.popNonStandardWarningStack();
+      }
+    }
+
+    var element = ReactElement.createElement.apply(this, arguments);
+
+    // The result can be nullish if a mock or a custom function is used.
+    // TODO: Drop this when these are no longer allowed as the type argument.
+    if (element == null) {
+      return element;
+    }
+
+    // Skip key warning if the type isn't valid since our key validation logic
+    // doesn't expect a non-string/function type and can throw confusing errors.
+    // We don't want exception behavior to differ between dev and prod.
+    // (Rendering will throw with a helpful message and as soon as the type is
+    // fixed, the key warnings will appear.)
+    if (validType) {
+      for (var i = 2; i < arguments.length; i++) {
+        validateChildKeys(arguments[i], type);
+      }
+    }
+
+    validatePropTypes(element);
+
+    return element;
+  },
+
+  createFactory: function (type) {
+    var validatedFactory = ReactElementValidator.createElement.bind(null, type);
+    // Legacy hook TODO: Warn if this is accessed
+    validatedFactory.type = type;
+
+    if (process.env.NODE_ENV !== 'production') {
+      if (canDefineProperty) {
+        Object.defineProperty(validatedFactory, 'type', {
+          enumerable: false,
+          get: function () {
+            lowPriorityWarning(false, 'Factory.type is deprecated. Access the class directly ' + 'before passing it to createFactory.');
+            Object.defineProperty(this, 'type', {
+              value: type
+            });
+            return type;
+          }
+        });
+      }
+    }
+
+    return validatedFactory;
+  },
+
+  cloneElement: function (element, props, children) {
+    var newElement = ReactElement.cloneElement.apply(this, arguments);
+    for (var i = 2; i < arguments.length; i++) {
+      validateChildKeys(arguments[i], newElement.type);
+    }
+    validatePropTypes(newElement);
+    return newElement;
+  }
+};
+
+module.exports = ReactElementValidator;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
+
+/***/ }),
+
 /***/ "./node_modules/lazy-route/node_modules/react/lib/ReactNoopUpdateQueue.js":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2015-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -21314,7 +22501,7 @@ module.exports = REACT_ELEMENT_TYPE;
 var warning = __webpack_require__("./node_modules/fbjs/lib/warning.js");
 
 function warnNoop(publicInstance, callerName) {
-  if (false) {
+  if (process.env.NODE_ENV !== 'production') {
     var constructor = publicInstance.constructor;
     process.env.NODE_ENV !== 'production' ? warning(false, '%s(...): Can only update a mounted or mounting component. ' + 'This usually means you called %s() on an unmounted component. ' + 'This is a no-op. Please check the code for the %s component.', callerName, callerName, constructor && (constructor.displayName || constructor.name) || 'ReactClass') : void 0;
   }
@@ -21393,6 +22580,37 @@ var ReactNoopUpdateQueue = {
 };
 
 module.exports = ReactNoopUpdateQueue;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
+
+/***/ }),
+
+/***/ "./node_modules/lazy-route/node_modules/react/lib/ReactPropTypeLocationNames.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * 
+ */
+
+
+
+var ReactPropTypeLocationNames = {};
+
+if (process.env.NODE_ENV !== 'production') {
+  ReactPropTypeLocationNames = {
+    prop: 'prop',
+    context: 'context',
+    childContext: 'child context'
+  };
+}
+
+module.exports = ReactPropTypeLocationNames;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -21419,6 +22637,27 @@ module.exports = factory(isValidElement);
 
 /***/ }),
 
+/***/ "./node_modules/lazy-route/node_modules/react/lib/ReactPropTypesSecret.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * 
+ */
+
+
+
+var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
+
+module.exports = ReactPropTypesSecret;
+
+/***/ }),
+
 /***/ "./node_modules/lazy-route/node_modules/react/lib/ReactVersion.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -21441,7 +22680,7 @@ module.exports = '15.6.2';
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -21453,7 +22692,7 @@ module.exports = '15.6.2';
 
 
 var canDefineProperty = false;
-if (false) {
+if (process.env.NODE_ENV !== 'production') {
   try {
     // $FlowFixMe https://github.com/facebook/flow/issues/285
     Object.defineProperty({}, 'x', { get: function () {} });
@@ -21464,6 +22703,99 @@ if (false) {
 }
 
 module.exports = canDefineProperty;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
+
+/***/ }),
+
+/***/ "./node_modules/lazy-route/node_modules/react/lib/checkReactTypeSpec.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+
+
+var _prodInvariant = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/reactProdInvariant.js");
+
+var ReactPropTypeLocationNames = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/ReactPropTypeLocationNames.js");
+var ReactPropTypesSecret = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/ReactPropTypesSecret.js");
+
+var invariant = __webpack_require__("./node_modules/fbjs/lib/invariant.js");
+var warning = __webpack_require__("./node_modules/fbjs/lib/warning.js");
+
+var ReactComponentTreeHook;
+
+if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test') {
+  // Temporary hack.
+  // Inline requires don't work well with Jest:
+  // https://github.com/facebook/react/issues/7240
+  // Remove the inline requires when we don't need them anymore:
+  // https://github.com/facebook/react/pull/7178
+  ReactComponentTreeHook = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/ReactComponentTreeHook.js");
+}
+
+var loggedTypeFailures = {};
+
+/**
+ * Assert that the values match with the type specs.
+ * Error messages are memorized and will only be shown once.
+ *
+ * @param {object} typeSpecs Map of name to a ReactPropType
+ * @param {object} values Runtime values that need to be type-checked
+ * @param {string} location e.g. "prop", "context", "child context"
+ * @param {string} componentName Name of the component for error messages.
+ * @param {?object} element The React element that is being type-checked
+ * @param {?number} debugID The React component instance that is being type-checked
+ * @private
+ */
+function checkReactTypeSpec(typeSpecs, values, location, componentName, element, debugID) {
+  for (var typeSpecName in typeSpecs) {
+    if (typeSpecs.hasOwnProperty(typeSpecName)) {
+      var error;
+      // Prop type validation may throw. In case they do, we don't want to
+      // fail the render phase where it didn't fail before. So we log it.
+      // After these have been cleaned up, we'll let them throw.
+      try {
+        // This is intentionally an invariant that gets caught. It's the same
+        // behavior as without this statement except with a better message.
+        !(typeof typeSpecs[typeSpecName] === 'function') ? process.env.NODE_ENV !== 'production' ? invariant(false, '%s: %s type `%s` is invalid; it must be a function, usually from React.PropTypes.', componentName || 'React class', ReactPropTypeLocationNames[location], typeSpecName) : _prodInvariant('84', componentName || 'React class', ReactPropTypeLocationNames[location], typeSpecName) : void 0;
+        error = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, ReactPropTypesSecret);
+      } catch (ex) {
+        error = ex;
+      }
+      process.env.NODE_ENV !== 'production' ? warning(!error || error instanceof Error, '%s: type specification of %s `%s` is invalid; the type checker ' + 'function must return `null` or an `Error` but returned a %s. ' + 'You may have forgotten to pass an argument to the type checker ' + 'creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and ' + 'shape all require an argument).', componentName || 'React class', ReactPropTypeLocationNames[location], typeSpecName, typeof error) : void 0;
+      if (error instanceof Error && !(error.message in loggedTypeFailures)) {
+        // Only monitor this failure once because there tends to be a lot of the
+        // same error.
+        loggedTypeFailures[error.message] = true;
+
+        var componentStackInfo = '';
+
+        if (process.env.NODE_ENV !== 'production') {
+          if (!ReactComponentTreeHook) {
+            ReactComponentTreeHook = __webpack_require__("./node_modules/lazy-route/node_modules/react/lib/ReactComponentTreeHook.js");
+          }
+          if (debugID !== null) {
+            componentStackInfo = ReactComponentTreeHook.getStackAddendumByID(debugID);
+          } else if (element !== null) {
+            componentStackInfo = ReactComponentTreeHook.getCurrentStackAddendum(element);
+          }
+        }
+
+        process.env.NODE_ENV !== 'production' ? warning(false, 'Failed %s type: %s%s', location, error.message, componentStackInfo) : void 0;
+      }
+    }
+  }
+}
+
+module.exports = checkReactTypeSpec;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -21543,7 +22875,7 @@ module.exports = getIteratorFn;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -21569,7 +22901,7 @@ module.exports = getIteratorFn;
 
 var lowPriorityWarning = function () {};
 
-if (false) {
+if (process.env.NODE_ENV !== 'production') {
   var printWarning = function (format) {
     for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
       args[_key - 1] = arguments[_key];
@@ -21605,6 +22937,7 @@ if (false) {
 }
 
 module.exports = lowPriorityWarning;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -21612,7 +22945,7 @@ module.exports = lowPriorityWarning;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -21642,11 +22975,12 @@ var invariant = __webpack_require__("./node_modules/fbjs/lib/invariant.js");
  * structure.
  */
 function onlyChild(children) {
-  !ReactElement.isValidElement(children) ?  false ? invariant(false, 'React.Children.only expected to receive a single React element child.') : _prodInvariant('143') : void 0;
+  !ReactElement.isValidElement(children) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'React.Children.only expected to receive a single React element child.') : _prodInvariant('143') : void 0;
   return children;
 }
 
 module.exports = onlyChild;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -21697,7 +23031,7 @@ module.exports = reactProdInvariant;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
+/* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -21802,7 +23136,7 @@ function traverseAllChildrenImpl(children, nameSoFar, callback, traverseContext)
           subtreeCount += traverseAllChildrenImpl(child, nextName, callback, traverseContext);
         }
       } else {
-        if (false) {
+        if (process.env.NODE_ENV !== 'production') {
           var mapsAsChildrenAddendum = '';
           if (ReactCurrentOwner.current) {
             var mapsAsChildrenOwnerName = ReactCurrentOwner.current.getName();
@@ -21825,7 +23159,7 @@ function traverseAllChildrenImpl(children, nameSoFar, callback, traverseContext)
       }
     } else if (type === 'object') {
       var addendum = '';
-      if (false) {
+      if (process.env.NODE_ENV !== 'production') {
         addendum = ' If you meant to render a collection of children, use an array ' + 'instead or wrap the object using createFragment(object) from the ' + 'React add-ons.';
         if (children._isReactElement) {
           addendum = " It looks like you're using an element created by a different " + 'version of React. Make sure to use only one copy of React.';
@@ -21838,7 +23172,7 @@ function traverseAllChildrenImpl(children, nameSoFar, callback, traverseContext)
         }
       }
       var childrenString = String(children);
-       true ?  false ? invariant(false, 'Objects are not valid as a React child (found: %s).%s', childrenString === '[object Object]' ? 'object with keys {' + Object.keys(children).join(', ') + '}' : childrenString, addendum) : _prodInvariant('31', childrenString === '[object Object]' ? 'object with keys {' + Object.keys(children).join(', ') + '}' : childrenString, addendum) : void 0;
+       true ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Objects are not valid as a React child (found: %s).%s', childrenString === '[object Object]' ? 'object with keys {' + Object.keys(children).join(', ') + '}' : childrenString, addendum) : _prodInvariant('31', childrenString === '[object Object]' ? 'object with keys {' + Object.keys(children).join(', ') + '}' : childrenString, addendum) : void 0;
     }
   }
 
@@ -21870,6 +23204,7 @@ function traverseAllChildren(children, callback, traverseContext) {
 }
 
 module.exports = traverseAllChildren;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -40777,296 +42112,6 @@ if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === "object") {
 
 /***/ }),
 
-/***/ "./node_modules/node-libs-browser/node_modules/process/browser.js":
-/***/ (function(module, exports) {
-
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-
-/***/ }),
-
-/***/ "./node_modules/prop-types/checkPropTypes.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-var printWarning = function() {};
-
-if (false) {
-  var ReactPropTypesSecret = require('./lib/ReactPropTypesSecret');
-  var loggedTypeFailures = {};
-
-  printWarning = function(text) {
-    var message = 'Warning: ' + text;
-    if (typeof console !== 'undefined') {
-      console.error(message);
-    }
-    try {
-      // --- Welcome to debugging React ---
-      // This error was thrown as a convenience so that you can use this stack
-      // to find the callsite that caused this warning to fire.
-      throw new Error(message);
-    } catch (x) {}
-  };
-}
-
-/**
- * Assert that the values match with the type specs.
- * Error messages are memorized and will only be shown once.
- *
- * @param {object} typeSpecs Map of name to a ReactPropType
- * @param {object} values Runtime values that need to be type-checked
- * @param {string} location e.g. "prop", "context", "child context"
- * @param {string} componentName Name of the component for error messages.
- * @param {?Function} getStack Returns the component stack.
- * @private
- */
-function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
-  if (false) {
-    for (var typeSpecName in typeSpecs) {
-      if (typeSpecs.hasOwnProperty(typeSpecName)) {
-        var error;
-        // Prop type validation may throw. In case they do, we don't want to
-        // fail the render phase where it didn't fail before. So we log it.
-        // After these have been cleaned up, we'll let them throw.
-        try {
-          // This is intentionally an invariant that gets caught. It's the same
-          // behavior as without this statement except with a better message.
-          if (typeof typeSpecs[typeSpecName] !== 'function') {
-            var err = Error(
-              (componentName || 'React class') + ': ' + location + ' type `' + typeSpecName + '` is invalid; ' +
-              'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.'
-            );
-            err.name = 'Invariant Violation';
-            throw err;
-          }
-          error = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, ReactPropTypesSecret);
-        } catch (ex) {
-          error = ex;
-        }
-        if (error && !(error instanceof Error)) {
-          printWarning(
-            (componentName || 'React class') + ': type specification of ' +
-            location + ' `' + typeSpecName + '` is invalid; the type checker ' +
-            'function must return `null` or an `Error` but returned a ' + typeof error + '. ' +
-            'You may have forgotten to pass an argument to the type checker ' +
-            'creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and ' +
-            'shape all require an argument).'
-          )
-
-        }
-        if (error instanceof Error && !(error.message in loggedTypeFailures)) {
-          // Only monitor this failure once because there tends to be a lot of the
-          // same error.
-          loggedTypeFailures[error.message] = true;
-
-          var stack = getStack ? getStack() : '';
-
-          printWarning(
-            'Failed ' + location + ' type: ' + error.message + (stack != null ? stack : '')
-          );
-        }
-      }
-    }
-  }
-}
-
-module.exports = checkPropTypes;
-
-
-/***/ }),
-
 /***/ "./node_modules/prop-types/factory.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -41089,569 +42134,6 @@ module.exports = function(isValidElement) {
   // It is still allowed in 15.5.
   var throwOnDirectAccess = false;
   return factory(isValidElement, throwOnDirectAccess);
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/prop-types/factoryWithTypeCheckers.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-var assign = __webpack_require__("./node_modules/object-assign/index.js");
-
-var ReactPropTypesSecret = __webpack_require__("./node_modules/prop-types/lib/ReactPropTypesSecret.js");
-var checkPropTypes = __webpack_require__("./node_modules/prop-types/checkPropTypes.js");
-
-var printWarning = function() {};
-
-if (false) {
-  printWarning = function(text) {
-    var message = 'Warning: ' + text;
-    if (typeof console !== 'undefined') {
-      console.error(message);
-    }
-    try {
-      // --- Welcome to debugging React ---
-      // This error was thrown as a convenience so that you can use this stack
-      // to find the callsite that caused this warning to fire.
-      throw new Error(message);
-    } catch (x) {}
-  };
-}
-
-function emptyFunctionThatReturnsNull() {
-  return null;
-}
-
-module.exports = function(isValidElement, throwOnDirectAccess) {
-  /* global Symbol */
-  var ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
-  var FAUX_ITERATOR_SYMBOL = '@@iterator'; // Before Symbol spec.
-
-  /**
-   * Returns the iterator method function contained on the iterable object.
-   *
-   * Be sure to invoke the function with the iterable as context:
-   *
-   *     var iteratorFn = getIteratorFn(myIterable);
-   *     if (iteratorFn) {
-   *       var iterator = iteratorFn.call(myIterable);
-   *       ...
-   *     }
-   *
-   * @param {?object} maybeIterable
-   * @return {?function}
-   */
-  function getIteratorFn(maybeIterable) {
-    var iteratorFn = maybeIterable && (ITERATOR_SYMBOL && maybeIterable[ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL]);
-    if (typeof iteratorFn === 'function') {
-      return iteratorFn;
-    }
-  }
-
-  /**
-   * Collection of methods that allow declaration and validation of props that are
-   * supplied to React components. Example usage:
-   *
-   *   var Props = require('ReactPropTypes');
-   *   var MyArticle = React.createClass({
-   *     propTypes: {
-   *       // An optional string prop named "description".
-   *       description: Props.string,
-   *
-   *       // A required enum prop named "category".
-   *       category: Props.oneOf(['News','Photos']).isRequired,
-   *
-   *       // A prop named "dialog" that requires an instance of Dialog.
-   *       dialog: Props.instanceOf(Dialog).isRequired
-   *     },
-   *     render: function() { ... }
-   *   });
-   *
-   * A more formal specification of how these methods are used:
-   *
-   *   type := array|bool|func|object|number|string|oneOf([...])|instanceOf(...)
-   *   decl := ReactPropTypes.{type}(.isRequired)?
-   *
-   * Each and every declaration produces a function with the same signature. This
-   * allows the creation of custom validation functions. For example:
-   *
-   *  var MyLink = React.createClass({
-   *    propTypes: {
-   *      // An optional string or URI prop named "href".
-   *      href: function(props, propName, componentName) {
-   *        var propValue = props[propName];
-   *        if (propValue != null && typeof propValue !== 'string' &&
-   *            !(propValue instanceof URI)) {
-   *          return new Error(
-   *            'Expected a string or an URI for ' + propName + ' in ' +
-   *            componentName
-   *          );
-   *        }
-   *      }
-   *    },
-   *    render: function() {...}
-   *  });
-   *
-   * @internal
-   */
-
-  var ANONYMOUS = '<<anonymous>>';
-
-  // Important!
-  // Keep this list in sync with production version in `./factoryWithThrowingShims.js`.
-  var ReactPropTypes = {
-    array: createPrimitiveTypeChecker('array'),
-    bool: createPrimitiveTypeChecker('boolean'),
-    func: createPrimitiveTypeChecker('function'),
-    number: createPrimitiveTypeChecker('number'),
-    object: createPrimitiveTypeChecker('object'),
-    string: createPrimitiveTypeChecker('string'),
-    symbol: createPrimitiveTypeChecker('symbol'),
-
-    any: createAnyTypeChecker(),
-    arrayOf: createArrayOfTypeChecker,
-    element: createElementTypeChecker(),
-    instanceOf: createInstanceTypeChecker,
-    node: createNodeChecker(),
-    objectOf: createObjectOfTypeChecker,
-    oneOf: createEnumTypeChecker,
-    oneOfType: createUnionTypeChecker,
-    shape: createShapeTypeChecker,
-    exact: createStrictShapeTypeChecker,
-  };
-
-  /**
-   * inlined Object.is polyfill to avoid requiring consumers ship their own
-   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
-   */
-  /*eslint-disable no-self-compare*/
-  function is(x, y) {
-    // SameValue algorithm
-    if (x === y) {
-      // Steps 1-5, 7-10
-      // Steps 6.b-6.e: +0 != -0
-      return x !== 0 || 1 / x === 1 / y;
-    } else {
-      // Step 6.a: NaN == NaN
-      return x !== x && y !== y;
-    }
-  }
-  /*eslint-enable no-self-compare*/
-
-  /**
-   * We use an Error-like object for backward compatibility as people may call
-   * PropTypes directly and inspect their output. However, we don't use real
-   * Errors anymore. We don't inspect their stack anyway, and creating them
-   * is prohibitively expensive if they are created too often, such as what
-   * happens in oneOfType() for any type before the one that matched.
-   */
-  function PropTypeError(message) {
-    this.message = message;
-    this.stack = '';
-  }
-  // Make `instanceof Error` still work for returned errors.
-  PropTypeError.prototype = Error.prototype;
-
-  function createChainableTypeChecker(validate) {
-    if (false) {
-      var manualPropTypeCallCache = {};
-      var manualPropTypeWarningCount = 0;
-    }
-    function checkType(isRequired, props, propName, componentName, location, propFullName, secret) {
-      componentName = componentName || ANONYMOUS;
-      propFullName = propFullName || propName;
-
-      if (secret !== ReactPropTypesSecret) {
-        if (throwOnDirectAccess) {
-          // New behavior only for users of `prop-types` package
-          var err = new Error(
-            'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
-            'Use `PropTypes.checkPropTypes()` to call them. ' +
-            'Read more at http://fb.me/use-check-prop-types'
-          );
-          err.name = 'Invariant Violation';
-          throw err;
-        } else if (false) {
-          // Old behavior for people using React.PropTypes
-          var cacheKey = componentName + ':' + propName;
-          if (
-            !manualPropTypeCallCache[cacheKey] &&
-            // Avoid spamming the console because they are often not actionable except for lib authors
-            manualPropTypeWarningCount < 3
-          ) {
-            printWarning(
-              'You are manually calling a React.PropTypes validation ' +
-              'function for the `' + propFullName + '` prop on `' + componentName  + '`. This is deprecated ' +
-              'and will throw in the standalone `prop-types` package. ' +
-              'You may be seeing this warning due to a third-party PropTypes ' +
-              'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.'
-            );
-            manualPropTypeCallCache[cacheKey] = true;
-            manualPropTypeWarningCount++;
-          }
-        }
-      }
-      if (props[propName] == null) {
-        if (isRequired) {
-          if (props[propName] === null) {
-            return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required ' + ('in `' + componentName + '`, but its value is `null`.'));
-          }
-          return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required in ' + ('`' + componentName + '`, but its value is `undefined`.'));
-        }
-        return null;
-      } else {
-        return validate(props, propName, componentName, location, propFullName);
-      }
-    }
-
-    var chainedCheckType = checkType.bind(null, false);
-    chainedCheckType.isRequired = checkType.bind(null, true);
-
-    return chainedCheckType;
-  }
-
-  function createPrimitiveTypeChecker(expectedType) {
-    function validate(props, propName, componentName, location, propFullName, secret) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== expectedType) {
-        // `propValue` being instance of, say, date/regexp, pass the 'object'
-        // check, but we can offer a more precise error message here rather than
-        // 'of type `object`'.
-        var preciseType = getPreciseType(propValue);
-
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createAnyTypeChecker() {
-    return createChainableTypeChecker(emptyFunctionThatReturnsNull);
-  }
-
-  function createArrayOfTypeChecker(typeChecker) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (typeof typeChecker !== 'function') {
-        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside arrayOf.');
-      }
-      var propValue = props[propName];
-      if (!Array.isArray(propValue)) {
-        var propType = getPropType(propValue);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an array.'));
-      }
-      for (var i = 0; i < propValue.length; i++) {
-        var error = typeChecker(propValue, i, componentName, location, propFullName + '[' + i + ']', ReactPropTypesSecret);
-        if (error instanceof Error) {
-          return error;
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createElementTypeChecker() {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      if (!isValidElement(propValue)) {
-        var propType = getPropType(propValue);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createInstanceTypeChecker(expectedClass) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (!(props[propName] instanceof expectedClass)) {
-        var expectedClassName = expectedClass.name || ANONYMOUS;
-        var actualClassName = getClassName(props[propName]);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + actualClassName + '` supplied to `' + componentName + '`, expected ') + ('instance of `' + expectedClassName + '`.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createEnumTypeChecker(expectedValues) {
-    if (!Array.isArray(expectedValues)) {
-       false ? printWarning('Invalid argument supplied to oneOf, expected an instance of array.') : void 0;
-      return emptyFunctionThatReturnsNull;
-    }
-
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      for (var i = 0; i < expectedValues.length; i++) {
-        if (is(propValue, expectedValues[i])) {
-          return null;
-        }
-      }
-
-      var valuesString = JSON.stringify(expectedValues);
-      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of value `' + propValue + '` ' + ('supplied to `' + componentName + '`, expected one of ' + valuesString + '.'));
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createObjectOfTypeChecker(typeChecker) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (typeof typeChecker !== 'function') {
-        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside objectOf.');
-      }
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an object.'));
-      }
-      for (var key in propValue) {
-        if (propValue.hasOwnProperty(key)) {
-          var error = typeChecker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-          if (error instanceof Error) {
-            return error;
-          }
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createUnionTypeChecker(arrayOfTypeCheckers) {
-    if (!Array.isArray(arrayOfTypeCheckers)) {
-       false ? printWarning('Invalid argument supplied to oneOfType, expected an instance of array.') : void 0;
-      return emptyFunctionThatReturnsNull;
-    }
-
-    for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
-      var checker = arrayOfTypeCheckers[i];
-      if (typeof checker !== 'function') {
-        printWarning(
-          'Invalid argument supplied to oneOfType. Expected an array of check functions, but ' +
-          'received ' + getPostfixForTypeWarning(checker) + ' at index ' + i + '.'
-        );
-        return emptyFunctionThatReturnsNull;
-      }
-    }
-
-    function validate(props, propName, componentName, location, propFullName) {
-      for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
-        var checker = arrayOfTypeCheckers[i];
-        if (checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret) == null) {
-          return null;
-        }
-      }
-
-      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`.'));
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createNodeChecker() {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (!isNode(props[propName])) {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`, expected a ReactNode.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createShapeTypeChecker(shapeTypes) {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
-      }
-      for (var key in shapeTypes) {
-        var checker = shapeTypes[key];
-        if (!checker) {
-          continue;
-        }
-        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-        if (error) {
-          return error;
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createStrictShapeTypeChecker(shapeTypes) {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
-      }
-      // We need to check all keys in case some are required but missing from
-      // props.
-      var allKeys = assign({}, props[propName], shapeTypes);
-      for (var key in allKeys) {
-        var checker = shapeTypes[key];
-        if (!checker) {
-          return new PropTypeError(
-            'Invalid ' + location + ' `' + propFullName + '` key `' + key + '` supplied to `' + componentName + '`.' +
-            '\nBad object: ' + JSON.stringify(props[propName], null, '  ') +
-            '\nValid keys: ' +  JSON.stringify(Object.keys(shapeTypes), null, '  ')
-          );
-        }
-        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-        if (error) {
-          return error;
-        }
-      }
-      return null;
-    }
-
-    return createChainableTypeChecker(validate);
-  }
-
-  function isNode(propValue) {
-    switch (typeof propValue) {
-      case 'number':
-      case 'string':
-      case 'undefined':
-        return true;
-      case 'boolean':
-        return !propValue;
-      case 'object':
-        if (Array.isArray(propValue)) {
-          return propValue.every(isNode);
-        }
-        if (propValue === null || isValidElement(propValue)) {
-          return true;
-        }
-
-        var iteratorFn = getIteratorFn(propValue);
-        if (iteratorFn) {
-          var iterator = iteratorFn.call(propValue);
-          var step;
-          if (iteratorFn !== propValue.entries) {
-            while (!(step = iterator.next()).done) {
-              if (!isNode(step.value)) {
-                return false;
-              }
-            }
-          } else {
-            // Iterator will provide entry [k,v] tuples rather than values.
-            while (!(step = iterator.next()).done) {
-              var entry = step.value;
-              if (entry) {
-                if (!isNode(entry[1])) {
-                  return false;
-                }
-              }
-            }
-          }
-        } else {
-          return false;
-        }
-
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  function isSymbol(propType, propValue) {
-    // Native Symbol.
-    if (propType === 'symbol') {
-      return true;
-    }
-
-    // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
-    if (propValue['@@toStringTag'] === 'Symbol') {
-      return true;
-    }
-
-    // Fallback for non-spec compliant Symbols which are polyfilled.
-    if (typeof Symbol === 'function' && propValue instanceof Symbol) {
-      return true;
-    }
-
-    return false;
-  }
-
-  // Equivalent of `typeof` but with special handling for array and regexp.
-  function getPropType(propValue) {
-    var propType = typeof propValue;
-    if (Array.isArray(propValue)) {
-      return 'array';
-    }
-    if (propValue instanceof RegExp) {
-      // Old webkits (at least until Android 4.0) return 'function' rather than
-      // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
-      // passes PropTypes.object.
-      return 'object';
-    }
-    if (isSymbol(propType, propValue)) {
-      return 'symbol';
-    }
-    return propType;
-  }
-
-  // This handles more types than `getPropType`. Only used for error messages.
-  // See `createPrimitiveTypeChecker`.
-  function getPreciseType(propValue) {
-    if (typeof propValue === 'undefined' || propValue === null) {
-      return '' + propValue;
-    }
-    var propType = getPropType(propValue);
-    if (propType === 'object') {
-      if (propValue instanceof Date) {
-        return 'date';
-      } else if (propValue instanceof RegExp) {
-        return 'regexp';
-      }
-    }
-    return propType;
-  }
-
-  // Returns a string that is postfixed to a warning about an invalid type.
-  // For example, "undefined" or "of type array"
-  function getPostfixForTypeWarning(value) {
-    var type = getPreciseType(value);
-    switch (type) {
-      case 'array':
-      case 'object':
-        return 'an ' + type;
-      case 'boolean':
-      case 'date':
-      case 'regexp':
-        return 'a ' + type;
-      default:
-        return type;
-    }
-  }
-
-  // Returns class name of the object, if any.
-  function getClassName(propValue) {
-    if (!propValue.constructor || !propValue.constructor.name) {
-      return ANONYMOUS;
-    }
-    return propValue.constructor.name;
-  }
-
-  ReactPropTypes.checkPropTypes = checkPropTypes;
-  ReactPropTypes.PropTypes = ReactPropTypes;
-
-  return ReactPropTypes;
 };
 
 
@@ -44535,7 +45017,7 @@ var InnerSlider = exports.InnerSlider = function (_React$Component) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+/* WEBPACK VAR INJECTION */(function(process) {
 
 exports.__esModule = true;
 
@@ -44682,17 +45164,17 @@ var Slider = function (_React$Component) {
 
     // force scrolling by one if centerMode is on
     if (settings.centerMode) {
-      if (settings.slidesToScroll > 1 && "production" !== "production") {
+      if (settings.slidesToScroll > 1 && process.env.NODE_ENV !== "production") {
         console.warn("slidesToScroll should be equal to 1 in centerMode, you are using " + settings.slidesToScroll);
       }
       settings.slidesToScroll = 1;
     }
     // force showing one slide and scrolling by one if the fade mode is on
     if (settings.fade) {
-      if (settings.slidesToShow > 1 && "production" !== "production") {
+      if (settings.slidesToShow > 1 && process.env.NODE_ENV !== "production") {
         console.warn("slidesToShow should be equal to 1 when fade is true, you're using " + settings.slidesToShow);
       }
-      if (settings.slidesToScroll > 1 && "production" !== "production") {
+      if (settings.slidesToScroll > 1 && process.env.NODE_ENV !== "production") {
         console.warn("slidesToScroll should be equal to 1 when fade is true, you're using " + settings.slidesToScroll);
       }
       settings.slidesToShow = 1;
@@ -44778,6 +45260,7 @@ var Slider = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = Slider;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -46755,14 +47238,14 @@ exports.fetchDataOnLocationMatch = _fetch.fetchDataOnLocationMatch;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
+/* WEBPACK VAR INJECTION */(function(process, global) {
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
   env: function env(_env) {
-    var ENV = "production";
+    var ENV = process.env.NODE_ENV;
     return ENV === _env;
   },
   type: function type(_type) {
@@ -46774,14 +47257,14 @@ exports.default = {
   script: function script(target) {
     var env = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
-    var ENV = "production";
-    var TARGET = Object({"NODE_ENV":"production"}).npm_lifecycle_event;
+    var ENV = process.env.NODE_ENV;
+    var TARGET = process.env.npm_lifecycle_event;
     if (env) return TARGET === target && ENV === env;
     return TARGET === target;
   }
 };
 module.exports = exports["default"];
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/webpack/buildin/global.js")))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js"), __webpack_require__("./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -47227,7 +47710,7 @@ function tokenize(str) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__);
@@ -47329,7 +47812,7 @@ function (_Component) {
           header = _this$props.header,
           open = _this$props.open,
           size = _this$props.size;
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getUnhandledProps */])(Confirm, this.props); // `open` is auto controlled by the Modal
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["r" /* getUnhandledProps */])(Confirm, this.props); // `open` is auto controlled by the Modal
       // It cannot be present (even undefined) with `defaultOpen`
       // only apply it if the user provided an open prop
 
@@ -47367,18 +47850,18 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Co
 
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Confirm, "handledProps", ["cancelButton", "confirmButton", "content", "header", "onCancel", "onConfirm", "open", "size"]);
 
-Confirm.propTypes =  false ? {
+Confirm.propTypes = process.env.NODE_ENV !== "production" ? {
   /** The cancel button text. */
-  cancelButton: customPropTypes.itemShorthand,
+  cancelButton: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** The OK button text. */
-  confirmButton: customPropTypes.itemShorthand,
+  confirmButton: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** The ModalContent text. */
-  content: customPropTypes.itemShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** The ModalHeader text. */
-  header: customPropTypes.itemShorthand,
+  header: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand,
 
   /**
    * Called when the Modal is closed without clicking confirm.
@@ -47386,7 +47869,7 @@ Confirm.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onCancel: PropTypes.func,
+  onCancel: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /**
    * Called when the OK button is clicked.
@@ -47394,15 +47877,16 @@ Confirm.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onConfirm: PropTypes.func,
+  onConfirm: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /** Whether or not the modal is visible. */
-  open: PropTypes.bool,
+  open: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** A Confirm can vary in size */
-  size: PropTypes.oneOf(['fullscreen', 'large', 'mini', 'small', 'tiny'])
+  size: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.oneOf(['fullscreen', 'large', 'mini', 'small', 'tiny'])
 } : {};
 /* unused harmony default export */ var _unused_webpack_default_export = (Confirm);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -47421,7 +47905,7 @@ Confirm.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MountNode; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MountNode; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_createClass__ = __webpack_require__("./node_modules/@babel/runtime/helpers/createClass.js");
@@ -47516,13 +48000,14 @@ function (_Component) {
 __WEBPACK_IMPORTED_MODULE_5__babel_runtime_helpers_defineProperty___default()(MountNode, "handledProps", ["className", "node"]);
 
 
-MountNode.propTypes =  false ? {
+MountNode.propTypes = process.env.NODE_ENV !== "production" ? {
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_6_prop_types___default.a.string,
 
   /** The DOM node where we will apply class names. Defaults to document.body. */
-  node: customPropTypes.domNode
+  node: __WEBPACK_IMPORTED_MODULE_8__lib__["m" /* customPropTypes */].domNode
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -47660,7 +48145,7 @@ var computeClassNamesDifference = function computeClassNamesDifference(prevClass
 var getNodeFromProps = function getNodeFromProps(props) {
   var node = props.node;
 
-  if (Object(__WEBPACK_IMPORTED_MODULE_1__lib__["s" /* isBrowser */])()) {
+  if (Object(__WEBPACK_IMPORTED_MODULE_1__lib__["t" /* isBrowser */])()) {
     if (__WEBPACK_IMPORTED_MODULE_0_lodash_isNil___default()(node)) return document.body;
     return node;
   }
@@ -47713,7 +48198,7 @@ var handleClassNamesChange = function handleClassNamesChange(node, components) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export default */
+/* WEBPACK VAR INJECTION */(function(process) {/* unused harmony export default */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
@@ -47831,7 +48316,7 @@ function (_Component) {
         siblingRange: siblingRange,
         totalPages: totalPages
       });
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getUnhandledProps */])(Pagination, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["r" /* getUnhandledProps */])(Pagination, this.props);
       return __WEBPACK_IMPORTED_MODULE_12_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_14__collections_Menu__["a" /* default */], __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         "aria-label": ariaLabel,
         pagination: true,
@@ -47885,36 +48370,36 @@ __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Pa
 __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Pagination, "handledProps", ["activePage", "aria-label", "boundaryRange", "defaultActivePage", "ellipsisItem", "firstItem", "lastItem", "nextItem", "onPageChange", "pageItem", "prevItem", "siblingRange", "totalPages"]);
 
 
-Pagination.propTypes =  false ? {
+Pagination.propTypes = process.env.NODE_ENV !== "production" ? {
   /** A pagination item can have an aria label. */
-  'aria-label': PropTypes.string,
+  'aria-label': __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string,
 
   /** Initial activePage value. */
-  defaultActivePage: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  defaultActivePage: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string]),
 
   /** Index of the currently active page. */
-  activePage: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  activePage: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string]),
 
   /** Number of always visible pages at the beginning and end. */
-  boundaryRange: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  boundaryRange: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string]),
 
   /** A shorthand for PaginationItem. */
-  ellipsisItem: customPropTypes.itemShorthand,
+  ellipsisItem: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A shorthand for PaginationItem. */
-  firstItem: customPropTypes.itemShorthand,
+  firstItem: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A shorthand for PaginationItem. */
-  lastItem: customPropTypes.itemShorthand,
+  lastItem: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A shorthand for PaginationItem. */
-  nextItem: customPropTypes.itemShorthand,
+  nextItem: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A shorthand for PaginationItem. */
-  pageItem: customPropTypes.itemShorthand,
+  pageItem: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A shorthand for PaginationItem. */
-  prevItem: customPropTypes.itemShorthand,
+  prevItem: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand,
 
   /**
    * Called on change of an active page.
@@ -47922,14 +48407,15 @@ Pagination.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onPageChange: PropTypes.func,
+  onPageChange: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /** Number of always visible pages before and after the current one. */
-  siblingRange: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  siblingRange: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string]),
 
   /** Total number of pages. */
-  totalPages: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired
+  totalPages: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string]).isRequired
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -47937,7 +48423,7 @@ Pagination.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_createClass__ = __webpack_require__("./node_modules/@babel/runtime/helpers/createClass.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_createClass___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_createClass__);
@@ -48043,12 +48529,12 @@ function (_Component) {
 
 __WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_defineProperty___default()(PaginationItem, "handledProps", ["active", "disabled", "onClick", "onKeyDown", "type"]);
 
-PaginationItem.propTypes =  false ? {
+PaginationItem.propTypes = process.env.NODE_ENV !== "production" ? {
   /** A pagination item can be active. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.bool,
 
   /** A pagination item can be disabled. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.bool,
 
   /**
    * Called on click.
@@ -48056,7 +48542,7 @@ PaginationItem.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.func,
 
   /**
    * Called on key down.
@@ -48064,10 +48550,10 @@ PaginationItem.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onKeyDown: PropTypes.func,
+  onKeyDown: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.func,
 
   /** A pagination should have a type. */
-  type: PropTypes.oneOf(['ellipsisItem', 'firstItem', 'prevItem', 'pageItem', 'nextItem', 'lastItem'])
+  type: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.oneOf(['ellipsisItem', 'firstItem', 'prevItem', 'pageItem', 'nextItem', 'lastItem'])
 } : {};
 PaginationItem.create = Object(__WEBPACK_IMPORTED_MODULE_11__lib__["l" /* createShorthandFactory */])(PaginationItem, function (content) {
   return {
@@ -48075,6 +48561,7 @@ PaginationItem.create = Object(__WEBPACK_IMPORTED_MODULE_11__lib__["l" /* create
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (PaginationItem);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -48093,7 +48580,7 @@ PaginationItem.create = Object(__WEBPACK_IMPORTED_MODULE_11__lib__["l" /* create
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__);
@@ -48165,8 +48652,8 @@ function (_Component) {
       var closeOnDocumentClick = _this.props.closeOnDocumentClick;
 
       if (!_this.portalNode || // no portal
-      Object(__WEBPACK_IMPORTED_MODULE_12__lib__["m" /* doesNodeContainClick */])(_this.triggerNode, e) || // event happened in trigger (delegate to trigger handlers)
-      Object(__WEBPACK_IMPORTED_MODULE_12__lib__["m" /* doesNodeContainClick */])(_this.portalNode, e) // event happened in the portal
+      Object(__WEBPACK_IMPORTED_MODULE_12__lib__["n" /* doesNodeContainClick */])(_this.triggerNode, e) || // event happened in trigger (delegate to trigger handlers)
+      Object(__WEBPACK_IMPORTED_MODULE_12__lib__["n" /* doesNodeContainClick */])(_this.portalNode, e) // event happened in the portal
       ) {
           return;
         } // ignore the click
@@ -48333,18 +48820,18 @@ function (_Component) {
       var target = _ref.node;
       var eventPool = _this.props.eventPool;
       _this.portalNode = target;
-      __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].sub('mouseleave', _this.handlePortalMouseLeave, {
+      __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].sub('mouseleave', _this.handlePortalMouseLeave, {
         pool: eventPool,
         target: target
       });
-      __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].sub('mouseenter', _this.handlePortalMouseEnter, {
+      __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].sub('mouseenter', _this.handlePortalMouseEnter, {
         pool: eventPool,
         target: target
       });
-      __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].sub('click', _this.handleDocumentClick, {
+      __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].sub('click', _this.handleDocumentClick, {
         pool: eventPool
       });
-      __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].sub('keydown', _this.handleEscape, {
+      __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].sub('keydown', _this.handleEscape, {
         pool: eventPool
       });
 
@@ -48355,18 +48842,18 @@ function (_Component) {
       var target = _ref2.node;
       var eventPool = _this.props.eventPool;
       _this.portalNode = null;
-      __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].unsub('mouseleave', _this.handlePortalMouseLeave, {
+      __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].unsub('mouseleave', _this.handlePortalMouseLeave, {
         pool: eventPool,
         target: target
       });
-      __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].unsub('mouseenter', _this.handlePortalMouseEnter, {
+      __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].unsub('mouseenter', _this.handlePortalMouseEnter, {
         pool: eventPool,
         target: target
       });
-      __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].unsub('click', _this.handleDocumentClick, {
+      __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].unsub('click', _this.handleDocumentClick, {
         pool: eventPool
       });
-      __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].unsub('keydown', _this.handleEscape, {
+      __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].unsub('keydown', _this.handleEscape, {
         pool: eventPool
       });
 
@@ -48434,46 +48921,46 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Po
 
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Portal, "handledProps", ["children", "closeOnDocumentClick", "closeOnEscape", "closeOnPortalMouseLeave", "closeOnTriggerBlur", "closeOnTriggerClick", "closeOnTriggerMouseLeave", "defaultOpen", "eventPool", "mountNode", "mouseEnterDelay", "mouseLeaveDelay", "onClose", "onMount", "onOpen", "onUnmount", "open", "openOnTriggerClick", "openOnTriggerFocus", "openOnTriggerMouseEnter", "trigger", "triggerRef"]);
 
-Portal.propTypes =  false ? {
+Portal.propTypes = process.env.NODE_ENV !== "production" ? {
   /** Primary content. */
-  children: PropTypes.node.isRequired,
+  children: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.node.isRequired,
 
   /** Controls whether or not the portal should close when the document is clicked. */
-  closeOnDocumentClick: PropTypes.bool,
+  closeOnDocumentClick: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Controls whether or not the portal should close when escape is pressed is displayed. */
-  closeOnEscape: PropTypes.bool,
+  closeOnEscape: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /**
    * Controls whether or not the portal should close when mousing out of the portal.
    * NOTE: This will prevent `closeOnTriggerMouseLeave` when mousing over the
    * gap from the trigger to the portal.
    */
-  closeOnPortalMouseLeave: PropTypes.bool,
+  closeOnPortalMouseLeave: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Controls whether or not the portal should close on blur of the trigger. */
-  closeOnTriggerBlur: PropTypes.bool,
+  closeOnTriggerBlur: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Controls whether or not the portal should close on click of the trigger. */
-  closeOnTriggerClick: PropTypes.bool,
+  closeOnTriggerClick: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Controls whether or not the portal should close when mousing out of the trigger. */
-  closeOnTriggerMouseLeave: PropTypes.bool,
+  closeOnTriggerMouseLeave: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Initial value of open. */
-  defaultOpen: PropTypes.bool,
+  defaultOpen: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Event pool namespace that is used to handle component events */
-  eventPool: PropTypes.string,
+  eventPool: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string,
 
   /** The node where the portal should mount. */
-  mountNode: PropTypes.any,
+  mountNode: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.any,
 
   /** Milliseconds to wait before opening on mouse over */
-  mouseEnterDelay: PropTypes.number,
+  mouseEnterDelay: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.number,
 
   /** Milliseconds to wait before closing on mouse leave */
-  mouseLeaveDelay: PropTypes.number,
+  mouseLeaveDelay: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.number,
 
   /**
    * Called when a close event happens
@@ -48481,7 +48968,7 @@ Portal.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClose: PropTypes.func,
+  onClose: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /**
    * Called when the portal is mounted on the DOM.
@@ -48489,7 +48976,7 @@ Portal.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onMount: PropTypes.func,
+  onMount: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /**
    * Called when an open event happens
@@ -48497,7 +48984,7 @@ Portal.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onOpen: PropTypes.func,
+  onOpen: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /**
    * Called when the portal is unmounted from the DOM.
@@ -48505,31 +48992,32 @@ Portal.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onUnmount: PropTypes.func,
+  onUnmount: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /** Controls whether or not the portal is displayed. */
-  open: PropTypes.bool,
+  open: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Controls whether or not the portal should open when the trigger is clicked. */
-  openOnTriggerClick: PropTypes.bool,
+  openOnTriggerClick: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Controls whether or not the portal should open on focus of the trigger. */
-  openOnTriggerFocus: PropTypes.bool,
+  openOnTriggerFocus: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Controls whether or not the portal should open when mousing over the trigger. */
-  openOnTriggerMouseEnter: PropTypes.bool,
+  openOnTriggerMouseEnter: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Element to be rendered in-place where the portal is defined. */
-  trigger: PropTypes.node,
+  trigger: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.node,
 
   /**
    * Called with a ref to the trigger node.
    *
    * @param {HTMLElement} node - Referred node.
    */
-  triggerRef: PropTypes.func
+  triggerRef: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (Portal);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -48537,7 +49025,7 @@ Portal.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__);
@@ -48626,7 +49114,7 @@ function (_Component) {
       var _this$props = this.props,
           children = _this$props.children,
           _this$props$mountNode = _this$props.mountNode,
-          mountNode = _this$props$mountNode === void 0 ? Object(__WEBPACK_IMPORTED_MODULE_12__lib__["s" /* isBrowser */])() ? document.body : null : _this$props$mountNode;
+          mountNode = _this$props$mountNode === void 0 ? Object(__WEBPACK_IMPORTED_MODULE_12__lib__["t" /* isBrowser */])() ? document.body : null : _this$props$mountNode;
       return Object(__WEBPACK_IMPORTED_MODULE_11_react_dom__["createPortal"])(__WEBPACK_IMPORTED_MODULE_10_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_13__Ref__["a" /* default */], {
         innerRef: this.handleRef
       }, children), mountNode);
@@ -48638,12 +49126,12 @@ function (_Component) {
 
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(PortalInner, "handledProps", ["children", "mountNode", "onMount", "onUnmount"]);
 
-PortalInner.propTypes =  false ? {
+PortalInner.propTypes = process.env.NODE_ENV !== "production" ? {
   /** Primary content. */
-  children: PropTypes.node.isRequired,
+  children: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.node.isRequired,
 
   /** The node where the portal should mount. */
-  mountNode: PropTypes.any,
+  mountNode: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.any,
 
   /**
    * Called when the portal is mounted on the DOM
@@ -48651,7 +49139,7 @@ PortalInner.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onMount: PropTypes.func,
+  onMount: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.func,
 
   /**
    * Called when the portal is unmounted from the DOM
@@ -48659,9 +49147,10 @@ PortalInner.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onUnmount: PropTypes.func
+  onUnmount: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.func
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (PortalInner);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -48680,7 +49169,7 @@ PortalInner.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react__);
@@ -48701,7 +49190,7 @@ function Radio(props) {
   var slider = props.slider,
       toggle = props.toggle,
       type = props.type;
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getUnhandledProps */])(Radio, props); // const ElementType = getElementType(Radio, props)
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["r" /* getUnhandledProps */])(Radio, props); // const ElementType = getElementType(Radio, props)
   // radio, slider, toggle are exclusive
   // use an undefined radio if slider or toggle are present
 
@@ -48715,20 +49204,21 @@ function Radio(props) {
 }
 
 Radio.handledProps = ["slider", "toggle", "type"];
-Radio.propTypes =  false ? {
+Radio.propTypes = process.env.NODE_ENV !== "production" ? {
   /** Format to emphasize the current selection state. */
-  slider: Checkbox.propTypes.slider,
+  slider: __WEBPACK_IMPORTED_MODULE_3__modules_Checkbox__["a" /* default */].propTypes.slider,
 
   /** Format to show an on or off choice. */
-  toggle: Checkbox.propTypes.toggle,
+  toggle: __WEBPACK_IMPORTED_MODULE_3__modules_Checkbox__["a" /* default */].propTypes.toggle,
 
   /** HTML input type, either checkbox or radio. */
-  type: Checkbox.propTypes.type
+  type: __WEBPACK_IMPORTED_MODULE_3__modules_Checkbox__["a" /* default */].propTypes.type
 } : {};
 Radio.defaultProps = {
   type: 'radio'
 };
 /* harmony default export */ __webpack_exports__["a"] = (Radio);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -48747,7 +49237,7 @@ Radio.defaultProps = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Ref; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Ref; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_createClass__ = __webpack_require__("./node_modules/@babel/runtime/helpers/createClass.js");
@@ -48814,17 +49304,18 @@ function (_Component) {
 __WEBPACK_IMPORTED_MODULE_5__babel_runtime_helpers_defineProperty___default()(Ref, "handledProps", ["children", "innerRef"]);
 
 
-Ref.propTypes =  false ? {
+Ref.propTypes = process.env.NODE_ENV !== "production" ? {
   /** Primary content. */
-  children: PropTypes.element,
+  children: __WEBPACK_IMPORTED_MODULE_6_prop_types___default.a.element,
 
   /**
    * Called when componentDidMount.
    *
    * @param {HTMLElement} node - Referred node.
    */
-  innerRef: PropTypes.func
+  innerRef: __WEBPACK_IMPORTED_MODULE_6_prop_types___default.a.func
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -48843,7 +49334,7 @@ Ref.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export default */
+/* WEBPACK VAR INJECTION */(function(process) {/* unused harmony export default */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -48959,7 +49450,7 @@ function (_Component) {
     value: function componentDidMount() {
       var fireOnMount = this.props.fireOnMount;
       this.mounted = true;
-      __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].sub('resize', this.handleResize, {
+      __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].sub('resize', this.handleResize, {
         target: 'window'
       });
       if (fireOnMount) this.handleUpdate();
@@ -48968,7 +49459,7 @@ function (_Component) {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
       this.mounted = false;
-      __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].unsub('resize', this.handleResize, {
+      __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].unsub('resize', this.handleResize, {
         target: 'window'
       });
     }
@@ -48976,7 +49467,7 @@ function (_Component) {
     key: "shouldComponentUpdate",
     value: function shouldComponentUpdate(nextProps, nextState) {
       // Update when any prop changes or the width changes. If width does not change, no update is required.
-      return this.state.width !== nextState.width || !Object(__WEBPACK_IMPORTED_MODULE_12__lib__["x" /* shallowEqual */])(this.props, nextProps);
+      return this.state.width !== nextState.width || !Object(__WEBPACK_IMPORTED_MODULE_12__lib__["z" /* shallowEqual */])(this.props, nextProps);
     } // ----------------------------------------
     // Helpers
     // ----------------------------------------
@@ -48988,8 +49479,8 @@ function (_Component) {
     // ----------------------------------------
     value: function render() {
       var children = this.props.children;
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["p" /* getElementType */])(Responsive, this.props);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getUnhandledProps */])(Responsive, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getElementType */])(Responsive, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["r" /* getUnhandledProps */])(Responsive, this.props);
       if (this.isVisible()) return __WEBPACK_IMPORTED_MODULE_11_react___default.a.createElement(ElementType, rest, children);
       return null;
     }
@@ -49000,7 +49491,7 @@ function (_Component) {
 
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Responsive, "defaultProps", {
   getWidth: function getWidth() {
-    return Object(__WEBPACK_IMPORTED_MODULE_12__lib__["s" /* isBrowser */])() ? window.innerWidth : 0;
+    return Object(__WEBPACK_IMPORTED_MODULE_12__lib__["t" /* isBrowser */])() ? window.innerWidth : 0;
   }
 });
 
@@ -49030,27 +49521,27 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Re
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Responsive, "handledProps", ["as", "children", "fireOnMount", "getWidth", "maxWidth", "minWidth", "onUpdate"]);
 
 
-Responsive.propTypes =  false ? {
+Responsive.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.node,
 
   /** Fires callbacks immediately after mount. */
-  fireOnMount: PropTypes.bool,
+  fireOnMount: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /**
    * Called to get width of screen. Defaults to using `window.innerWidth` when in a browser;
    * otherwise, assumes a width of 0.
    */
-  getWidth: PropTypes.func,
+  getWidth: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /** The maximum width at which content will be displayed. */
-  maxWidth: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  maxWidth: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string]),
 
   /** The minimum width at which content will be displayed. */
-  minWidth: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  minWidth: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string]),
 
   /**
    * Called on update.
@@ -49058,8 +49549,9 @@ Responsive.propTypes =  false ? {
    * @param {SyntheticEvent} event - The React SyntheticEvent object
    * @param {object} data - All props and the event value.
    */
-  onUpdate: PropTypes.func
+  onUpdate: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -49078,7 +49570,7 @@ Responsive.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__("./node_modules/prop-types/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
@@ -49102,15 +49594,16 @@ function Select(props) {
 }
 
 Select.handledProps = ["options"];
-Select.propTypes =  false ? {
+Select.propTypes = process.env.NODE_ENV !== "production" ? {
   /** Array of Dropdown.Item props e.g. `{ text: '', value: '' }` */
-  options: PropTypes.arrayOf(PropTypes.shape(Dropdown.Item.propTypes)).isRequired
+  options: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape(__WEBPACK_IMPORTED_MODULE_3__modules_Dropdown__["a" /* default */].Item.propTypes)).isRequired
 } : {};
 Select.Divider = __WEBPACK_IMPORTED_MODULE_3__modules_Dropdown__["a" /* default */].Divider;
 Select.Header = __WEBPACK_IMPORTED_MODULE_3__modules_Dropdown__["a" /* default */].Header;
 Select.Item = __WEBPACK_IMPORTED_MODULE_3__modules_Dropdown__["a" /* default */].Item;
 Select.Menu = __WEBPACK_IMPORTED_MODULE_3__modules_Dropdown__["a" /* default */].Menu;
 /* harmony default export */ __webpack_exports__["a"] = (Select);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -49129,7 +49622,7 @@ Select.Menu = __WEBPACK_IMPORTED_MODULE_3__modules_Dropdown__["a" /* default */]
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__);
@@ -49276,8 +49769,8 @@ function (_Component) {
           rows = _this$props.rows,
           style = _this$props.style,
           value = _this$props.value;
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["q" /* getUnhandledProps */])(TextArea, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["p" /* getElementType */])(TextArea, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["r" /* getUnhandledProps */])(TextArea, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["q" /* getElementType */])(TextArea, this.props);
       var resize = autoHeight ? 'none' : '';
       return __WEBPACK_IMPORTED_MODULE_13_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         onChange: this.handleChange,
@@ -49302,37 +49795,38 @@ __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Te
 
 __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(TextArea, "handledProps", ["as", "autoHeight", "onChange", "onInput", "rows", "style", "value"]);
 
-TextArea.propTypes =  false ? {
+TextArea.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].as,
 
   /** Indicates whether height of the textarea fits the content or not. */
-  autoHeight: PropTypes.bool,
+  autoHeight: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /**
    * Called on change.
    * @param {SyntheticEvent} event - The React SyntheticEvent object
    * @param {object} data - All props and the event value.
    */
-  onChange: PropTypes.func,
+  onChange: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.func,
 
   /**
    * Called on input.
    * @param {SyntheticEvent} event - The React SyntheticEvent object
    * @param {object} data - All props and the event value.
    */
-  onInput: PropTypes.func,
+  onInput: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.func,
 
   /** Indicates row count for a TextArea. */
-  rows: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  rows: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string]),
 
   /** Custom TextArea style. */
-  style: PropTypes.object,
+  style: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.object,
 
   /** The value of the textarea. */
-  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
+  value: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string])
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (TextArea);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -49351,7 +49845,7 @@ TextArea.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export default */
+/* WEBPACK VAR INJECTION */(function(process) {/* unused harmony export default */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
@@ -49498,7 +49992,7 @@ function (_Component) {
           portalOpen = _this$state.portalOpen,
           transitionVisible = _this$state.transitionVisible;
       var open = portalOpen || transitionVisible;
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["q" /* getUnhandledProps */])(TransitionablePortal, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["r" /* getUnhandledProps */])(TransitionablePortal, this.props);
       return __WEBPACK_IMPORTED_MODULE_11_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_12__Portal__["a" /* default */], __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         open: open,
         onOpen: this.handlePortalOpen,
@@ -49525,9 +50019,9 @@ __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Tr
 __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(TransitionablePortal, "handledProps", ["children", "onClose", "onHide", "onOpen", "onStart", "open", "transition"]);
 
 
-TransitionablePortal.propTypes =  false ? {
+TransitionablePortal.propTypes = process.env.NODE_ENV !== "production" ? {
   /** Primary content. */
-  children: PropTypes.node.isRequired,
+  children: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.node.isRequired,
 
   /**
    * Called when a close event happens.
@@ -49535,7 +50029,7 @@ TransitionablePortal.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props and internal state.
    */
-  onClose: PropTypes.func,
+  onClose: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /**
    * Callback on each transition that changes visibility to hidden.
@@ -49543,7 +50037,7 @@ TransitionablePortal.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props with transition status and internal state.
    */
-  onHide: PropTypes.func,
+  onHide: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /**
    * Called when an open event happens.
@@ -49551,7 +50045,7 @@ TransitionablePortal.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props and internal state.
    */
-  onOpen: PropTypes.func,
+  onOpen: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /**
    * Callback on animation start.
@@ -49559,14 +50053,15 @@ TransitionablePortal.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props with transition status and internal state.
    */
-  onStart: PropTypes.func,
+  onStart: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /** Controls whether or not the portal is displayed. */
-  open: PropTypes.bool,
+  open: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Transition props. */
-  transition: PropTypes.object
+  transition: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.object
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -49585,7 +50080,7 @@ TransitionablePortal.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export default */
+/* WEBPACK VAR INJECTION */(function(process) {/* unused harmony export default */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_slicedToArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/slicedToArray.js");
@@ -49815,7 +50310,7 @@ function (_Component) {
     key: "componentDidMount",
     value: function componentDidMount() {
       this.mounted = true;
-      if (!Object(__WEBPACK_IMPORTED_MODULE_16__lib__["s" /* isBrowser */])()) return;
+      if (!Object(__WEBPACK_IMPORTED_MODULE_16__lib__["t" /* isBrowser */])()) return;
       var _this$props3 = this.props,
           context = _this$props3.context,
           fireOnMount = _this$props3.fireOnMount,
@@ -49836,10 +50331,10 @@ function (_Component) {
     value: function attachHandlers(context, updateOn) {
       if (updateOn === 'events') {
         if (context) {
-          __WEBPACK_IMPORTED_MODULE_16__lib__["n" /* eventStack */].sub('resize', this.handleUpdate, {
+          __WEBPACK_IMPORTED_MODULE_16__lib__["o" /* eventStack */].sub('resize', this.handleUpdate, {
             target: context
           });
-          __WEBPACK_IMPORTED_MODULE_16__lib__["n" /* eventStack */].sub('scroll', this.handleUpdate, {
+          __WEBPACK_IMPORTED_MODULE_16__lib__["o" /* eventStack */].sub('scroll', this.handleUpdate, {
             target: context
           });
         }
@@ -49855,10 +50350,10 @@ function (_Component) {
     key: "unattachHandlers",
     value: function unattachHandlers(context) {
       if (context) {
-        __WEBPACK_IMPORTED_MODULE_16__lib__["n" /* eventStack */].unsub('resize', this.handleUpdate, {
+        __WEBPACK_IMPORTED_MODULE_16__lib__["o" /* eventStack */].unsub('resize', this.handleUpdate, {
           target: context
         });
-        __WEBPACK_IMPORTED_MODULE_16__lib__["n" /* eventStack */].unsub('scroll', this.handleUpdate, {
+        __WEBPACK_IMPORTED_MODULE_16__lib__["o" /* eventStack */].unsub('scroll', this.handleUpdate, {
           target: context
         });
       }
@@ -49919,7 +50414,7 @@ function (_Component) {
           top = _this$ref$getBounding.top,
           width = _this$ref$getBounding.width;
 
-      var _normalizeOffset = Object(__WEBPACK_IMPORTED_MODULE_16__lib__["u" /* normalizeOffset */])(offset),
+      var _normalizeOffset = Object(__WEBPACK_IMPORTED_MODULE_16__lib__["v" /* normalizeOffset */])(offset),
           _normalizeOffset2 = __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_slicedToArray___default()(_normalizeOffset, 2),
           topOffset = _normalizeOffset2[0],
           bottomOffset = _normalizeOffset2[1];
@@ -49961,8 +50456,8 @@ function (_Component) {
     // ----------------------------------------
     value: function render() {
       var children = this.props.children;
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_16__lib__["p" /* getElementType */])(Visibility, this.props);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_16__lib__["q" /* getUnhandledProps */])(Visibility, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_16__lib__["q" /* getElementType */])(Visibility, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_16__lib__["r" /* getUnhandledProps */])(Visibility, this.props);
       return __WEBPACK_IMPORTED_MODULE_15_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         ref: this.handleRef
       }), children);
@@ -49973,7 +50468,7 @@ function (_Component) {
 }(__WEBPACK_IMPORTED_MODULE_15_react__["Component"]);
 
 __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(Visibility, "defaultProps", {
-  context: Object(__WEBPACK_IMPORTED_MODULE_16__lib__["s" /* isBrowser */])() ? window : null,
+  context: Object(__WEBPACK_IMPORTED_MODULE_16__lib__["t" /* isBrowser */])() ? window : null,
   continuous: false,
   offset: [0, 0],
   once: true,
@@ -49983,24 +50478,24 @@ __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(Vi
 __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(Visibility, "handledProps", ["as", "children", "context", "continuous", "fireOnMount", "offset", "onBottomPassed", "onBottomPassedReverse", "onBottomVisible", "onBottomVisibleReverse", "onOffScreen", "onOnScreen", "onPassed", "onPassing", "onPassingReverse", "onTopPassed", "onTopPassedReverse", "onTopVisible", "onTopVisibleReverse", "onUpdate", "once", "updateOn"]);
 
 
-Visibility.propTypes =  false ? {
+Visibility.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_16__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.node,
 
   /** Context which visibility should attach onscroll events. */
-  context: PropTypes.object,
+  context: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.object,
 
   /**
    * When set to true a callback will occur anytime an element passes a condition not just immediately after the
    * threshold is met.
    */
-  continuous: PropTypes.bool,
+  continuous: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.bool,
 
   /** Fires callbacks immediately after mount. */
-  fireOnMount: PropTypes.bool,
+  fireOnMount: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.bool,
 
   /**
    * Element's bottom edge has passed top of screen.
@@ -50008,7 +50503,7 @@ Visibility.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onBottomPassed: PropTypes.func,
+  onBottomPassed: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func,
 
   /**
    * Element's bottom edge has not passed top of screen.
@@ -50016,7 +50511,7 @@ Visibility.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onBottomPassedReverse: PropTypes.func,
+  onBottomPassedReverse: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func,
 
   /**
    * Element's bottom edge has passed bottom of screen
@@ -50024,7 +50519,7 @@ Visibility.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onBottomVisible: PropTypes.func,
+  onBottomVisible: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func,
 
   /**
    * Element's bottom edge has not passed bottom of screen.
@@ -50032,19 +50527,19 @@ Visibility.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onBottomVisibleReverse: PropTypes.func,
+  onBottomVisibleReverse: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func,
 
   /**
    * Value that context should be adjusted in pixels. Useful for making content appear below content fixed to the
    * page.
    */
-  offset: PropTypes.oneOfType([PropTypes.number, PropTypes.string, PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.number, PropTypes.string]))]),
+  offset: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.string, __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.string]))]),
 
   /** When set to false a callback will occur each time an element passes the threshold for a condition. */
-  once: PropTypes.bool,
+  once: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.bool,
 
   /** Element is not visible on the screen. */
-  onPassed: PropTypes.object,
+  onPassed: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.object,
 
   /**
    * Any part of an element is visible on screen.
@@ -50052,7 +50547,7 @@ Visibility.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onPassing: PropTypes.func,
+  onPassing: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func,
 
   /**
    * Element's top has not passed top of screen but bottom has.
@@ -50060,7 +50555,7 @@ Visibility.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onPassingReverse: PropTypes.func,
+  onPassingReverse: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func,
 
   /**
    * Element is not visible on the screen.
@@ -50068,7 +50563,7 @@ Visibility.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onOffScreen: PropTypes.func,
+  onOffScreen: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func,
 
   /**
    * Element is visible on the screen.
@@ -50076,7 +50571,7 @@ Visibility.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onOnScreen: PropTypes.func,
+  onOnScreen: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func,
 
   /**
    * Element's top edge has passed top of the screen.
@@ -50084,7 +50579,7 @@ Visibility.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onTopPassed: PropTypes.func,
+  onTopPassed: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func,
 
   /**
    * Element's top edge has not passed top of the screen.
@@ -50092,7 +50587,7 @@ Visibility.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onTopPassedReverse: PropTypes.func,
+  onTopPassedReverse: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func,
 
   /**
    * Element's top edge has passed bottom of screen.
@@ -50100,7 +50595,7 @@ Visibility.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onTopVisible: PropTypes.func,
+  onTopVisible: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func,
 
   /**
    * Element's top edge has not passed bottom of screen.
@@ -50108,7 +50603,7 @@ Visibility.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onTopVisibleReverse: PropTypes.func,
+  onTopVisibleReverse: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func,
 
   /**
    * Element's top edge has passed bottom of screen.
@@ -50116,15 +50611,16 @@ Visibility.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onUpdate: PropTypes.func,
+  onUpdate: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func,
 
   /**
    * Allows to choose the mode of the position calculations:
    * - `events` - (default) update and fire callbacks only on scroll/resize events
    * - `repaint` - update and fire callbacks on browser repaint (animation frames)
    */
-  updateOn: PropTypes.oneOf(['events', 'repaint'])
+  updateOn: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.oneOf(['events', 'repaint'])
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -50143,7 +50639,7 @@ Visibility.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -50179,8 +50675,8 @@ function Breadcrumb(props) {
       sections = props.sections,
       size = props.size;
   var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()('ui', size, 'breadcrumb', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getUnhandledProps */])(Breadcrumb, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["p" /* getElementType */])(Breadcrumb, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["r" /* getUnhandledProps */])(Breadcrumb, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getElementType */])(Breadcrumb, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_6__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_5_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -50211,32 +50707,33 @@ function Breadcrumb(props) {
 }
 
 Breadcrumb.handledProps = ["as", "children", "className", "divider", "icon", "sections", "size"];
-Breadcrumb.propTypes =  false ? {
+Breadcrumb.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.string,
 
   /** Shorthand for primary content of the Breadcrumb.Divider. */
-  divider: customPropTypes.every([customPropTypes.disallow(['icon']), customPropTypes.contentShorthand]),
+  divider: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].disallow(['icon']), __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].contentShorthand]),
 
   /** For use with the sections prop. Render as an `Icon` component with `divider` class instead of a `div` in
    *  Breadcrumb.Divider. */
-  icon: customPropTypes.every([customPropTypes.disallow(['divider']), customPropTypes.itemShorthand]),
+  icon: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].disallow(['divider']), __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].itemShorthand]),
 
   /** Shorthand array of props for Breadcrumb.Section. */
-  sections: customPropTypes.collectionShorthand,
+  sections: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].collectionShorthand,
 
   /** Size of Breadcrumb. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium'))
+  size: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].SIZES, 'medium'))
 } : {};
 Breadcrumb.Divider = __WEBPACK_IMPORTED_MODULE_7__BreadcrumbDivider__["a" /* default */];
 Breadcrumb.Section = __WEBPACK_IMPORTED_MODULE_8__BreadcrumbSection__["a" /* default */];
 /* unused harmony default export */ var _unused_webpack_default_export = (Breadcrumb);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -50244,7 +50741,7 @@ Breadcrumb.Section = __WEBPACK_IMPORTED_MODULE_8__BreadcrumbSection__["a" /* def
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__);
@@ -50276,8 +50773,8 @@ function BreadcrumbDivider(props) {
       content = props.content,
       icon = props.icon;
   var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()('divider', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getUnhandledProps */])(BreadcrumbDivider, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["p" /* getElementType */])(BreadcrumbDivider, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["r" /* getUnhandledProps */])(BreadcrumbDivider, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getElementType */])(BreadcrumbDivider, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_2_lodash_isNil___default()(icon)) {
     return __WEBPACK_IMPORTED_MODULE_7__elements_Icon__["a" /* default */].create(icon, {
@@ -50300,21 +50797,21 @@ function BreadcrumbDivider(props) {
 }
 
 BreadcrumbDivider.handledProps = ["as", "children", "className", "content", "icon"];
-BreadcrumbDivider.propTypes =  false ? {
+BreadcrumbDivider.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Render as an `Icon` component with `divider` class instead of a `div`. */
-  icon: customPropTypes.itemShorthand
+  icon: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].itemShorthand
 } : {};
 BreadcrumbDivider.create = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["l" /* createShorthandFactory */])(BreadcrumbDivider, function (icon) {
   return {
@@ -50322,6 +50819,7 @@ BreadcrumbDivider.create = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["l" /* crea
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (BreadcrumbDivider);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -50329,7 +50827,7 @@ BreadcrumbDivider.create = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["l" /* crea
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BreadcrumbSection; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BreadcrumbSection; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -50413,9 +50911,9 @@ function (_Component) {
           className = _this$props2.className,
           content = _this$props2.content,
           href = _this$props2.href;
-      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(active, 'active'), 'section', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getUnhandledProps */])(BreadcrumbSection, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["p" /* getElementType */])(BreadcrumbSection, this.props, this.computeElementType);
+      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(active, 'active'), 'section', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["r" /* getUnhandledProps */])(BreadcrumbSection, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getElementType */])(BreadcrumbSection, this.props, this.computeElementType);
       return __WEBPACK_IMPORTED_MODULE_11_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         className: classes,
         href: href,
@@ -50430,27 +50928,27 @@ function (_Component) {
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(BreadcrumbSection, "handledProps", ["active", "as", "children", "className", "content", "href", "link", "onClick"]);
 
 
-BreadcrumbSection.propTypes =  false ? {
+BreadcrumbSection.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].as,
 
   /** Style as the currently active section. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Render as an `a` tag instead of a `div` and adds the href attribute. */
-  href: customPropTypes.every([customPropTypes.disallow(['link']), PropTypes.string]),
+  href: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].disallow(['link']), __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string]),
 
   /** Render as an `a` tag instead of a `div`. */
-  link: customPropTypes.every([customPropTypes.disallow(['href']), PropTypes.bool]),
+  link: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].disallow(['href']), __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool]),
 
   /**
    * Called on click. When passed, the component will render as an `a`
@@ -50459,7 +50957,7 @@ BreadcrumbSection.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClick: PropTypes.func
+  onClick: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func
 } : {};
 BreadcrumbSection.create = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["l" /* createShorthandFactory */])(BreadcrumbSection, function (content) {
   return {
@@ -50467,6 +50965,7 @@ BreadcrumbSection.create = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["l" /* cre
     link: true
   };
 });
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -50485,7 +50984,7 @@ BreadcrumbSection.create = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["l" /* cre
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__);
@@ -50606,9 +51105,9 @@ function (_Component) {
           unstackable = _this$props.unstackable,
           warning = _this$props.warning,
           widths = _this$props.widths;
-      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(reply, 'reply'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(success, 'success'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(unstackable, 'unstackable'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(warning, 'warning'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["E" /* useWidthProp */])(widths, null, true), 'form', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getUnhandledProps */])(Form, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["p" /* getElementType */])(Form, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(reply, 'reply'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(success, 'success'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(unstackable, 'unstackable'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(warning, 'warning'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["G" /* useWidthProp */])(widths, null, true), 'form', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["r" /* getUnhandledProps */])(Form, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getElementType */])(Form, this.props);
       return __WEBPACK_IMPORTED_MODULE_12_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         action: action,
         className: classes,
@@ -50644,50 +51143,51 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Fo
 
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Form, "handledProps", ["action", "as", "children", "className", "error", "inverted", "loading", "onSubmit", "reply", "size", "success", "unstackable", "warning", "widths"]);
 
-Form.propTypes =  false ? {
+Form.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].as,
 
   /** The HTML form action */
-  action: PropTypes.string,
+  action: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string,
 
   /** Automatically show any error Message children. */
-  error: PropTypes.bool,
+  error: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A form can have its color inverted for contrast. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Automatically show a loading indicator. */
-  loading: PropTypes.bool,
+  loading: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** The HTML form submit handler. */
-  onSubmit: PropTypes.func,
+  onSubmit: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /** A comment can contain a form to reply to a comment. This may have arbitrary content. */
-  reply: PropTypes.bool,
+  reply: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A form can vary in size. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium')),
+  size: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_9_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_13__lib__["b" /* SUI */].SIZES, 'medium')),
 
   /** Automatically show any success Message children. */
-  success: PropTypes.bool,
+  success: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A form can prevent itself from stacking on mobile. */
-  unstackable: PropTypes.bool,
+  unstackable: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Automatically show any warning Message children. */
-  warning: PropTypes.bool,
+  warning: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Forms can automatically divide fields to be equal width. */
-  widths: PropTypes.oneOf(['equal'])
+  widths: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(['equal'])
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (Form);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -50695,7 +51195,7 @@ Form.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react__);
@@ -50715,26 +51215,27 @@ Form.propTypes =  false ? {
 
 function FormButton(props) {
   var control = props.control;
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getUnhandledProps */])(FormButton, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["p" /* getElementType */])(FormButton, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["r" /* getUnhandledProps */])(FormButton, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getElementType */])(FormButton, props);
   return __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     control: control
   }));
 }
 
 FormButton.handledProps = ["as", "control"];
-FormButton.propTypes =  false ? {
+FormButton.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_2__lib__["m" /* customPropTypes */].as,
 
   /** A FormField control prop. */
-  control: FormField.propTypes.control
+  control: __WEBPACK_IMPORTED_MODULE_4__FormField__["a" /* default */].propTypes.control
 } : {};
 FormButton.defaultProps = {
   as: __WEBPACK_IMPORTED_MODULE_4__FormField__["a" /* default */],
   control: __WEBPACK_IMPORTED_MODULE_3__elements_Button__["a" /* default */]
 };
 /* harmony default export */ __webpack_exports__["a"] = (FormButton);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -50742,7 +51243,7 @@ FormButton.defaultProps = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react__);
@@ -50762,26 +51263,27 @@ FormButton.defaultProps = {
 
 function FormCheckbox(props) {
   var control = props.control;
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getUnhandledProps */])(FormCheckbox, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["p" /* getElementType */])(FormCheckbox, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["r" /* getUnhandledProps */])(FormCheckbox, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getElementType */])(FormCheckbox, props);
   return __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     control: control
   }));
 }
 
 FormCheckbox.handledProps = ["as", "control"];
-FormCheckbox.propTypes =  false ? {
+FormCheckbox.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_2__lib__["m" /* customPropTypes */].as,
 
   /** A FormField control prop. */
-  control: FormField.propTypes.control
+  control: __WEBPACK_IMPORTED_MODULE_4__FormField__["a" /* default */].propTypes.control
 } : {};
 FormCheckbox.defaultProps = {
   as: __WEBPACK_IMPORTED_MODULE_4__FormField__["a" /* default */],
   control: __WEBPACK_IMPORTED_MODULE_3__modules_Checkbox__["a" /* default */]
 };
 /* harmony default export */ __webpack_exports__["a"] = (FormCheckbox);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -50789,7 +51291,7 @@ FormCheckbox.defaultProps = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react__);
@@ -50809,26 +51311,27 @@ FormCheckbox.defaultProps = {
 
 function FormDropdown(props) {
   var control = props.control;
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getUnhandledProps */])(FormDropdown, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["p" /* getElementType */])(FormDropdown, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["r" /* getUnhandledProps */])(FormDropdown, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getElementType */])(FormDropdown, props);
   return __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     control: control
   }));
 }
 
 FormDropdown.handledProps = ["as", "control"];
-FormDropdown.propTypes =  false ? {
+FormDropdown.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_2__lib__["m" /* customPropTypes */].as,
 
   /** A FormField control prop. */
-  control: FormField.propTypes.control
+  control: __WEBPACK_IMPORTED_MODULE_4__FormField__["a" /* default */].propTypes.control
 } : {};
 FormDropdown.defaultProps = {
   as: __WEBPACK_IMPORTED_MODULE_4__FormField__["a" /* default */],
   control: __WEBPACK_IMPORTED_MODULE_3__modules_Dropdown__["a" /* default */]
 };
 /* harmony default export */ __webpack_exports__["a"] = (FormDropdown);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -50836,7 +51339,7 @@ FormDropdown.defaultProps = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__);
@@ -50887,9 +51390,9 @@ function FormField(props) {
       required = props.required,
       type = props.type,
       width = props.width;
-  var classes = __WEBPACK_IMPORTED_MODULE_4_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_7__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_7__lib__["y" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_7__lib__["y" /* useKeyOnly */])(inline, 'inline'), Object(__WEBPACK_IMPORTED_MODULE_7__lib__["y" /* useKeyOnly */])(required, 'required'), Object(__WEBPACK_IMPORTED_MODULE_7__lib__["E" /* useWidthProp */])(width, 'wide'), 'field', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_7__lib__["q" /* getUnhandledProps */])(FormField, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_7__lib__["p" /* getElementType */])(FormField, props); // ----------------------------------------
+  var classes = __WEBPACK_IMPORTED_MODULE_4_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_7__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_7__lib__["A" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_7__lib__["A" /* useKeyOnly */])(inline, 'inline'), Object(__WEBPACK_IMPORTED_MODULE_7__lib__["A" /* useKeyOnly */])(required, 'required'), Object(__WEBPACK_IMPORTED_MODULE_7__lib__["G" /* useWidthProp */])(width, 'wide'), 'field', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_7__lib__["r" /* getUnhandledProps */])(FormField, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_7__lib__["q" /* getElementType */])(FormField, props); // ----------------------------------------
   // No Control
   // ----------------------------------------
 
@@ -50948,51 +51451,52 @@ function FormField(props) {
 }
 
 FormField.handledProps = ["as", "children", "className", "content", "control", "disabled", "error", "inline", "label", "required", "type", "width"];
-FormField.propTypes =  false ? {
+FormField.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_7__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_7__lib__["m" /* customPropTypes */].contentShorthand,
 
   /**
    * A form control component (i.e. Dropdown) or HTML tagName (i.e. 'input').
    * Extra FormField props are passed to the control component.
    * Mutually exclusive with children.
    */
-  control: customPropTypes.some([PropTypes.func, PropTypes.oneOf(['button', 'input', 'select', 'textarea'])]),
+  control: __WEBPACK_IMPORTED_MODULE_7__lib__["m" /* customPropTypes */].some([__WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.func, __WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.oneOf(['button', 'input', 'select', 'textarea'])]),
 
   /** Individual fields may be disabled. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.bool,
 
   /** Individual fields may display an error state. */
-  error: PropTypes.bool,
+  error: __WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.bool,
 
   /** A field can have its label next to instead of above it. */
-  inline: PropTypes.bool,
+  inline: __WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.bool,
   // Heads Up!
   // Do not disallow children with `label` shorthand
   // The `control` might accept a `label` prop and `children`
 
   /** Mutually exclusive with children. */
-  label: PropTypes.oneOfType([PropTypes.node, PropTypes.object]),
+  label: __WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.node, __WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.object]),
 
   /** A field can show that input is mandatory. */
-  required: PropTypes.bool,
+  required: __WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.bool,
 
   /** Passed to the control component (i.e. <input type='password' />) */
-  type: customPropTypes.every([customPropTypes.demand(['control'])]),
+  type: __WEBPACK_IMPORTED_MODULE_7__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_7__lib__["m" /* customPropTypes */].demand(['control'])]),
 
   /** A field can specify its width in grid columns */
-  width: PropTypes.oneOf(SUI.WIDTHS)
+  width: __WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_7__lib__["b" /* SUI */].WIDTHS)
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (FormField);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -51000,7 +51504,7 @@ FormField.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/toConsumableArray.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/toConsumableArray.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__);
@@ -51029,38 +51533,39 @@ function FormGroup(props) {
       inline = props.inline,
       unstackable = props.unstackable,
       widths = props.widths;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(grouped, 'grouped'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(inline, 'inline'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(unstackable, 'unstackable'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["E" /* useWidthProp */])(widths, null, true), 'fields', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(FormGroup, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(FormGroup, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(grouped, 'grouped'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(inline, 'inline'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(unstackable, 'unstackable'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["G" /* useWidthProp */])(widths, null, true), 'fields', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(FormGroup, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(FormGroup, props);
   return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), children);
 }
 
 FormGroup.handledProps = ["as", "children", "className", "grouped", "inline", "unstackable", "widths"];
-FormGroup.propTypes =  false ? {
+FormGroup.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** Fields can show related choices. */
-  grouped: customPropTypes.every([customPropTypes.disallow(['inline']), PropTypes.bool]),
+  grouped: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].disallow(['inline']), __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool]),
 
   /** Multiple fields may be inline in a row. */
-  inline: customPropTypes.every([customPropTypes.disallow(['grouped']), PropTypes.bool]),
+  inline: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].disallow(['grouped']), __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool]),
 
   /** A form group can prevent itself from stacking on mobile. */
-  unstackable: PropTypes.bool,
+  unstackable: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Fields Groups can specify their width in grid columns or automatically divide fields to be equal width. */
-  widths: PropTypes.oneOf(_toConsumableArray(SUI.WIDTHS).concat(['equal']))
+  widths: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].WIDTHS).concat(['equal']))
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (FormGroup);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -51068,7 +51573,7 @@ FormGroup.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react__);
@@ -51088,26 +51593,27 @@ FormGroup.propTypes =  false ? {
 
 function FormInput(props) {
   var control = props.control;
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getUnhandledProps */])(FormInput, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["p" /* getElementType */])(FormInput, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["r" /* getUnhandledProps */])(FormInput, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getElementType */])(FormInput, props);
   return __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     control: control
   }));
 }
 
 FormInput.handledProps = ["as", "control"];
-FormInput.propTypes =  false ? {
+FormInput.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_2__lib__["m" /* customPropTypes */].as,
 
   /** A FormField control prop. */
-  control: FormField.propTypes.control
+  control: __WEBPACK_IMPORTED_MODULE_4__FormField__["a" /* default */].propTypes.control
 } : {};
 FormInput.defaultProps = {
   as: __WEBPACK_IMPORTED_MODULE_4__FormField__["a" /* default */],
   control: __WEBPACK_IMPORTED_MODULE_3__elements_Input__["a" /* default */]
 };
 /* harmony default export */ __webpack_exports__["a"] = (FormInput);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -51115,7 +51621,7 @@ FormInput.defaultProps = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react__);
@@ -51135,26 +51641,27 @@ FormInput.defaultProps = {
 
 function FormRadio(props) {
   var control = props.control;
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getUnhandledProps */])(FormRadio, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["p" /* getElementType */])(FormRadio, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["r" /* getUnhandledProps */])(FormRadio, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getElementType */])(FormRadio, props);
   return __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     control: control
   }));
 }
 
 FormRadio.handledProps = ["as", "control"];
-FormRadio.propTypes =  false ? {
+FormRadio.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_2__lib__["m" /* customPropTypes */].as,
 
   /** A FormField control prop. */
-  control: FormField.propTypes.control
+  control: __WEBPACK_IMPORTED_MODULE_4__FormField__["a" /* default */].propTypes.control
 } : {};
 FormRadio.defaultProps = {
   as: __WEBPACK_IMPORTED_MODULE_4__FormField__["a" /* default */],
   control: __WEBPACK_IMPORTED_MODULE_3__addons_Radio__["a" /* default */]
 };
 /* harmony default export */ __webpack_exports__["a"] = (FormRadio);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -51162,7 +51669,7 @@ FormRadio.defaultProps = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__("./node_modules/prop-types/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
@@ -51188,8 +51695,8 @@ FormRadio.defaultProps = {
 function FormSelect(props) {
   var control = props.control,
       options = props.options;
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_3__lib__["q" /* getUnhandledProps */])(FormSelect, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_3__lib__["p" /* getElementType */])(FormSelect, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_3__lib__["r" /* getUnhandledProps */])(FormSelect, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_3__lib__["q" /* getElementType */])(FormSelect, props);
   return __WEBPACK_IMPORTED_MODULE_2_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     control: control,
     options: options
@@ -51197,21 +51704,22 @@ function FormSelect(props) {
 }
 
 FormSelect.handledProps = ["as", "control", "options"];
-FormSelect.propTypes =  false ? {
+FormSelect.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_3__lib__["m" /* customPropTypes */].as,
 
   /** A FormField control prop. */
-  control: FormField.propTypes.control,
+  control: __WEBPACK_IMPORTED_MODULE_6__FormField__["a" /* default */].propTypes.control,
 
   /** Array of Dropdown.Item props e.g. `{ text: '', value: '' }` */
-  options: PropTypes.arrayOf(PropTypes.shape(Dropdown.Item.propTypes)).isRequired
+  options: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape(__WEBPACK_IMPORTED_MODULE_5__modules_Dropdown__["a" /* default */].Item.propTypes)).isRequired
 } : {};
 FormSelect.defaultProps = {
   as: __WEBPACK_IMPORTED_MODULE_6__FormField__["a" /* default */],
   control: __WEBPACK_IMPORTED_MODULE_4__addons_Select__["a" /* default */]
 };
 /* harmony default export */ __webpack_exports__["a"] = (FormSelect);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -51219,7 +51727,7 @@ FormSelect.defaultProps = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react__);
@@ -51239,26 +51747,27 @@ FormSelect.defaultProps = {
 
 function FormTextArea(props) {
   var control = props.control;
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getUnhandledProps */])(FormTextArea, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["p" /* getElementType */])(FormTextArea, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["r" /* getUnhandledProps */])(FormTextArea, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getElementType */])(FormTextArea, props);
   return __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     control: control
   }));
 }
 
 FormTextArea.handledProps = ["as", "control"];
-FormTextArea.propTypes =  false ? {
+FormTextArea.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_2__lib__["m" /* customPropTypes */].as,
 
   /** A FormField control prop. */
-  control: FormField.propTypes.control
+  control: __WEBPACK_IMPORTED_MODULE_4__FormField__["a" /* default */].propTypes.control
 } : {};
 FormTextArea.defaultProps = {
   as: __WEBPACK_IMPORTED_MODULE_4__FormField__["a" /* default */],
   control: __WEBPACK_IMPORTED_MODULE_3__addons_TextArea__["a" /* default */]
 };
 /* harmony default export */ __webpack_exports__["a"] = (FormTextArea);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -51277,7 +51786,7 @@ FormTextArea.defaultProps = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/toConsumableArray.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/toConsumableArray.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__);
@@ -51319,9 +51828,9 @@ function Grid(props) {
       stretched = props.stretched,
       textAlign = props.textAlign,
       verticalAlign = props.verticalAlign;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(centered, 'centered'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(container, 'container'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(doubling, 'doubling'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(stackable, 'stackable'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(stretched, 'stretched'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["z" /* useKeyOrValueAndKey */])(celled, 'celled'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["z" /* useKeyOrValueAndKey */])(divided, 'divided'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["z" /* useKeyOrValueAndKey */])(padded, 'padded'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["z" /* useKeyOrValueAndKey */])(relaxed, 'relaxed'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useMultipleProp */])(reversed, 'reversed'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["D" /* useVerticalAlignProp */])(verticalAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["E" /* useWidthProp */])(columns, 'column', true), 'grid', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(Grid, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(Grid, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(centered, 'centered'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(container, 'container'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(doubling, 'doubling'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(stackable, 'stackable'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(stretched, 'stretched'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useKeyOrValueAndKey */])(celled, 'celled'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useKeyOrValueAndKey */])(divided, 'divided'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useKeyOrValueAndKey */])(padded, 'padded'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useKeyOrValueAndKey */])(relaxed, 'relaxed'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["C" /* useMultipleProp */])(reversed, 'reversed'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["D" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["F" /* useVerticalAlignProp */])(verticalAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["G" /* useWidthProp */])(columns, 'column', true), 'grid', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(Grid, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(Grid, props);
   return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), children);
@@ -51330,59 +51839,60 @@ function Grid(props) {
 Grid.handledProps = ["as", "celled", "centered", "children", "className", "columns", "container", "divided", "doubling", "inverted", "padded", "relaxed", "reversed", "stackable", "stretched", "textAlign", "verticalAlign"];
 Grid.Column = __WEBPACK_IMPORTED_MODULE_6__GridColumn__["a" /* default */];
 Grid.Row = __WEBPACK_IMPORTED_MODULE_7__GridRow__["a" /* default */];
-Grid.propTypes =  false ? {
+Grid.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** A grid can have rows divided into cells. */
-  celled: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['internally'])]),
+  celled: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(['internally'])]),
 
   /** A grid can have its columns centered. */
-  centered: PropTypes.bool,
+  centered: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** Represents column count per row in Grid. */
-  columns: PropTypes.oneOf(_toConsumableArray(SUI.WIDTHS).concat(['equal'])),
+  columns: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].WIDTHS).concat(['equal'])),
 
   /** A grid can be combined with a container to use the available layout and alignment. */
-  container: PropTypes.bool,
+  container: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A grid can have dividers between its columns. */
-  divided: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['vertically'])]),
+  divided: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(['vertically'])]),
 
   /** A grid can double its column width on tablet and mobile sizes. */
-  doubling: PropTypes.bool,
+  doubling: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A grid's colors can be inverted. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A grid can preserve its vertical and horizontal gutters on first and last columns. */
-  padded: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['horizontally', 'vertically'])]),
+  padded: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(['horizontally', 'vertically'])]),
 
   /** A grid can increase its gutters to allow for more negative space. */
-  relaxed: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['very'])]),
+  relaxed: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(['very'])]),
 
   /** A grid can specify that its columns should reverse order at different device sizes. */
-  reversed: customPropTypes.multipleProp(['computer', 'computer vertically', 'mobile', 'mobile vertically', 'tablet', 'tablet vertically']),
+  reversed: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].multipleProp(['computer', 'computer vertically', 'mobile', 'mobile vertically', 'tablet', 'tablet vertically']),
 
   /** A grid can have its columns stack on-top of each other after reaching mobile breakpoints. */
-  stackable: PropTypes.bool,
+  stackable: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A grid can stretch its contents to take up the entire grid height. */
-  stretched: PropTypes.bool,
+  stretched: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A grid can specify its text alignment. */
-  textAlign: PropTypes.oneOf(SUI.TEXT_ALIGNMENTS),
+  textAlign: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].TEXT_ALIGNMENTS),
 
   /** A grid can specify its vertical alignment to have all its columns vertically centered. */
-  verticalAlign: PropTypes.oneOf(SUI.VERTICAL_ALIGNMENTS)
+  verticalAlign: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].VERTICAL_ALIGNMENTS)
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (Grid);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -51390,7 +51900,7 @@ Grid.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -51423,60 +51933,60 @@ function GridColumn(props) {
       verticalAlign = props.verticalAlign,
       widescreen = props.widescreen,
       width = props.width;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(color, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(stretched, 'stretched'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useMultipleProp */])(only, 'only'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["B" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["C" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["D" /* useVerticalAlignProp */])(verticalAlign), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["E" /* useWidthProp */])(computer, 'wide computer'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["E" /* useWidthProp */])(largeScreen, 'wide large screen'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["E" /* useWidthProp */])(mobile, 'wide mobile'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["E" /* useWidthProp */])(tablet, 'wide tablet'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["E" /* useWidthProp */])(widescreen, 'wide widescreen'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["E" /* useWidthProp */])(width, 'wide'), 'column', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(GridColumn, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(GridColumn, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(color, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(stretched, 'stretched'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["C" /* useMultipleProp */])(only, 'only'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["D" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["E" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["F" /* useVerticalAlignProp */])(verticalAlign), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["G" /* useWidthProp */])(computer, 'wide computer'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["G" /* useWidthProp */])(largeScreen, 'wide large screen'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["G" /* useWidthProp */])(mobile, 'wide mobile'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["G" /* useWidthProp */])(tablet, 'wide tablet'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["G" /* useWidthProp */])(widescreen, 'wide widescreen'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["G" /* useWidthProp */])(width, 'wide'), 'column', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(GridColumn, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(GridColumn, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), children);
 }
 
 GridColumn.handledProps = ["as", "children", "className", "color", "computer", "floated", "largeScreen", "mobile", "only", "stretched", "tablet", "textAlign", "verticalAlign", "widescreen", "width"];
-GridColumn.propTypes =  false ? {
+GridColumn.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** A grid column can be colored. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].COLORS),
 
   /** A column can specify a width for a computer. */
-  computer: PropTypes.oneOf(SUI.WIDTHS),
+  computer: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].WIDTHS),
 
   /** A column can sit flush against the left or right edge of a row. */
-  floated: PropTypes.oneOf(SUI.FLOATS),
+  floated: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].FLOATS),
 
   /** A column can specify a width for a large screen device. */
-  largeScreen: PropTypes.oneOf(SUI.WIDTHS),
+  largeScreen: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].WIDTHS),
 
   /** A column can specify a width for a mobile device. */
-  mobile: PropTypes.oneOf(SUI.WIDTHS),
+  mobile: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].WIDTHS),
 
   /** A column can appear only for a specific device, or screen sizes. */
-  only: customPropTypes.multipleProp(SUI.VISIBILITY),
+  only: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].multipleProp(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].VISIBILITY),
 
   /** A column can stretch its contents to take up the entire grid or row height. */
-  stretched: PropTypes.bool,
+  stretched: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** A column can specify a width for a tablet device. */
-  tablet: PropTypes.oneOf(SUI.WIDTHS),
+  tablet: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].WIDTHS),
 
   /** A column can specify its text alignment. */
-  textAlign: PropTypes.oneOf(SUI.TEXT_ALIGNMENTS),
+  textAlign: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].TEXT_ALIGNMENTS),
 
   /** A column can specify its vertical alignment to have all its columns vertically centered. */
-  verticalAlign: PropTypes.oneOf(SUI.VERTICAL_ALIGNMENTS),
+  verticalAlign: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].VERTICAL_ALIGNMENTS),
 
   /** A column can specify a width for a wide screen device. */
-  widescreen: PropTypes.oneOf(SUI.WIDTHS),
+  widescreen: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].WIDTHS),
 
   /** Represents width of column. */
-  width: PropTypes.oneOf(SUI.WIDTHS)
+  width: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].WIDTHS)
 } : {};
 GridColumn.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(GridColumn, function (children) {
   return {
@@ -51484,6 +51994,7 @@ GridColumn.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShort
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (GridColumn);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -51491,7 +52002,7 @@ GridColumn.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShort
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/toConsumableArray.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/toConsumableArray.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__);
@@ -51524,53 +52035,54 @@ function GridRow(props) {
       stretched = props.stretched,
       textAlign = props.textAlign,
       verticalAlign = props.verticalAlign;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(color, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(centered, 'centered'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(divided, 'divided'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(stretched, 'stretched'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useMultipleProp */])(only, 'only'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useMultipleProp */])(reversed, 'reversed'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["D" /* useVerticalAlignProp */])(verticalAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["E" /* useWidthProp */])(columns, 'column', true), 'row', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(GridRow, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(GridRow, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(color, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(centered, 'centered'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(divided, 'divided'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(stretched, 'stretched'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["C" /* useMultipleProp */])(only, 'only'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["C" /* useMultipleProp */])(reversed, 'reversed'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["D" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["F" /* useVerticalAlignProp */])(verticalAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["G" /* useWidthProp */])(columns, 'column', true), 'row', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(GridRow, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(GridRow, props);
   return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), children);
 }
 
 GridRow.handledProps = ["as", "centered", "children", "className", "color", "columns", "divided", "only", "reversed", "stretched", "textAlign", "verticalAlign"];
-GridRow.propTypes =  false ? {
+GridRow.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** A row can have its columns centered. */
-  centered: PropTypes.bool,
+  centered: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** A grid row can be colored. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].COLORS),
 
   /** Represents column count per line in Row. */
-  columns: PropTypes.oneOf(_toConsumableArray(SUI.WIDTHS).concat(['equal'])),
+  columns: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].WIDTHS).concat(['equal'])),
 
   /** A row can have dividers between its columns. */
-  divided: PropTypes.bool,
+  divided: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A row can appear only for a specific device, or screen sizes. */
-  only: customPropTypes.multipleProp(SUI.VISIBILITY),
+  only: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].multipleProp(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].VISIBILITY),
 
   /** A row can specify that its columns should reverse order at different device sizes. */
-  reversed: customPropTypes.multipleProp(['computer', 'computer vertically', 'mobile', 'mobile vertically', 'tablet', 'tablet vertically']),
+  reversed: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].multipleProp(['computer', 'computer vertically', 'mobile', 'mobile vertically', 'tablet', 'tablet vertically']),
 
   /** A row can stretch its contents to take up the entire column height. */
-  stretched: PropTypes.bool,
+  stretched: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A row can specify its text alignment. */
-  textAlign: PropTypes.oneOf(SUI.TEXT_ALIGNMENTS),
+  textAlign: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].TEXT_ALIGNMENTS),
 
   /** A row can specify its vertical alignment to have all its columns vertically centered. */
-  verticalAlign: PropTypes.oneOf(SUI.VERTICAL_ALIGNMENTS)
+  verticalAlign: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].VERTICAL_ALIGNMENTS)
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (GridRow);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -51589,7 +52101,7 @@ GridRow.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__);
@@ -51722,9 +52234,9 @@ function (_Component) {
           text = _this$props.text,
           vertical = _this$props.vertical,
           widths = _this$props.widths;
-      var classes = __WEBPACK_IMPORTED_MODULE_11_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(borderless, 'borderless'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(pagination, 'pagination'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(pointing, 'pointing'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(secondary, 'secondary'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(stackable, 'stackable'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(text, 'text'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(vertical, 'vertical'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["z" /* useKeyOrValueAndKey */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["z" /* useKeyOrValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["z" /* useKeyOrValueAndKey */])(icon, 'icon'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["z" /* useKeyOrValueAndKey */])(tabular, 'tabular'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["C" /* useValueAndKey */])(fixed, 'fixed'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["E" /* useWidthProp */])(widths, 'item'), className, 'menu');
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["q" /* getUnhandledProps */])(Menu, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["p" /* getElementType */])(Menu, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_11_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(borderless, 'borderless'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(pagination, 'pagination'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(pointing, 'pointing'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(secondary, 'secondary'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(stackable, 'stackable'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(text, 'text'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(vertical, 'vertical'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["B" /* useKeyOrValueAndKey */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["B" /* useKeyOrValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["B" /* useKeyOrValueAndKey */])(icon, 'icon'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["B" /* useKeyOrValueAndKey */])(tabular, 'tabular'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["E" /* useValueAndKey */])(fixed, 'fixed'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["G" /* useWidthProp */])(widths, 'item'), className, 'menu');
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["r" /* getUnhandledProps */])(Menu, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["q" /* getElementType */])(Menu, this.props);
       return __WEBPACK_IMPORTED_MODULE_13_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         className: classes
       }), __WEBPACK_IMPORTED_MODULE_14__lib__["c" /* childrenUtils */].isNil(children) ? this.renderItems() : children);
@@ -51744,51 +52256,51 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Me
 
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Menu, "handledProps", ["activeIndex", "as", "attached", "borderless", "children", "className", "color", "compact", "defaultActiveIndex", "fixed", "floated", "fluid", "icon", "inverted", "items", "onItemClick", "pagination", "pointing", "secondary", "size", "stackable", "tabular", "text", "vertical", "widths"]);
 
-Menu.propTypes =  false ? {
+Menu.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].as,
 
   /** Index of the currently active item. */
-  activeIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  activeIndex: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string]),
 
   /** A menu may be attached to other content segments. */
-  attached: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['top', 'bottom'])]),
+  attached: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(['top', 'bottom'])]),
 
   /** A menu item or menu can have no borders. */
-  borderless: PropTypes.bool,
+  borderless: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string,
 
   /** Additional colors can be specified. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_14__lib__["b" /* SUI */].COLORS),
 
   /** A menu can take up only the space necessary to fit its content. */
-  compact: PropTypes.bool,
+  compact: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** Initial activeIndex value. */
-  defaultActiveIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  defaultActiveIndex: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string]),
 
   /** A menu can be fixed to a side of its context. */
-  fixed: PropTypes.oneOf(['left', 'right', 'bottom', 'top']),
+  fixed: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(['left', 'right', 'bottom', 'top']),
 
   /** A menu can be floated. */
-  floated: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['right'])]),
+  floated: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(['right'])]),
 
   /** A vertical menu may take the size of its container. */
-  fluid: PropTypes.bool,
+  fluid: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** A menu may have just icons (bool) or labeled icons. */
-  icon: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['labeled'])]),
+  icon: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(['labeled'])]),
 
   /** A menu may have its colors inverted to show greater contrast. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** Shorthand array of props for Menu. */
-  items: customPropTypes.collectionShorthand,
+  items: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].collectionShorthand,
 
   /**
    * onClick handler for MenuItem. Mutually exclusive with children.
@@ -51796,34 +52308,34 @@ Menu.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All item props.
    */
-  onItemClick: customPropTypes.every([customPropTypes.disallow(['children']), PropTypes.func]),
+  onItemClick: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].disallow(['children']), __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.func]),
 
   /** A pagination menu is specially formatted to present links to pages of content. */
-  pagination: PropTypes.bool,
+  pagination: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** A menu can point to show its relationship to nearby content. */
-  pointing: PropTypes.bool,
+  pointing: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** A menu can adjust its appearance to de-emphasize its contents. */
-  secondary: PropTypes.bool,
+  secondary: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** A menu can vary in size. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium', 'big')),
+  size: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_10_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_14__lib__["b" /* SUI */].SIZES, 'medium', 'big')),
 
   /** A menu can stack at mobile resolutions. */
-  stackable: PropTypes.bool,
+  stackable: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** A menu can be formatted to show tabs of information. */
-  tabular: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['right'])]),
+  tabular: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(['right'])]),
 
   /** A menu can be formatted for text content. */
-  text: PropTypes.bool,
+  text: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** A vertical menu displays elements vertically. */
-  vertical: PropTypes.bool,
+  vertical: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** A menu can have its items divided evenly. */
-  widths: PropTypes.oneOf(SUI.WIDTHS)
+  widths: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_14__lib__["b" /* SUI */].WIDTHS)
 } : {};
 Menu.create = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["l" /* createShorthandFactory */])(Menu, function (items) {
   return {
@@ -51831,6 +52343,7 @@ Menu.create = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["l" /* createShorthandF
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (Menu);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -51838,7 +52351,7 @@ Menu.create = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["l" /* createShorthandF
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -51861,28 +52374,29 @@ function MenuHeader(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('header', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(MenuHeader, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(MenuHeader, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(MenuHeader, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(MenuHeader, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 MenuHeader.handledProps = ["as", "children", "className", "content"];
-MenuHeader.propTypes =  false ? {
+MenuHeader.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (MenuHeader);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -51890,7 +52404,7 @@ MenuHeader.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MenuItem; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MenuItem; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -51981,11 +52495,11 @@ function (_Component) {
           name = _this$props.name,
           onClick = _this$props.onClick,
           position = _this$props.position;
-      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()(color, position, Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(icon === true || icon && !(name || content), 'icon'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(header, 'header'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(link, 'link'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["z" /* useKeyOrValueAndKey */])(fitted, 'fitted'), 'item', className);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["p" /* getElementType */])(MenuItem, this.props, function () {
+      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()(color, position, Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(icon === true || icon && !(name || content), 'icon'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(header, 'header'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(link, 'link'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["B" /* useKeyOrValueAndKey */])(fitted, 'fitted'), 'item', className);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getElementType */])(MenuItem, this.props, function () {
         if (onClick) return 'a';
       });
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getUnhandledProps */])(MenuItem, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["r" /* getUnhandledProps */])(MenuItem, this.props);
 
       if (!__WEBPACK_IMPORTED_MODULE_13__lib__["c" /* childrenUtils */].isNil(children)) {
         return __WEBPACK_IMPORTED_MODULE_12_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -52009,45 +52523,45 @@ function (_Component) {
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(MenuItem, "handledProps", ["active", "as", "children", "className", "color", "content", "disabled", "fitted", "header", "icon", "index", "link", "name", "onClick", "position"]);
 
 
-MenuItem.propTypes =  false ? {
+MenuItem.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].as,
 
   /** A menu item can be active. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string,
 
   /** Additional colors can be specified. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_13__lib__["b" /* SUI */].COLORS),
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A menu item can be disabled. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A menu item or menu can remove element padding, vertically or horizontally. */
-  fitted: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['horizontally', 'vertically'])]),
+  fitted: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(['horizontally', 'vertically'])]),
 
   /** A menu item may include a header or may itself be a header. */
-  header: PropTypes.bool,
+  header: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** MenuItem can be only icon. */
-  icon: PropTypes.oneOfType([PropTypes.bool, customPropTypes.itemShorthand]),
+  icon: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand]),
 
   /** MenuItem index inside Menu. */
-  index: PropTypes.number,
+  index: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.number,
 
   /** A menu item can be link. */
-  link: PropTypes.bool,
+  link: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Internal name of the MenuItem. */
-  name: PropTypes.string,
+  name: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string,
 
   /**
    * Called on click. When passed, the component will render as an `a`
@@ -52056,10 +52570,10 @@ MenuItem.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /** A menu item can take left or right position. */
-  position: PropTypes.oneOf(['left', 'right'])
+  position: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(['left', 'right'])
 } : {};
 MenuItem.create = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["l" /* createShorthandFactory */])(MenuItem, function (val) {
   return {
@@ -52067,6 +52581,7 @@ MenuItem.create = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["l" /* createShorth
     name: val
   };
 });
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -52074,7 +52589,7 @@ MenuItem.create = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["l" /* createShorth
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -52098,31 +52613,32 @@ function MenuMenu(props) {
       content = props.content,
       position = props.position;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(position, 'menu', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(MenuMenu, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(MenuMenu, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(MenuMenu, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(MenuMenu, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 MenuMenu.handledProps = ["as", "children", "className", "content", "position"];
-MenuMenu.propTypes =  false ? {
+MenuMenu.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A sub menu can take left or right position. */
-  position: PropTypes.oneOf(['left', 'right'])
+  position: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(['left', 'right'])
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (MenuMenu);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -52141,7 +52657,7 @@ MenuMenu.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Message; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Message; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -52248,13 +52764,13 @@ function (_Component) {
           success = _this$props.success,
           visible = _this$props.visible,
           warning = _this$props.warning;
-      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(floating, 'floating'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(hidden, 'hidden'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(icon, 'icon'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(info, 'info'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(negative, 'negative'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(positive, 'positive'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(success, 'success'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(visible, 'visible'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(warning, 'warning'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["z" /* useKeyOrValueAndKey */])(attached, 'attached'), 'message', className);
+      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(floating, 'floating'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(hidden, 'hidden'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(icon, 'icon'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(info, 'info'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(negative, 'negative'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(positive, 'positive'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(success, 'success'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(visible, 'visible'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(warning, 'warning'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["B" /* useKeyOrValueAndKey */])(attached, 'attached'), 'message', className);
       var dismissIcon = onDismiss && __WEBPACK_IMPORTED_MODULE_12_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_14__elements_Icon__["a" /* default */], {
         name: "close",
         onClick: this.handleDismiss
       });
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getUnhandledProps */])(Message, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["p" /* getElementType */])(Message, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["r" /* getUnhandledProps */])(Message, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getElementType */])(Message, this.props);
 
       if (!__WEBPACK_IMPORTED_MODULE_13__lib__["c" /* childrenUtils */].isNil(children)) {
         return __WEBPACK_IMPORTED_MODULE_12_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -52290,51 +52806,51 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Me
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Message, "handledProps", ["as", "attached", "children", "className", "color", "compact", "content", "error", "floating", "header", "hidden", "icon", "info", "list", "negative", "onDismiss", "positive", "size", "success", "visible", "warning"]);
 
 
-Message.propTypes =  false ? {
+Message.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].as,
 
   /** A message can be formatted to attach itself to other content. */
-  attached: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['bottom', 'top'])]),
+  attached: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(['bottom', 'top'])]),
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string,
 
   /** A message can be formatted to be different colors. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_13__lib__["b" /* SUI */].COLORS),
 
   /** A message can only take up the width of its content. */
-  compact: PropTypes.bool,
+  compact: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A message may be formatted to display a negative message. Same as `negative`. */
-  error: PropTypes.bool,
+  error: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A message can float above content that it is related to. */
-  floating: PropTypes.bool,
+  floating: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Shorthand for MessageHeader. */
-  header: customPropTypes.itemShorthand,
+  header: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A message can be hidden. */
-  hidden: PropTypes.bool,
+  hidden: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A message can contain an icon. */
-  icon: PropTypes.oneOfType([customPropTypes.itemShorthand, PropTypes.bool]),
+  icon: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool]),
 
   /** A message may be formatted to display information. */
-  info: PropTypes.bool,
+  info: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Array shorthand items for the MessageList. Mutually exclusive with children. */
-  list: customPropTypes.collectionShorthand,
+  list: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].collectionShorthand,
 
   /** A message may be formatted to display a negative message. Same as `error`. */
-  negative: PropTypes.bool,
+  negative: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /**
    * A message that the user can choose to hide.
@@ -52343,23 +52859,24 @@ Message.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onDismiss: PropTypes.func,
+  onDismiss: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /** A message may be formatted to display a positive message.  Same as `success`. */
-  positive: PropTypes.bool,
+  positive: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A message can have different sizes. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium')),
+  size: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_9_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_13__lib__["b" /* SUI */].SIZES, 'medium')),
 
   /** A message may be formatted to display a positive message.  Same as `positive`. */
-  success: PropTypes.bool,
+  success: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A message can be set to visible to force itself to be shown. */
-  visible: PropTypes.bool,
+  visible: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A message may be formatted to display warning messages. */
-  warning: PropTypes.bool
+  warning: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -52367,7 +52884,7 @@ Message.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -52390,28 +52907,29 @@ function MessageContent(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('content', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(MessageContent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(MessageContent, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(MessageContent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(MessageContent, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 MessageContent.handledProps = ["as", "children", "className", "content"];
-MessageContent.propTypes =  false ? {
+MessageContent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (MessageContent);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -52419,7 +52937,7 @@ MessageContent.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -52442,26 +52960,26 @@ function MessageHeader(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('header', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(MessageHeader, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(MessageHeader, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(MessageHeader, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(MessageHeader, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 MessageHeader.handledProps = ["as", "children", "className", "content"];
-MessageHeader.propTypes =  false ? {
+MessageHeader.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 MessageHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(MessageHeader, function (val) {
   return {
@@ -52469,6 +52987,7 @@ MessageHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createSh
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (MessageHeader);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -52476,7 +52995,7 @@ MessageHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createSh
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -52499,26 +53018,26 @@ function MessageItem(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('content', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(MessageItem, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(MessageItem, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(MessageItem, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(MessageItem, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 MessageItem.handledProps = ["as", "children", "className", "content"];
-MessageItem.propTypes =  false ? {
+MessageItem.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 MessageItem.defaultProps = {
   as: 'li'
@@ -52529,6 +53048,7 @@ MessageItem.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShor
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (MessageItem);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -52536,7 +53056,7 @@ MessageItem.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShor
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_map__ = __webpack_require__("./node_modules/lodash/map.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_map__);
@@ -52564,26 +53084,26 @@ function MessageList(props) {
       className = props.className,
       items = props.items;
   var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('list', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(MessageList, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(MessageList, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(MessageList, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(MessageList, props);
   return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children) ? __WEBPACK_IMPORTED_MODULE_1_lodash_map___default()(items, __WEBPACK_IMPORTED_MODULE_6__MessageItem__["a" /* default */].create) : children);
 }
 
 MessageList.handledProps = ["as", "children", "className", "items"];
-MessageList.propTypes =  false ? {
+MessageList.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** Shorthand Message.Items. */
-  items: customPropTypes.collectionShorthand
+  items: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].collectionShorthand
 } : {};
 MessageList.defaultProps = {
   as: 'ul'
@@ -52594,6 +53114,7 @@ MessageList.create = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["l" /* createShor
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (MessageList);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -52612,7 +53133,7 @@ MessageList.create = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["l" /* createShor
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -52676,9 +53197,9 @@ function Table(props) {
       textAlign = props.textAlign,
       unstackable = props.unstackable,
       verticalAlign = props.verticalAlign;
-  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(celled, 'celled'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(collapsing, 'collapsing'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(definition, 'definition'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(fixed, 'fixed'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(selectable, 'selectable'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(singleLine, 'single line'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(sortable, 'sortable'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(stackable, 'stackable'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(striped, 'striped'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(structured, 'structured'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(unstackable, 'unstackable'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["z" /* useKeyOrValueAndKey */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["z" /* useKeyOrValueAndKey */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["z" /* useKeyOrValueAndKey */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["z" /* useKeyOrValueAndKey */])(padded, 'padded'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["B" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["D" /* useVerticalAlignProp */])(verticalAlign), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["E" /* useWidthProp */])(columns, 'column'), 'table', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getUnhandledProps */])(Table, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["p" /* getElementType */])(Table, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(celled, 'celled'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(collapsing, 'collapsing'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(definition, 'definition'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(fixed, 'fixed'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(selectable, 'selectable'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(singleLine, 'single line'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(sortable, 'sortable'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(stackable, 'stackable'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(striped, 'striped'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(structured, 'structured'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(unstackable, 'unstackable'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["B" /* useKeyOrValueAndKey */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["B" /* useKeyOrValueAndKey */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["B" /* useKeyOrValueAndKey */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["B" /* useKeyOrValueAndKey */])(padded, 'padded'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["D" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["F" /* useVerticalAlignProp */])(verticalAlign), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["G" /* useWidthProp */])(columns, 'column'), 'table', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["r" /* getUnhandledProps */])(Table, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getElementType */])(Table, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_6__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_5_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -52701,56 +53222,56 @@ Table.handledProps = ["as", "attached", "basic", "celled", "children", "classNam
 Table.defaultProps = {
   as: 'table'
 };
-Table.propTypes =  false ? {
+Table.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].as,
 
   /** Attach table to other content */
-  attached: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['top', 'bottom'])]),
+  attached: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(['top', 'bottom'])]),
 
   /** A table can reduce its complexity to increase readability. */
-  basic: PropTypes.oneOfType([PropTypes.oneOf(['very']), PropTypes.bool]),
+  basic: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(['very']), __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool]),
 
   /** A table may be divided each row into separate cells. */
-  celled: PropTypes.bool,
+  celled: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.string,
 
   /** A table can be collapsing, taking up only as much space as its rows. */
-  collapsing: PropTypes.bool,
+  collapsing: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A table can be given a color to distinguish it from other tables. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].COLORS),
 
   /** A table can specify its column count to divide its content evenly. */
-  columns: PropTypes.oneOf(SUI.WIDTHS),
+  columns: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].WIDTHS),
 
   /** A table may sometimes need to be more compact to make more rows visible at a time. */
-  compact: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['very'])]),
+  compact: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(['very'])]),
 
   /** A table may be formatted to emphasize a first column that defines a rows content. */
-  definition: PropTypes.bool,
+  definition: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /**
    * A table can use fixed a special faster form of table rendering that does not resize table cells based on content
    */
-  fixed: PropTypes.bool,
+  fixed: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Shorthand for a TableRow to be placed within Table.Footer. */
-  footerRow: customPropTypes.itemShorthand,
+  footerRow: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for a TableRow to be placed within Table.Header. */
-  headerRow: customPropTypes.itemShorthand,
+  headerRow: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A table's colors can be inverted. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A table may sometimes need to be more padded for legibility. */
-  padded: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['very'])]),
+  padded: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(['very'])]),
 
   /**
    * Mapped over `tableData` and should return shorthand for each Table.Row to be placed within Table.Body.
@@ -52759,40 +53280,40 @@ Table.propTypes =  false ? {
    * @param {number} index - The index of the current element in `tableData`.
    * @returns {*} Shorthand for a Table.Row.
    */
-  renderBodyRow: customPropTypes.every([customPropTypes.disallow(['children']), customPropTypes.demand(['tableData']), PropTypes.func]),
+  renderBodyRow: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].disallow(['children']), __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].demand(['tableData']), __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.func]),
 
   /** A table can have its rows appear selectable. */
-  selectable: PropTypes.bool,
+  selectable: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A table can specify that its cell contents should remain on a single line and not wrap. */
-  singleLine: PropTypes.bool,
+  singleLine: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A table can also be small or large. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'mini', 'tiny', 'medium', 'big', 'huge', 'massive')),
+  size: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].SIZES, 'mini', 'tiny', 'medium', 'big', 'huge', 'massive')),
 
   /** A table may allow a user to sort contents by clicking on a table header. */
-  sortable: PropTypes.bool,
+  sortable: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A table can specify how it stacks table content responsively. */
-  stackable: PropTypes.bool,
+  stackable: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A table can stripe alternate rows of content with a darker color to increase contrast. */
-  striped: PropTypes.bool,
+  striped: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A table can be formatted to display complex structured data. */
-  structured: PropTypes.bool,
+  structured: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Data to be passed to the renderBodyRow function. */
-  tableData: customPropTypes.every([customPropTypes.disallow(['children']), customPropTypes.demand(['renderBodyRow']), PropTypes.array]),
+  tableData: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].disallow(['children']), __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].demand(['renderBodyRow']), __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.array]),
 
   /** A table can adjust its text alignment. */
-  textAlign: PropTypes.oneOf(_without(SUI.TEXT_ALIGNMENTS, 'justified')),
+  textAlign: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].TEXT_ALIGNMENTS, 'justified')),
 
   /** A table can specify how it stacks table content responsively. */
-  unstackable: PropTypes.bool,
+  unstackable: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A table can adjust its text alignment. */
-  verticalAlign: PropTypes.oneOf(SUI.VERTICAL_ALIGNMENTS)
+  verticalAlign: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].VERTICAL_ALIGNMENTS)
 } : {};
 Table.Body = __WEBPACK_IMPORTED_MODULE_7__TableBody__["a" /* default */];
 Table.Cell = __WEBPACK_IMPORTED_MODULE_8__TableCell__["a" /* default */];
@@ -52801,6 +53322,7 @@ Table.Header = __WEBPACK_IMPORTED_MODULE_10__TableHeader__["a" /* default */];
 Table.HeaderCell = __WEBPACK_IMPORTED_MODULE_11__TableHeaderCell__["a" /* default */];
 Table.Row = __WEBPACK_IMPORTED_MODULE_12__TableRow__["a" /* default */];
 /* unused harmony default export */ var _unused_webpack_default_export = (Table);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -52808,7 +53330,7 @@ Table.Row = __WEBPACK_IMPORTED_MODULE_12__TableRow__["a" /* default */];
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -52827,8 +53349,8 @@ function TableBody(props) {
   var children = props.children,
       className = props.className;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(TableBody, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(TableBody, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(TableBody, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(TableBody, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), children);
@@ -52838,17 +53360,18 @@ TableBody.handledProps = ["as", "children", "className"];
 TableBody.defaultProps = {
   as: 'tbody'
 };
-TableBody.propTypes =  false ? {
+TableBody.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (TableBody);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -52856,7 +53379,7 @@ TableBody.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -52896,9 +53419,9 @@ function TableCell(props) {
       verticalAlign = props.verticalAlign,
       warning = props.warning,
       width = props.width;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(collapsing, 'collapsing'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(negative, 'negative'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(positive, 'positive'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(selectable, 'selectable'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(singleLine, 'single line'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(warning, 'warning'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["D" /* useVerticalAlignProp */])(verticalAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["E" /* useWidthProp */])(width, 'wide'), className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(TableCell, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(TableCell, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(collapsing, 'collapsing'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(negative, 'negative'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(positive, 'positive'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(selectable, 'selectable'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(singleLine, 'single line'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(warning, 'warning'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["D" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["F" /* useVerticalAlignProp */])(verticalAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["G" /* useWidthProp */])(width, 'wide'), className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(TableCell, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(TableCell, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -52915,57 +53438,57 @@ TableCell.handledProps = ["active", "as", "children", "className", "collapsing",
 TableCell.defaultProps = {
   as: 'td'
 };
-TableCell.propTypes =  false ? {
+TableCell.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** A cell can be active or selected by a user. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** A cell can be collapsing so that it only uses as much space as required. */
-  collapsing: PropTypes.bool,
+  collapsing: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A cell can be disabled. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A cell may call attention to an error or a negative value. */
-  error: PropTypes.bool,
+  error: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Add an Icon by name, props object, or pass an <Icon /> */
-  icon: customPropTypes.itemShorthand,
+  icon: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A cell may let a user know whether a value is bad. */
-  negative: PropTypes.bool,
+  negative: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A cell may let a user know whether a value is good. */
-  positive: PropTypes.bool,
+  positive: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A cell can be selectable. */
-  selectable: PropTypes.bool,
+  selectable: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A cell can specify that its contents should remain on a single line and not wrap. */
-  singleLine: PropTypes.bool,
+  singleLine: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A table cell can adjust its text alignment. */
-  textAlign: PropTypes.oneOf(_without(SUI.TEXT_ALIGNMENTS, 'justified')),
+  textAlign: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].TEXT_ALIGNMENTS, 'justified')),
 
   /** A table cell can adjust its text alignment. */
-  verticalAlign: PropTypes.oneOf(SUI.VERTICAL_ALIGNMENTS),
+  verticalAlign: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].VERTICAL_ALIGNMENTS),
 
   /** A cell may warn a user. */
-  warning: PropTypes.bool,
+  warning: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A table can specify the width of individual columns independently. */
-  width: PropTypes.oneOf(SUI.WIDTHS)
+  width: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].WIDTHS)
 } : {};
 TableCell.create = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["l" /* createShorthandFactory */])(TableCell, function (content) {
   return {
@@ -52973,6 +53496,7 @@ TableCell.create = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["l" /* createShorth
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (TableCell);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -52980,7 +53504,7 @@ TableCell.create = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["l" /* createShorth
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react__);
@@ -52996,21 +53520,22 @@ TableCell.create = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["l" /* createShorth
 
 function TableFooter(props) {
   var as = props.as;
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getUnhandledProps */])(TableFooter, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["r" /* getUnhandledProps */])(TableFooter, props);
   return __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__TableHeader__["a" /* default */], __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     as: as
   }));
 }
 
 TableFooter.handledProps = ["as"];
-TableFooter.propTypes =  false ? {
+TableFooter.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as
+  as: __WEBPACK_IMPORTED_MODULE_2__lib__["m" /* customPropTypes */].as
 } : {};
 TableFooter.defaultProps = {
   as: 'tfoot'
 };
 /* harmony default export */ __webpack_exports__["a"] = (TableFooter);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -53018,7 +53543,7 @@ TableFooter.defaultProps = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -53041,9 +53566,9 @@ function TableHeader(props) {
       className = props.className,
       content = props.content,
       fullWidth = props.fullWidth;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(fullWidth, 'full-width'), className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(TableHeader, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(TableHeader, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(fullWidth, 'full-width'), className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(TableHeader, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(TableHeader, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
@@ -53053,23 +53578,24 @@ TableHeader.handledProps = ["as", "children", "className", "content", "fullWidth
 TableHeader.defaultProps = {
   as: 'thead'
 };
-TableHeader.propTypes =  false ? {
+TableHeader.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A definition table can have a full width header or footer, filling in the gap left by the first column. */
-  fullWidth: PropTypes.bool
+  fullWidth: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (TableHeader);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -53077,7 +53603,7 @@ TableHeader.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -53101,8 +53627,8 @@ function TableHeaderCell(props) {
   var as = props.as,
       className = props.className,
       sorted = props.sorted;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["C" /* useValueAndKey */])(sorted, 'sorted'), className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(TableHeaderCell, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["E" /* useValueAndKey */])(sorted, 'sorted'), className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(TableHeaderCell, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__TableCell__["a" /* default */], __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     as: as,
     className: classes
@@ -53110,20 +53636,21 @@ function TableHeaderCell(props) {
 }
 
 TableHeaderCell.handledProps = ["as", "className", "sorted"];
-TableHeaderCell.propTypes =  false ? {
+TableHeaderCell.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** A header cell can be sorted in ascending or descending order. */
-  sorted: PropTypes.oneOf(['ascending', 'descending'])
+  sorted: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(['ascending', 'descending'])
 } : {};
 TableHeaderCell.defaultProps = {
   as: 'th'
 };
 /* harmony default export */ __webpack_exports__["a"] = (TableHeaderCell);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -53131,7 +53658,7 @@ TableHeaderCell.defaultProps = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -53170,9 +53697,9 @@ function TableRow(props) {
       textAlign = props.textAlign,
       verticalAlign = props.verticalAlign,
       warning = props.warning;
-  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(negative, 'negative'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(positive, 'positive'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(warning, 'warning'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["B" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["D" /* useVerticalAlignProp */])(verticalAlign), className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getUnhandledProps */])(TableRow, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["p" /* getElementType */])(TableRow, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(negative, 'negative'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(positive, 'positive'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(warning, 'warning'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["D" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["F" /* useVerticalAlignProp */])(verticalAlign), className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["r" /* getUnhandledProps */])(TableRow, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getElementType */])(TableRow, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_6__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_5_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -53196,45 +53723,45 @@ TableRow.defaultProps = {
   as: 'tr',
   cellAs: 'td'
 };
-TableRow.propTypes =  false ? {
+TableRow.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].as,
 
   /** A row can be active or selected by a user. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** An element type to render as (string or function). */
-  cellAs: customPropTypes.as,
+  cellAs: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].as,
 
   /** Shorthand array of props for TableCell. */
-  cells: customPropTypes.collectionShorthand,
+  cells: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].collectionShorthand,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.string,
 
   /** A row can be disabled. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A row may call attention to an error or a negative value. */
-  error: PropTypes.bool,
+  error: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A row may let a user know whether a value is bad. */
-  negative: PropTypes.bool,
+  negative: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A row may let a user know whether a value is good. */
-  positive: PropTypes.bool,
+  positive: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A table row can adjust its text alignment. */
-  textAlign: PropTypes.oneOf(_without(SUI.TEXT_ALIGNMENTS, 'justified')),
+  textAlign: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].TEXT_ALIGNMENTS, 'justified')),
 
   /** A table row can adjust its vertical alignment. */
-  verticalAlign: PropTypes.oneOf(SUI.VERTICAL_ALIGNMENTS),
+  verticalAlign: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].VERTICAL_ALIGNMENTS),
 
   /** A row may warn a user. */
-  warning: PropTypes.bool
+  warning: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool
 } : {};
 TableRow.create = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["l" /* createShorthandFactory */])(TableRow, function (cells) {
   return {
@@ -53242,6 +53769,7 @@ TableRow.create = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["l" /* createShortha
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (TableRow);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -53260,7 +53788,7 @@ TableRow.create = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["l" /* createShortha
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/toConsumableArray.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/toConsumableArray.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__);
@@ -53416,11 +53944,11 @@ function (_Component) {
           role = _this$props4.role,
           size = _this$props4.size,
           toggle = _this$props4.toggle;
-      var baseClasses = __WEBPACK_IMPORTED_MODULE_11_classnames___default()(color, size, Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(circular, 'circular'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(this.hasIconClass(), 'icon'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(negative, 'negative'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(positive, 'positive'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(primary, 'primary'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(secondary, 'secondary'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(toggle, 'toggle'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["z" /* useKeyOrValueAndKey */])(animated, 'animated'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["z" /* useKeyOrValueAndKey */])(attached, 'attached'));
-      var labeledClasses = __WEBPACK_IMPORTED_MODULE_11_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_14__lib__["z" /* useKeyOrValueAndKey */])(labelPosition || !!label, 'labeled'));
-      var wrapperClasses = __WEBPACK_IMPORTED_MODULE_11_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["C" /* useValueAndKey */])(floated, 'floated'));
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["q" /* getUnhandledProps */])(Button, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["p" /* getElementType */])(Button, this.props, this.computeElementType);
+      var baseClasses = __WEBPACK_IMPORTED_MODULE_11_classnames___default()(color, size, Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(circular, 'circular'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(this.hasIconClass(), 'icon'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(negative, 'negative'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(positive, 'positive'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(primary, 'primary'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(secondary, 'secondary'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(toggle, 'toggle'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["B" /* useKeyOrValueAndKey */])(animated, 'animated'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["B" /* useKeyOrValueAndKey */])(attached, 'attached'));
+      var labeledClasses = __WEBPACK_IMPORTED_MODULE_11_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_14__lib__["B" /* useKeyOrValueAndKey */])(labelPosition || !!label, 'labeled'));
+      var wrapperClasses = __WEBPACK_IMPORTED_MODULE_11_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["E" /* useValueAndKey */])(floated, 'floated'));
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["r" /* getUnhandledProps */])(Button, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["q" /* getElementType */])(Button, this.props, this.computeElementType);
       var tabIndex = this.computeTabIndex(ElementType);
 
       if (!__WEBPACK_IMPORTED_MODULE_10_lodash_isNil___default()(label)) {
@@ -53477,96 +54005,96 @@ __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Bu
 
 __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Button, "handledProps", ["active", "animated", "as", "attached", "basic", "children", "circular", "className", "color", "compact", "content", "disabled", "floated", "fluid", "icon", "inverted", "label", "labelPosition", "loading", "negative", "onClick", "positive", "primary", "role", "secondary", "size", "tabIndex", "toggle"]);
 
-Button.propTypes =  false ? {
+Button.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].as,
 
   /** A button can show it is currently the active user selection. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** A button can animate to show hidden content. */
-  animated: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['fade', 'vertical'])]),
+  animated: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(['fade', 'vertical'])]),
 
   /** A button can be attached to other content. */
-  attached: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['left', 'right', 'top', 'bottom'])]),
+  attached: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(['left', 'right', 'top', 'bottom'])]),
 
   /** A basic button is less pronounced. */
-  basic: PropTypes.bool,
+  basic: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: customPropTypes.every([PropTypes.node, customPropTypes.disallow(['label']), customPropTypes.givenProps({
-    icon: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.object.isRequired, PropTypes.element.isRequired])
-  }, customPropTypes.disallow(['icon']))]),
+  children: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.node, __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].disallow(['label']), __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].givenProps({
+    icon: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string.isRequired, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.object.isRequired, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.element.isRequired])
+  }, __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].disallow(['icon']))]),
 
   /** A button can be circular. */
-  circular: PropTypes.bool,
+  circular: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string,
 
   /** A button can have different colors */
-  color: PropTypes.oneOf(_toConsumableArray(SUI.COLORS).concat(['facebook', 'google plus', 'instagram', 'linkedin', 'twitter', 'vk', 'youtube'])),
+  color: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray___default()(__WEBPACK_IMPORTED_MODULE_14__lib__["b" /* SUI */].COLORS).concat(['facebook', 'google plus', 'instagram', 'linkedin', 'twitter', 'vk', 'youtube'])),
 
   /** A button can reduce its padding to fit into tighter spaces. */
-  compact: PropTypes.bool,
+  compact: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A button can show it is currently unable to be interacted with. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** A button can be aligned to the left or right of its container. */
-  floated: PropTypes.oneOf(SUI.FLOATS),
+  floated: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_14__lib__["b" /* SUI */].FLOATS),
 
   /** A button can take the width of its container. */
-  fluid: PropTypes.bool,
+  fluid: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** Add an Icon by name, props object, or pass an <Icon />. */
-  icon: customPropTypes.some([PropTypes.bool, PropTypes.string, PropTypes.object, PropTypes.element]),
+  icon: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].some([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.object, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.element]),
 
   /** A button can be formatted to appear on dark backgrounds. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** Add a Label by text, props object, or pass a <Label />. */
-  label: customPropTypes.some([PropTypes.string, PropTypes.object, PropTypes.element]),
+  label: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].some([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.object, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.element]),
 
   /** A labeled button can format a Label or Icon to appear on the left or right. */
-  labelPosition: PropTypes.oneOf(['right', 'left']),
+  labelPosition: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(['right', 'left']),
 
   /** A button can show a loading indicator. */
-  loading: PropTypes.bool,
+  loading: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** A button can hint towards a negative consequence. */
-  negative: PropTypes.bool,
+  negative: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /**
    * Called after user's click.
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.func,
 
   /** A button can hint towards a positive consequence. */
-  positive: PropTypes.bool,
+  positive: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** A button can be formatted to show different levels of emphasis. */
-  primary: PropTypes.bool,
+  primary: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** The role of the HTML element. */
-  role: PropTypes.string,
+  role: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string,
 
   /** A button can be formatted to show different levels of emphasis. */
-  secondary: PropTypes.bool,
+  secondary: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** A button can have different sizes. */
-  size: PropTypes.oneOf(SUI.SIZES),
+  size: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_14__lib__["b" /* SUI */].SIZES),
 
   /** A button can receive focus. */
-  tabIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  tabIndex: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string]),
 
   /** A button can be formatted to toggle on and off. */
-  toggle: PropTypes.bool
+  toggle: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool
 } : {};
 Button.create = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["l" /* createShorthandFactory */])(Button, function (value) {
   return {
@@ -53574,6 +54102,7 @@ Button.create = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["l" /* createShorthan
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (Button);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -53581,7 +54110,7 @@ Button.create = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["l" /* createShorthan
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -53605,35 +54134,36 @@ function ButtonContent(props) {
       content = props.content,
       hidden = props.hidden,
       visible = props.visible;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(visible, 'visible'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(hidden, 'hidden'), 'content', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ButtonContent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ButtonContent, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(visible, 'visible'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(hidden, 'hidden'), 'content', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ButtonContent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ButtonContent, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 ButtonContent.handledProps = ["as", "children", "className", "content", "hidden", "visible"];
-ButtonContent.propTypes =  false ? {
+ButtonContent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Initially hidden, visible on hover. */
-  hidden: PropTypes.bool,
+  hidden: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Initially visible, hidden on hover. */
-  visible: PropTypes.bool
+  visible: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (ButtonContent);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -53641,7 +54171,7 @@ ButtonContent.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_map__ = __webpack_require__("./node_modules/lodash/map.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_map__);
@@ -53689,9 +54219,9 @@ function ButtonGroup(props) {
       toggle = props.toggle,
       vertical = props.vertical,
       widths = props.widths;
-  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(icon, 'icon'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(labeled, 'labeled'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(negative, 'negative'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(positive, 'positive'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(primary, 'primary'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(secondary, 'secondary'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(toggle, 'toggle'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(vertical, 'vertical'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["z" /* useKeyOrValueAndKey */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["C" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["E" /* useWidthProp */])(widths), 'buttons', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getUnhandledProps */])(ButtonGroup, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["p" /* getElementType */])(ButtonGroup, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(icon, 'icon'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(labeled, 'labeled'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(negative, 'negative'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(positive, 'positive'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(primary, 'primary'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(secondary, 'secondary'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(toggle, 'toggle'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(vertical, 'vertical'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["B" /* useKeyOrValueAndKey */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["E" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["G" /* useWidthProp */])(widths), 'buttons', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["r" /* getUnhandledProps */])(ButtonGroup, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getElementType */])(ButtonGroup, props);
 
   if (__WEBPACK_IMPORTED_MODULE_2_lodash_isNil___default()(buttons)) {
     return __WEBPACK_IMPORTED_MODULE_5_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -53707,74 +54237,75 @@ function ButtonGroup(props) {
 }
 
 ButtonGroup.handledProps = ["as", "attached", "basic", "buttons", "children", "className", "color", "compact", "content", "floated", "fluid", "icon", "inverted", "labeled", "negative", "positive", "primary", "secondary", "size", "toggle", "vertical", "widths"];
-ButtonGroup.propTypes =  false ? {
+ButtonGroup.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].as,
 
   /** Groups can be attached to other content. */
-  attached: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['left', 'right', 'top', 'bottom'])]),
+  attached: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(['left', 'right', 'top', 'bottom'])]),
 
   /** Groups can be less pronounced. */
-  basic: PropTypes.bool,
+  basic: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Array of shorthand Button values. */
-  buttons: customPropTypes.collectionShorthand,
+  buttons: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].collectionShorthand,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.string,
 
   /** Groups can have a shared color. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].COLORS),
 
   /** Groups can reduce their padding to fit into tighter spaces. */
-  compact: PropTypes.bool,
+  compact: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Groups can be aligned to the left or right of its container. */
-  floated: PropTypes.oneOf(SUI.FLOATS),
+  floated: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].FLOATS),
 
   /** Groups can take the width of their container. */
-  fluid: PropTypes.bool,
+  fluid: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Groups can be formatted as icons. */
-  icon: PropTypes.bool,
+  icon: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Groups can be formatted to appear on dark backgrounds. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Groups can be formatted as labeled icon buttons. */
-  labeled: PropTypes.bool,
+  labeled: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Groups can hint towards a negative consequence. */
-  negative: PropTypes.bool,
+  negative: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Groups can hint towards a positive consequence. */
-  positive: PropTypes.bool,
+  positive: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Groups can be formatted to show different levels of emphasis. */
-  primary: PropTypes.bool,
+  primary: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Groups can be formatted to show different levels of emphasis. */
-  secondary: PropTypes.bool,
+  secondary: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Groups can have different sizes. */
-  size: PropTypes.oneOf(SUI.SIZES),
+  size: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].SIZES),
 
   /** Groups can be formatted to toggle on and off. */
-  toggle: PropTypes.bool,
+  toggle: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Groups can be formatted to appear vertically. */
-  vertical: PropTypes.bool,
+  vertical: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Groups can have their widths divided evenly. */
-  widths: PropTypes.oneOf(SUI.WIDTHS)
+  widths: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].WIDTHS)
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (ButtonGroup);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -53782,7 +54313,7 @@ ButtonGroup.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -53804,8 +54335,8 @@ function ButtonOr(props) {
   var className = props.className,
       text = props.text;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('or', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ButtonOr, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ButtonOr, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ButtonOr, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ButtonOr, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes,
     "data-text": text
@@ -53813,17 +54344,18 @@ function ButtonOr(props) {
 }
 
 ButtonOr.handledProps = ["as", "className", "text"];
-ButtonOr.propTypes =  false ? {
+ButtonOr.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Or buttons can have their text localized, or adjusted by using the text prop. */
-  text: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
+  text: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string])
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (ButtonOr);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -53842,7 +54374,7 @@ ButtonOr.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -53867,38 +54399,39 @@ function Container(props) {
       fluid = props.fluid,
       text = props.text,
       textAlign = props.textAlign;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(text, 'text'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["B" /* useTextAlignProp */])(textAlign), 'container', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(Container, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(Container, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(text, 'text'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["D" /* useTextAlignProp */])(textAlign), 'container', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(Container, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(Container, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 Container.handledProps = ["as", "children", "className", "content", "fluid", "text", "textAlign"];
-Container.propTypes =  false ? {
+Container.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Container has no maximum width. */
-  fluid: PropTypes.bool,
+  fluid: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Reduce maximum width to more naturally accommodate text. */
-  text: PropTypes.bool,
+  text: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Align container text. */
-  textAlign: PropTypes.oneOf(SUI.TEXT_ALIGNMENTS)
+  textAlign: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].TEXT_ALIGNMENTS)
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (Container);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -53917,7 +54450,7 @@ Container.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -53946,50 +54479,51 @@ function Divider(props) {
       inverted = props.inverted,
       section = props.section,
       vertical = props.vertical;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(clearing, 'clearing'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(fitted, 'fitted'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(hidden, 'hidden'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(horizontal, 'horizontal'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(section, 'section'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(vertical, 'vertical'), 'divider', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(Divider, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(Divider, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(clearing, 'clearing'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(fitted, 'fitted'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(hidden, 'hidden'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(horizontal, 'horizontal'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(section, 'section'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(vertical, 'vertical'), 'divider', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(Divider, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(Divider, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 Divider.handledProps = ["as", "children", "className", "clearing", "content", "fitted", "hidden", "horizontal", "inverted", "section", "vertical"];
-Divider.propTypes =  false ? {
+Divider.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Divider can clear the content above it. */
-  clearing: PropTypes.bool,
+  clearing: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Divider can be fitted without any space above or below it. */
-  fitted: PropTypes.bool,
+  fitted: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Divider can divide content without creating a dividing line. */
-  hidden: PropTypes.bool,
+  hidden: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Divider can segment content horizontally. */
-  horizontal: PropTypes.bool,
+  horizontal: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Divider can have its colours inverted. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Divider can provide greater margins to divide sections of content. */
-  section: PropTypes.bool,
+  section: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Divider can segment content vertically. */
-  vertical: PropTypes.bool
+  vertical: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool
 } : {};
 /* unused harmony default export */ var _unused_webpack_default_export = (Divider);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -54008,7 +54542,7 @@ Divider.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export names */
+/* WEBPACK VAR INJECTION */(function(process) {/* unused harmony export names */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -54064,8 +54598,8 @@ function (_PureComponent) {
           className = _this$props.className,
           name = _this$props.name;
       var classes = __WEBPACK_IMPORTED_MODULE_7_classnames___default()(name, 'flag', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["q" /* getUnhandledProps */])(Flag, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["p" /* getElementType */])(Flag, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["r" /* getUnhandledProps */])(Flag, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["q" /* getElementType */])(Flag, this.props);
       return __WEBPACK_IMPORTED_MODULE_9_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         className: classes
       }));
@@ -54081,15 +54615,15 @@ __WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_defineProperty___default()(Fl
 
 __WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_defineProperty___default()(Flag, "handledProps", ["as", "className", "name"]);
 
-Flag.propTypes =  false ? {
+Flag.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_10__lib__["m" /* customPropTypes */].as,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.string,
 
   /** Flag name, can use the two digit country code, the full name, or a common alias. */
-  name: customPropTypes.suggest(names)
+  name: __WEBPACK_IMPORTED_MODULE_10__lib__["m" /* customPropTypes */].suggest(names)
 } : {};
 Flag.create = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["l" /* createShorthandFactory */])(Flag, function (value) {
   return {
@@ -54097,6 +54631,7 @@ Flag.create = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["l" /* createShorthandF
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (Flag);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -54115,7 +54650,7 @@ Flag.create = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["l" /* createShorthandF
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -54161,9 +54696,9 @@ function Header(props) {
       sub = props.sub,
       subheader = props.subheader,
       textAlign = props.textAlign;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(block, 'block'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(dividing, 'dividing'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["C" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(icon === true, 'icon'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(image === true, 'image'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(sub, 'sub'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["z" /* useKeyOrValueAndKey */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useTextAlignProp */])(textAlign), 'header', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(Header, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(Header, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(block, 'block'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(dividing, 'dividing'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["E" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(icon === true, 'icon'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(image === true, 'image'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(sub, 'sub'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useKeyOrValueAndKey */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["D" /* useTextAlignProp */])(textAlign), 'header', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(Header, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(Header, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -54193,61 +54728,62 @@ function Header(props) {
 }
 
 Header.handledProps = ["as", "attached", "block", "children", "className", "color", "content", "disabled", "dividing", "floated", "icon", "image", "inverted", "size", "sub", "subheader", "textAlign"];
-Header.propTypes =  false ? {
+Header.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** Attach header  to other content, like a segment. */
-  attached: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['top', 'bottom'])]),
+  attached: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(['top', 'bottom'])]),
 
   /** Format header to appear inside a content block. */
-  block: PropTypes.bool,
+  block: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** Color of the header. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].COLORS),
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Show that the header is inactive. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Divide header from the content below it. */
-  dividing: PropTypes.bool,
+  dividing: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Header can sit to the left or right of other content. */
-  floated: PropTypes.oneOf(SUI.FLOATS),
+  floated: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].FLOATS),
 
   /** Add an icon by icon name or pass an Icon. */
-  icon: customPropTypes.every([customPropTypes.disallow(['image']), PropTypes.oneOfType([PropTypes.bool, customPropTypes.itemShorthand])]),
+  icon: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].disallow(['image']), __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].itemShorthand])]),
 
   /** Add an image by img src or pass an Image. */
-  image: customPropTypes.every([customPropTypes.disallow(['icon']), PropTypes.oneOfType([PropTypes.bool, customPropTypes.itemShorthand])]),
+  image: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].disallow(['icon']), __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].itemShorthand])]),
 
   /** Inverts the color of the header for dark backgrounds. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Content headings are sized with em and are based on the font-size of their container. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'big', 'massive', 'mini')),
+  size: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].SIZES, 'big', 'massive', 'mini')),
 
   /** Headers may be formatted to label smaller or de-emphasized content. */
-  sub: PropTypes.bool,
+  sub: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Shorthand for Header.Subheader. */
-  subheader: customPropTypes.itemShorthand,
+  subheader: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Align header content. */
-  textAlign: PropTypes.oneOf(SUI.TEXT_ALIGNMENTS)
+  textAlign: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].TEXT_ALIGNMENTS)
 } : {};
 Header.Content = __WEBPACK_IMPORTED_MODULE_9__HeaderContent__["a" /* default */];
 Header.Subheader = __WEBPACK_IMPORTED_MODULE_8__HeaderSubheader__["a" /* default */];
 /* harmony default export */ __webpack_exports__["a"] = (Header);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -54255,7 +54791,7 @@ Header.Subheader = __WEBPACK_IMPORTED_MODULE_8__HeaderSubheader__["a" /* default
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -54278,28 +54814,29 @@ function HeaderContent(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('content', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(HeaderContent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(HeaderContent, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(HeaderContent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(HeaderContent, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 HeaderContent.handledProps = ["as", "children", "className", "content"];
-HeaderContent.propTypes =  false ? {
+HeaderContent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (HeaderContent);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -54307,7 +54844,7 @@ HeaderContent.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -54330,26 +54867,26 @@ function HeaderSubheader(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('sub header', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(HeaderSubheader, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(HeaderSubheader, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(HeaderSubheader, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(HeaderSubheader, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 HeaderSubheader.handledProps = ["as", "children", "className", "content"];
-HeaderSubheader.propTypes =  false ? {
+HeaderSubheader.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 HeaderSubheader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(HeaderSubheader, function (content) {
   return {
@@ -54357,6 +54894,7 @@ HeaderSubheader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* create
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (HeaderSubheader);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -54375,7 +54913,7 @@ HeaderSubheader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* create
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__);
@@ -54469,9 +55007,9 @@ function (_PureComponent) {
           name = _this$props2.name,
           rotated = _this$props2.rotated,
           size = _this$props2.size;
-      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()(color, name, size, Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(bordered, 'bordered'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(circular, 'circular'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(corner, 'corner'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(fitted, 'fitted'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(link, 'link'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["C" /* useValueAndKey */])(flipped, 'flipped'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["C" /* useValueAndKey */])(rotated, 'rotated'), 'icon', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getUnhandledProps */])(Icon, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["p" /* getElementType */])(Icon, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()(color, name, size, Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(bordered, 'bordered'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(circular, 'circular'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(corner, 'corner'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(fitted, 'fitted'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(link, 'link'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["E" /* useValueAndKey */])(flipped, 'flipped'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["E" /* useValueAndKey */])(rotated, 'rotated'), 'icon', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["r" /* getUnhandledProps */])(Icon, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getElementType */])(Icon, this.props);
       var ariaOptions = this.getIconAriaOptions();
       return __WEBPACK_IMPORTED_MODULE_11_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, ariaOptions, {
         className: classes
@@ -54490,57 +55028,57 @@ __WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_defineProperty___default()(Ic
 
 __WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_defineProperty___default()(Icon, "handledProps", ["aria-hidden", "aria-label", "as", "bordered", "circular", "className", "color", "corner", "disabled", "fitted", "flipped", "inverted", "link", "loading", "name", "rotated", "size"]);
 
-Icon.propTypes =  false ? {
+Icon.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].as,
 
   /** Formatted to appear bordered. */
-  bordered: PropTypes.bool,
+  bordered: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Icon can formatted to appear circular. */
-  circular: PropTypes.bool,
+  circular: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string,
 
   /** Color of the icon. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_12__lib__["b" /* SUI */].COLORS),
 
   /** Icons can display a smaller corner icon. */
-  corner: PropTypes.bool,
+  corner: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Show that the icon is inactive. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Fitted, without space to left or right of Icon. */
-  fitted: PropTypes.bool,
+  fitted: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Icon can flipped. */
-  flipped: PropTypes.oneOf(['horizontally', 'vertically']),
+  flipped: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.oneOf(['horizontally', 'vertically']),
 
   /** Formatted to have its colors inverted for contrast. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Icon can be formatted as a link. */
-  link: PropTypes.bool,
+  link: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Icon can be used as a simple loader. */
-  loading: PropTypes.bool,
+  loading: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Name of the icon. */
-  name: customPropTypes.suggest(SUI.ALL_ICONS_IN_ALL_CONTEXTS),
+  name: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].suggest(__WEBPACK_IMPORTED_MODULE_12__lib__["b" /* SUI */].ALL_ICONS_IN_ALL_CONTEXTS),
 
   /** Icon can rotated. */
-  rotated: PropTypes.oneOf(['clockwise', 'counterclockwise']),
+  rotated: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.oneOf(['clockwise', 'counterclockwise']),
 
   /** Size of the icon. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium')),
+  size: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_8_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_12__lib__["b" /* SUI */].SIZES, 'medium')),
 
   /** Icon can have an aria label. */
-  'aria-hidden': PropTypes.string,
+  'aria-hidden': __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string,
 
   /** Icon can have an aria label. */
-  'aria-label': PropTypes.string
+  'aria-label': __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string
 } : {};
 Icon.create = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["l" /* createShorthandFactory */])(Icon, function (value) {
   return {
@@ -54548,6 +55086,7 @@ Icon.create = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["l" /* createShorthandF
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (Icon);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -54555,7 +55094,7 @@ Icon.create = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["l" /* createShorthandF
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -54582,34 +55121,35 @@ function IconGroup(props) {
       content = props.content,
       size = props.size;
   var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(size, 'icons', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(IconGroup, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(IconGroup, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(IconGroup, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(IconGroup, props);
   return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 IconGroup.handledProps = ["as", "children", "className", "content", "size"];
-IconGroup.propTypes =  false ? {
+IconGroup.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Size of the icon group. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium'))
+  size: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].SIZES, 'medium'))
 } : {};
 IconGroup.defaultProps = {
   as: 'i'
 };
 /* harmony default export */ __webpack_exports__["a"] = (IconGroup);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -54628,7 +55168,7 @@ IconGroup.defaultProps = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_slicedToArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/slicedToArray.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_slicedToArray___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_slicedToArray__);
@@ -54682,17 +55222,17 @@ function Image(props) {
       verticalAlign = props.verticalAlign,
       wrapped = props.wrapped,
       ui = props.ui;
-  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(ui, 'ui'), size, Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(avatar, 'avatar'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(bordered, 'bordered'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(circular, 'circular'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(centered, 'centered'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(hidden, 'hidden'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(inline, 'inline'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(rounded, 'rounded'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["z" /* useKeyOrValueAndKey */])(spaced, 'spaced'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["C" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["D" /* useVerticalAlignProp */])(verticalAlign, 'aligned'), 'image', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getUnhandledProps */])(Image, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(ui, 'ui'), size, Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(avatar, 'avatar'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(bordered, 'bordered'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(circular, 'circular'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(centered, 'centered'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(hidden, 'hidden'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(inline, 'inline'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(rounded, 'rounded'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["B" /* useKeyOrValueAndKey */])(spaced, 'spaced'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["E" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["F" /* useVerticalAlignProp */])(verticalAlign, 'aligned'), 'image', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["r" /* getUnhandledProps */])(Image, props);
 
-  var _partitionHTMLProps = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["w" /* partitionHTMLProps */])(rest, {
+  var _partitionHTMLProps = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* partitionHTMLProps */])(rest, {
     htmlProps: imageProps
   }),
       _partitionHTMLProps2 = __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_slicedToArray___default()(_partitionHTMLProps, 2),
       imgTagProps = _partitionHTMLProps2[0],
       rootProps = _partitionHTMLProps2[1];
 
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["p" /* getElementType */])(Image, props, function () {
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getElementType */])(Image, props, function () {
     if (!__WEBPACK_IMPORTED_MODULE_2_lodash_isNil___default()(dimmer) || !__WEBPACK_IMPORTED_MODULE_2_lodash_isNil___default()(label) || !__WEBPACK_IMPORTED_MODULE_2_lodash_isNil___default()(wrapped) || !__WEBPACK_IMPORTED_MODULE_6__lib__["c" /* childrenUtils */].isNil(children)) {
       return 'div';
     }
@@ -54728,72 +55268,72 @@ function Image(props) {
 
 Image.handledProps = ["as", "avatar", "bordered", "centered", "children", "circular", "className", "content", "dimmer", "disabled", "floated", "fluid", "hidden", "href", "inline", "label", "rounded", "size", "spaced", "ui", "verticalAlign", "wrapped"];
 Image.Group = __WEBPACK_IMPORTED_MODULE_9__ImageGroup__["a" /* default */];
-Image.propTypes =  false ? {
+Image.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].as,
 
   /** An image may be formatted to appear inline with text as an avatar. */
-  avatar: PropTypes.bool,
+  avatar: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** An image may include a border to emphasize the edges of white or transparent content. */
-  bordered: PropTypes.bool,
+  bordered: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** An image can appear centered in a content block. */
-  centered: PropTypes.bool,
+  centered: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.node,
 
   /** An image may appear circular. */
-  circular: PropTypes.bool,
+  circular: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** An image can show that it is disabled and cannot be selected. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Shorthand for Dimmer. */
-  dimmer: customPropTypes.itemShorthand,
+  dimmer: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** An image can sit to the left or right of other content. */
-  floated: PropTypes.oneOf(SUI.FLOATS),
+  floated: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].FLOATS),
 
   /** An image can take up the width of its container. */
-  fluid: customPropTypes.every([PropTypes.bool, customPropTypes.disallow(['size'])]),
+  fluid: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].disallow(['size'])]),
 
   /** An image can be hidden. */
-  hidden: PropTypes.bool,
+  hidden: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Renders the Image as an <a> tag with this href. */
-  href: PropTypes.string,
+  href: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.string,
 
   /** An image may appear inline. */
-  inline: PropTypes.bool,
+  inline: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Shorthand for Label. */
-  label: customPropTypes.itemShorthand,
+  label: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** An image may appear rounded. */
-  rounded: PropTypes.bool,
+  rounded: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** An image may appear at different sizes. */
-  size: PropTypes.oneOf(SUI.SIZES),
+  size: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].SIZES),
 
   /** An image can specify that it needs an additional spacing to separate it from nearby content. */
-  spaced: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['left', 'right'])]),
+  spaced: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(['left', 'right'])]),
 
   /** Whether or not to add the ui className. */
-  ui: PropTypes.bool,
+  ui: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** An image can specify its vertical alignment. */
-  verticalAlign: PropTypes.oneOf(SUI.VERTICAL_ALIGNMENTS),
+  verticalAlign: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].VERTICAL_ALIGNMENTS),
 
   /** An image can render wrapped in a `div.ui.image` as alternative HTML markup. */
-  wrapped: PropTypes.bool
+  wrapped: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool
 } : {};
 Image.defaultProps = {
   as: 'img',
@@ -54805,6 +55345,7 @@ Image.create = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["l" /* createShorthandF
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (Image);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -54812,7 +55353,7 @@ Image.create = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["l" /* createShorthandF
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -54836,31 +55377,32 @@ function ImageGroup(props) {
       content = props.content,
       size = props.size;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', size, className, 'images');
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ImageGroup, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ImageGroup, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ImageGroup, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ImageGroup, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 ImageGroup.handledProps = ["as", "children", "className", "content", "size"];
-ImageGroup.propTypes =  false ? {
+ImageGroup.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A group of images can be formatted to have the same size. */
-  size: PropTypes.oneOf(SUI.SIZES)
+  size: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].SIZES)
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (ImageGroup);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -54879,7 +55421,7 @@ ImageGroup.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_slicedToArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/slicedToArray.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_slicedToArray___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_slicedToArray__);
@@ -55020,9 +55562,9 @@ function (_Component) {
 
       var tabIndex = _this.computeTabIndex();
 
-      var unhandled = Object(__WEBPACK_IMPORTED_MODULE_18__lib__["q" /* getUnhandledProps */])(Input, _this.props);
+      var unhandled = Object(__WEBPACK_IMPORTED_MODULE_18__lib__["r" /* getUnhandledProps */])(Input, _this.props);
 
-      var _partitionHTMLProps = Object(__WEBPACK_IMPORTED_MODULE_18__lib__["w" /* partitionHTMLProps */])(unhandled),
+      var _partitionHTMLProps = Object(__WEBPACK_IMPORTED_MODULE_18__lib__["y" /* partitionHTMLProps */])(unhandled),
           _partitionHTMLProps2 = __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_slicedToArray___default()(_partitionHTMLProps, 2),
           htmlInputProps = _partitionHTMLProps2[0],
           rest = _partitionHTMLProps2[1];
@@ -55063,8 +55605,8 @@ function (_Component) {
           size = _this$props4.size,
           transparent = _this$props4.transparent,
           type = _this$props4.type;
-      var classes = __WEBPACK_IMPORTED_MODULE_15_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_18__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["y" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["y" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["y" /* useKeyOnly */])(focus, 'focus'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["y" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["y" /* useKeyOnly */])(transparent, 'transparent'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["C" /* useValueAndKey */])(actionPosition, 'action') || Object(__WEBPACK_IMPORTED_MODULE_18__lib__["y" /* useKeyOnly */])(action, 'action'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["C" /* useValueAndKey */])(iconPosition, 'icon') || Object(__WEBPACK_IMPORTED_MODULE_18__lib__["y" /* useKeyOnly */])(icon || loading, 'icon'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["C" /* useValueAndKey */])(labelPosition, 'labeled') || Object(__WEBPACK_IMPORTED_MODULE_18__lib__["y" /* useKeyOnly */])(label, 'labeled'), 'input', className);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_18__lib__["p" /* getElementType */])(Input, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_15_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_18__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["A" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["A" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["A" /* useKeyOnly */])(focus, 'focus'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["A" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["A" /* useKeyOnly */])(transparent, 'transparent'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["E" /* useValueAndKey */])(actionPosition, 'action') || Object(__WEBPACK_IMPORTED_MODULE_18__lib__["A" /* useKeyOnly */])(action, 'action'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["E" /* useValueAndKey */])(iconPosition, 'icon') || Object(__WEBPACK_IMPORTED_MODULE_18__lib__["A" /* useKeyOnly */])(icon || loading, 'icon'), Object(__WEBPACK_IMPORTED_MODULE_18__lib__["E" /* useValueAndKey */])(labelPosition, 'labeled') || Object(__WEBPACK_IMPORTED_MODULE_18__lib__["A" /* useKeyOnly */])(label, 'labeled'), 'input', className);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_18__lib__["q" /* getElementType */])(Input, this.props);
 
       var _this$partitionProps = this.partitionProps(),
           _this$partitionProps2 = __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_slicedToArray___default()(_this$partitionProps, 2),
@@ -55117,54 +55659,54 @@ __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(In
 
 __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(Input, "handledProps", ["action", "actionPosition", "as", "children", "className", "disabled", "error", "fluid", "focus", "icon", "iconPosition", "input", "inverted", "label", "labelPosition", "loading", "onChange", "size", "tabIndex", "transparent", "type"]);
 
-Input.propTypes =  false ? {
+Input.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_18__lib__["m" /* customPropTypes */].as,
 
   /** An Input can be formatted to alert the user to an action they may perform. */
-  action: PropTypes.oneOfType([PropTypes.bool, customPropTypes.itemShorthand]),
+  action: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_18__lib__["m" /* customPropTypes */].itemShorthand]),
 
   /** An action can appear along side an Input on the left or right. */
-  actionPosition: PropTypes.oneOf(['left']),
+  actionPosition: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.oneOf(['left']),
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.string,
 
   /** An Input field can show that it is disabled. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.bool,
 
   /** An Input field can show the data contains errors. */
-  error: PropTypes.bool,
+  error: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.bool,
 
   /** Take on the size of its container. */
-  fluid: PropTypes.bool,
+  fluid: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.bool,
 
   /** An Input field can show a user is currently interacting with it. */
-  focus: PropTypes.bool,
+  focus: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.bool,
 
   /** Optional Icon to display inside the Input. */
-  icon: PropTypes.oneOfType([PropTypes.bool, customPropTypes.itemShorthand]),
+  icon: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_18__lib__["m" /* customPropTypes */].itemShorthand]),
 
   /** An Icon can appear inside an Input on the left or right. */
-  iconPosition: PropTypes.oneOf(['left']),
+  iconPosition: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.oneOf(['left']),
 
   /** Shorthand for creating the HTML Input. */
-  input: customPropTypes.itemShorthand,
+  input: __WEBPACK_IMPORTED_MODULE_18__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Format to appear on dark backgrounds. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.bool,
 
   /** Optional Label to display along side the Input. */
-  label: customPropTypes.itemShorthand,
+  label: __WEBPACK_IMPORTED_MODULE_18__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A Label can appear outside an Input on the left or right. */
-  labelPosition: PropTypes.oneOf(['left', 'right', 'left corner', 'right corner']),
+  labelPosition: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.oneOf(['left', 'right', 'left corner', 'right corner']),
 
   /** An Icon Input field can show that it is currently loading data. */
-  loading: PropTypes.bool,
+  loading: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.bool,
 
   /**
    * Called on change.
@@ -55172,19 +55714,19 @@ Input.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props and proposed value.
    */
-  onChange: PropTypes.func,
+  onChange: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.func,
 
   /** An Input can vary in size. */
-  size: PropTypes.oneOf(SUI.SIZES),
+  size: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_18__lib__["b" /* SUI */].SIZES),
 
   /** An Input can receive focus. */
-  tabIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  tabIndex: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.string]),
 
   /** Transparent Input has no background. */
-  transparent: PropTypes.bool,
+  transparent: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.bool,
 
   /** The HTML input type. */
-  type: PropTypes.string
+  type: __WEBPACK_IMPORTED_MODULE_16_prop_types___default.a.string
 } : {};
 Input.create = Object(__WEBPACK_IMPORTED_MODULE_18__lib__["l" /* createShorthandFactory */])(Input, function (type) {
   return {
@@ -55192,6 +55734,7 @@ Input.create = Object(__WEBPACK_IMPORTED_MODULE_18__lib__["l" /* createShorthand
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (Input);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -55210,7 +55753,7 @@ Input.create = Object(__WEBPACK_IMPORTED_MODULE_18__lib__["l" /* createShorthand
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Label; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Label; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -55326,9 +55869,9 @@ function (_Component) {
           size = _this$props.size,
           tag = _this$props.tag;
       var pointingClass = pointing === true && 'pointing' || (pointing === 'left' || pointing === 'right') && "".concat(pointing, " pointing") || (pointing === 'above' || pointing === 'below') && "pointing ".concat(pointing);
-      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()('ui', color, pointingClass, size, Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(circular, 'circular'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(empty, 'empty'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(floating, 'floating'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(horizontal, 'horizontal'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(image === true, 'image'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(tag, 'tag'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["z" /* useKeyOrValueAndKey */])(corner, 'corner'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["z" /* useKeyOrValueAndKey */])(ribbon, 'ribbon'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["C" /* useValueAndKey */])(attached, 'attached'), 'label', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getUnhandledProps */])(Label, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["p" /* getElementType */])(Label, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()('ui', color, pointingClass, size, Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(circular, 'circular'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(empty, 'empty'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(floating, 'floating'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(horizontal, 'horizontal'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(image === true, 'image'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(tag, 'tag'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["B" /* useKeyOrValueAndKey */])(corner, 'corner'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["B" /* useKeyOrValueAndKey */])(ribbon, 'ribbon'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["E" /* useValueAndKey */])(attached, 'attached'), 'label', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["r" /* getUnhandledProps */])(Label, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getElementType */])(Label, this.props);
 
       if (!__WEBPACK_IMPORTED_MODULE_13__lib__["c" /* childrenUtils */].isNil(children)) {
         return __WEBPACK_IMPORTED_MODULE_12_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -55364,54 +55907,54 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(La
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Label, "handledProps", ["active", "as", "attached", "basic", "children", "circular", "className", "color", "content", "corner", "detail", "empty", "floating", "horizontal", "icon", "image", "onClick", "onRemove", "pointing", "removeIcon", "ribbon", "size", "tag"]);
 
 
-Label.propTypes =  false ? {
+Label.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].as,
 
   /** A label can be active. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A label can attach to a content segment. */
-  attached: PropTypes.oneOf(['top', 'bottom', 'top right', 'top left', 'bottom left', 'bottom right']),
+  attached: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(['top', 'bottom', 'top right', 'top left', 'bottom left', 'bottom right']),
 
   /** A label can reduce its complexity. */
-  basic: PropTypes.bool,
+  basic: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.node,
 
   /** A label can be circular. */
-  circular: PropTypes.bool,
+  circular: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string,
 
   /** Color of the label. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_13__lib__["b" /* SUI */].COLORS),
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A label can position itself in the corner of an element. */
-  corner: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['left', 'right'])]),
+  corner: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(['left', 'right'])]),
 
   /** Shorthand for LabelDetail. */
-  detail: customPropTypes.itemShorthand,
+  detail: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Formats the label as a dot. */
-  empty: customPropTypes.every([PropTypes.bool, customPropTypes.demand(['circular'])]),
+  empty: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].demand(['circular'])]),
 
   /** Float above another element in the upper right corner. */
-  floating: PropTypes.bool,
+  floating: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A horizontal label is formatted to label content along-side it horizontally. */
-  horizontal: PropTypes.bool,
+  horizontal: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Shorthand for Icon. */
-  icon: customPropTypes.itemShorthand,
+  icon: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A label can be formatted to emphasize an image or prop can be used as shorthand for Image. */
-  image: PropTypes.oneOfType([PropTypes.bool, customPropTypes.itemShorthand]),
+  image: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand]),
 
   /**
    * Called on click.
@@ -55419,7 +55962,7 @@ Label.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /**
    * Adds an "x" icon, called when "x" is clicked.
@@ -55427,28 +55970,29 @@ Label.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onRemove: PropTypes.func,
+  onRemove: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /** A label can point to content next to it. */
-  pointing: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['above', 'below', 'left', 'right'])]),
+  pointing: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(['above', 'below', 'left', 'right'])]),
 
   /** Shorthand for Icon to appear as the last child and trigger onRemove. */
-  removeIcon: customPropTypes.itemShorthand,
+  removeIcon: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A label can appear as a ribbon attaching itself to an element. */
-  ribbon: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['right'])]),
+  ribbon: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(['right'])]),
 
   /** A label can have different sizes. */
-  size: PropTypes.oneOf(SUI.SIZES),
+  size: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_13__lib__["b" /* SUI */].SIZES),
 
   /** A label can appear as a tag. */
-  tag: PropTypes.bool
+  tag: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool
 } : {};
 Label.create = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["l" /* createShorthandFactory */])(Label, function (value) {
   return {
     content: value
   };
 });
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -55456,7 +56000,7 @@ Label.create = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["l" /* createShorthand
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -55476,26 +56020,26 @@ function LabelDetail(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('detail', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(LabelDetail, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(LabelDetail, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(LabelDetail, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(LabelDetail, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 LabelDetail.handledProps = ["as", "children", "className", "content"];
-LabelDetail.propTypes =  false ? {
+LabelDetail.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 LabelDetail.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(LabelDetail, function (val) {
   return {
@@ -55503,6 +56047,7 @@ LabelDetail.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShor
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (LabelDetail);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -55510,7 +56055,7 @@ LabelDetail.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShor
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -55536,41 +56081,42 @@ function LabelGroup(props) {
       content = props.content,
       size = props.size,
       tag = props.tag;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(circular, 'circular'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(tag, 'tag'), 'labels', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(LabelGroup, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(LabelGroup, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(circular, 'circular'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(tag, 'tag'), 'labels', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(LabelGroup, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(LabelGroup, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 LabelGroup.handledProps = ["as", "children", "circular", "className", "color", "content", "size", "tag"];
-LabelGroup.propTypes =  false ? {
+LabelGroup.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Labels can share shapes. */
-  circular: PropTypes.bool,
+  circular: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Label group can share colors together. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].COLORS),
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Label group can share sizes together. */
-  size: PropTypes.oneOf(SUI.SIZES),
+  size: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].SIZES),
 
   /** Label group can share tag formatting. */
-  tag: PropTypes.bool
+  tag: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (LabelGroup);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -55589,7 +56135,7 @@ LabelGroup.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__);
@@ -55700,9 +56246,9 @@ function (_Component) {
           selection = _this$props.selection,
           size = _this$props.size,
           verticalAlign = _this$props.verticalAlign;
-      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(animated, 'animated'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(bulleted, 'bulleted'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(celled, 'celled'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(divided, 'divided'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(horizontal, 'horizontal'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(link, 'link'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(ordered, 'ordered'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(selection, 'selection'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["z" /* useKeyOrValueAndKey */])(relaxed, 'relaxed'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["C" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["D" /* useVerticalAlignProp */])(verticalAlign), 'list', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getUnhandledProps */])(List, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["p" /* getElementType */])(List, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(animated, 'animated'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(bulleted, 'bulleted'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(celled, 'celled'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(divided, 'divided'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(horizontal, 'horizontal'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(link, 'link'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(ordered, 'ordered'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(selection, 'selection'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["B" /* useKeyOrValueAndKey */])(relaxed, 'relaxed'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["E" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["F" /* useVerticalAlignProp */])(verticalAlign), 'list', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["r" /* getUnhandledProps */])(List, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getElementType */])(List, this.props);
 
       if (!__WEBPACK_IMPORTED_MODULE_13__lib__["c" /* childrenUtils */].isNil(children)) {
         return __WEBPACK_IMPORTED_MODULE_12_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({
@@ -55746,45 +56292,45 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Li
 
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(List, "handledProps", ["animated", "as", "bulleted", "celled", "children", "className", "content", "divided", "floated", "horizontal", "inverted", "items", "link", "onItemClick", "ordered", "relaxed", "selection", "size", "verticalAlign"]);
 
-List.propTypes =  false ? {
+List.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].as,
 
   /** A list can animate to set the current item apart from the list. */
-  animated: PropTypes.bool,
+  animated: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A list can mark items with a bullet. */
-  bulleted: PropTypes.bool,
+  bulleted: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A list can divide its items into cells. */
-  celled: PropTypes.bool,
+  celled: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A list can show divisions between content. */
-  divided: PropTypes.bool,
+  divided: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** An list can be floated left or right. */
-  floated: PropTypes.oneOf(SUI.FLOATS),
+  floated: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_13__lib__["b" /* SUI */].FLOATS),
 
   /** A list can be formatted to have items appear horizontally. */
-  horizontal: PropTypes.bool,
+  horizontal: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A list can be inverted to appear on a dark background. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Shorthand array of props for ListItem. */
-  items: customPropTypes.collectionShorthand,
+  items: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].collectionShorthand,
 
   /** A list can be specially formatted for navigation links. */
-  link: PropTypes.bool,
+  link: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /**
    * onClick handler for ListItem. Mutually exclusive with children.
@@ -55792,24 +56338,25 @@ List.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All item props.
    */
-  onItemClick: customPropTypes.every([customPropTypes.disallow(['children']), PropTypes.func]),
+  onItemClick: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].disallow(['children']), __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func]),
 
   /** A list can be ordered numerically. */
-  ordered: PropTypes.bool,
+  ordered: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A list can relax its padding to provide more negative space. */
-  relaxed: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['very'])]),
+  relaxed: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(['very'])]),
 
   /** A selection list formats list items as possible choices. */
-  selection: PropTypes.bool,
+  selection: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** A list can vary in size. */
-  size: PropTypes.oneOf(SUI.SIZES),
+  size: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_13__lib__["b" /* SUI */].SIZES),
 
   /** An element inside a list can be vertically aligned. */
-  verticalAlign: PropTypes.oneOf(SUI.VERTICAL_ALIGNMENTS)
+  verticalAlign: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_13__lib__["b" /* SUI */].VERTICAL_ALIGNMENTS)
 } : {};
 /* unused harmony default export */ var _unused_webpack_default_export = (List);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -55817,7 +56364,7 @@ List.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -55847,9 +56394,9 @@ function ListContent(props) {
       floated = props.floated,
       header = props.header,
       verticalAlign = props.verticalAlign;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["C" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["D" /* useVerticalAlignProp */])(verticalAlign), 'content', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ListContent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ListContent, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["E" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["F" /* useVerticalAlignProp */])(verticalAlign), 'content', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ListContent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ListContent, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -55863,30 +56410,30 @@ function ListContent(props) {
 }
 
 ListContent.handledProps = ["as", "children", "className", "content", "description", "floated", "header", "verticalAlign"];
-ListContent.propTypes =  false ? {
+ListContent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Shorthand for ListDescription. */
-  description: customPropTypes.itemShorthand,
+  description: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** An list content can be floated left or right. */
-  floated: PropTypes.oneOf(SUI.FLOATS),
+  floated: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].FLOATS),
 
   /** Shorthand for ListHeader. */
-  header: customPropTypes.itemShorthand,
+  header: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** An element inside a list can be vertically aligned. */
-  verticalAlign: PropTypes.oneOf(SUI.VERTICAL_ALIGNMENTS)
+  verticalAlign: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].VERTICAL_ALIGNMENTS)
 } : {};
 ListContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(ListContent, function (content) {
   return {
@@ -55894,6 +56441,7 @@ ListContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShor
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (ListContent);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -55901,7 +56449,7 @@ ListContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShor
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -55924,26 +56472,26 @@ function ListDescription(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(className, 'description');
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ListDescription, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ListDescription, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ListDescription, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ListDescription, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 ListDescription.handledProps = ["as", "children", "className", "content"];
-ListDescription.propTypes =  false ? {
+ListDescription.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 ListDescription.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(ListDescription, function (content) {
   return {
@@ -55951,6 +56499,7 @@ ListDescription.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* create
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (ListDescription);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -55958,7 +56507,7 @@ ListDescription.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* create
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -55981,26 +56530,26 @@ function ListHeader(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('header', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ListHeader, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ListHeader, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ListHeader, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ListHeader, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 ListHeader.handledProps = ["as", "children", "className", "content"];
-ListHeader.propTypes =  false ? {
+ListHeader.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 ListHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(ListHeader, function (content) {
   return {
@@ -56008,6 +56557,7 @@ ListHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShort
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (ListHeader);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -56015,7 +56565,7 @@ ListHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShort
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -56038,20 +56588,20 @@ ListHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShort
 function ListIcon(props) {
   var className = props.className,
       verticalAlign = props.verticalAlign;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["D" /* useVerticalAlignProp */])(verticalAlign), className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ListIcon, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["F" /* useVerticalAlignProp */])(verticalAlign), className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ListIcon, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__Icon_Icon__["a" /* default */], __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }));
 }
 
 ListIcon.handledProps = ["className", "verticalAlign"];
-ListIcon.propTypes =  false ? {
+ListIcon.propTypes = process.env.NODE_ENV !== "production" ? {
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** An element inside a list can be vertically aligned. */
-  verticalAlign: PropTypes.oneOf(SUI.VERTICAL_ALIGNMENTS)
+  verticalAlign: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].VERTICAL_ALIGNMENTS)
 } : {};
 ListIcon.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(ListIcon, function (name) {
   return {
@@ -56059,6 +56609,7 @@ ListIcon.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShortha
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (ListIcon);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -56066,7 +56617,7 @@ ListIcon.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShortha
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__);
@@ -56161,9 +56712,9 @@ function (_Component) {
           icon = _this$props.icon,
           image = _this$props.image,
           value = _this$props.value;
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["p" /* getElementType */])(ListItem, this.props);
-      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(ElementType !== 'li', 'item'), className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getUnhandledProps */])(ListItem, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getElementType */])(ListItem, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(ElementType !== 'li', 'item'), className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["r" /* getUnhandledProps */])(ListItem, this.props);
       var valueProp = ElementType === 'li' ? {
         value: value
       } : {
@@ -56227,18 +56778,18 @@ function (_Component) {
 
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(ListItem, "handledProps", ["active", "as", "children", "className", "content", "description", "disabled", "header", "icon", "image", "onClick", "value"]);
 
-ListItem.propTypes =  false ? {
+ListItem.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].as,
 
   /** A list item can active. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string,
 
   /**
    * Shorthand for primary content.
@@ -56255,28 +56806,28 @@ ListItem.propTypes =  false ? {
    * props to it. If you pass a content prop within that props object, it
    * will be treated as the sibling node to header/description.
    */
-  content: customPropTypes.itemShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for ListDescription. */
-  description: customPropTypes.itemShorthand,
+  description: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A list item can disabled. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Shorthand for ListHeader. */
-  header: customPropTypes.itemShorthand,
+  header: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for ListIcon. */
-  icon: customPropTypes.every([customPropTypes.disallow(['image']), customPropTypes.itemShorthand]),
+  icon: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].disallow(['image']), __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand]),
 
   /** Shorthand for Image. */
-  image: customPropTypes.every([customPropTypes.disallow(['icon']), customPropTypes.itemShorthand]),
+  image: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].disallow(['icon']), __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].itemShorthand]),
 
   /** A ListItem can be clicked */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /** A value for an ordered list. */
-  value: PropTypes.string
+  value: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string
 } : {};
 ListItem.create = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["l" /* createShorthandFactory */])(ListItem, function (content) {
   return {
@@ -56284,6 +56835,7 @@ ListItem.create = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["l" /* createShorth
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (ListItem);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -56291,7 +56843,7 @@ ListItem.create = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["l" /* createShorth
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -56313,29 +56865,30 @@ function ListList(props) {
   var children = props.children,
       className = props.className,
       content = props.content;
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ListList, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ListList, props);
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(ElementType !== 'ul' && ElementType !== 'ol', 'list'), className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ListList, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ListList, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(ElementType !== 'ul' && ElementType !== 'ol', 'list'), className);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 ListList.handledProps = ["as", "children", "className", "content"];
-ListList.propTypes =  false ? {
+ListList.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (ListList);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -56354,7 +56907,7 @@ ListList.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -56383,47 +56936,48 @@ function Loader(props) {
       inline = props.inline,
       inverted = props.inverted,
       size = props.size;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(indeterminate, 'indeterminate'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(children || content, 'text'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["z" /* useKeyOrValueAndKey */])(inline, 'inline'), 'loader', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(Loader, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(Loader, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(indeterminate, 'indeterminate'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(children || content, 'text'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["B" /* useKeyOrValueAndKey */])(inline, 'inline'), 'loader', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(Loader, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(Loader, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 Loader.handledProps = ["active", "as", "children", "className", "content", "disabled", "indeterminate", "inline", "inverted", "size"];
-Loader.propTypes =  false ? {
+Loader.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** A loader can be active or visible. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A loader can be disabled or hidden. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** A loader can show it's unsure of how long a task will take. */
-  indeterminate: PropTypes.bool,
+  indeterminate: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Loaders can appear inline with content. */
-  inline: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['centered'])]),
+  inline: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(['centered'])]),
 
   /** Loaders can have their colors inverted. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Loaders can have different sizes. */
-  size: PropTypes.oneOf(SUI.SIZES)
+  size: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].SIZES)
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (Loader);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -56442,7 +56996,7 @@ Loader.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -56473,47 +57027,48 @@ function Rail(props) {
       internal = props.internal,
       position = props.position,
       size = props.size;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', position, size, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(dividing, 'dividing'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(internal, 'internal'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["z" /* useKeyOrValueAndKey */])(close, 'close'), 'rail', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(Rail, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(Rail, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', position, size, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(dividing, 'dividing'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(internal, 'internal'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useKeyOrValueAndKey */])(close, 'close'), 'rail', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(Rail, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(Rail, props);
   return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 Rail.handledProps = ["as", "attached", "children", "className", "close", "content", "dividing", "internal", "position", "size"];
-Rail.propTypes =  false ? {
+Rail.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** A rail can appear attached to the main viewport. */
-  attached: PropTypes.bool,
+  attached: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** A rail can appear closer to the main viewport. */
-  close: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['very'])]),
+  close: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(['very'])]),
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A rail can create a division between itself and a container. */
-  dividing: PropTypes.bool,
+  dividing: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A rail can attach itself to the inside of a container. */
-  internal: PropTypes.bool,
+  internal: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A rail can be presented on the left or right side of a container. */
-  position: PropTypes.oneOf(SUI.FLOATS).isRequired,
+  position: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].FLOATS).isRequired,
 
   /** A rail can have different sizes. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium'))
+  size: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].SIZES, 'medium'))
 } : {};
 /* unused harmony default export */ var _unused_webpack_default_export = (Rail);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -56532,7 +57087,7 @@ Rail.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -56560,42 +57115,43 @@ function Reveal(props) {
       content = props.content,
       disabled = props.disabled,
       instant = props.instant;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', animated, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(instant, 'instant'), 'reveal', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(Reveal, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(Reveal, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', animated, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(instant, 'instant'), 'reveal', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(Reveal, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(Reveal, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 Reveal.handledProps = ["active", "animated", "as", "children", "className", "content", "disabled", "instant"];
-Reveal.propTypes =  false ? {
+Reveal.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** An active reveal displays its hidden content. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** An animation name that will be applied to Reveal. */
-  animated: PropTypes.oneOf(['fade', 'small fade', 'move', 'move right', 'move up', 'move down', 'rotate', 'rotate left']),
+  animated: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(['fade', 'small fade', 'move', 'move right', 'move up', 'move down', 'rotate', 'rotate left']),
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A disabled reveal will not animate when hovered. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** An element can show its content without delay. */
-  instant: PropTypes.bool
+  instant: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool
 } : {};
 Reveal.Content = __WEBPACK_IMPORTED_MODULE_5__RevealContent__["a" /* default */];
 /* unused harmony default export */ var _unused_webpack_default_export = (Reveal);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -56603,7 +57159,7 @@ Reveal.Content = __WEBPACK_IMPORTED_MODULE_5__RevealContent__["a" /* default */]
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -56627,35 +57183,36 @@ function RevealContent(props) {
       content = props.content,
       hidden = props.hidden,
       visible = props.visible;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(hidden, 'hidden'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(visible, 'visible'), 'content', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(RevealContent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(RevealContent, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(hidden, 'hidden'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(visible, 'visible'), 'content', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(RevealContent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(RevealContent, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 RevealContent.handledProps = ["as", "children", "className", "content", "hidden", "visible"];
-RevealContent.propTypes =  false ? {
+RevealContent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A reveal may contain content that is visible before interaction. */
-  hidden: PropTypes.bool,
+  hidden: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** A reveal may contain content that is hidden before user interaction. */
-  visible: PropTypes.bool
+  visible: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (RevealContent);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -56674,7 +57231,7 @@ RevealContent.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -56720,9 +57277,9 @@ function Segment(props) {
       tertiary = props.tertiary,
       textAlign = props.textAlign,
       vertical = props.vertical;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(circular, 'circular'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(clearing, 'clearing'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(piled, 'piled'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(raised, 'raised'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(secondary, 'secondary'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(stacked, 'stacked'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(tertiary, 'tertiary'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(vertical, 'vertical'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["z" /* useKeyOrValueAndKey */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["z" /* useKeyOrValueAndKey */])(padded, 'padded'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["C" /* useValueAndKey */])(floated, 'floated'), 'segment', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(Segment, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(Segment, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(circular, 'circular'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(clearing, 'clearing'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(piled, 'piled'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(raised, 'raised'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(secondary, 'secondary'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(stacked, 'stacked'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(tertiary, 'tertiary'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(vertical, 'vertical'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useKeyOrValueAndKey */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useKeyOrValueAndKey */])(padded, 'padded'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["D" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["E" /* useValueAndKey */])(floated, 'floated'), 'segment', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(Segment, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(Segment, props);
   return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
@@ -56730,77 +57287,78 @@ function Segment(props) {
 
 Segment.handledProps = ["as", "attached", "basic", "children", "circular", "className", "clearing", "color", "compact", "content", "disabled", "floated", "inverted", "loading", "padded", "piled", "raised", "secondary", "size", "stacked", "tertiary", "textAlign", "vertical"];
 Segment.Group = __WEBPACK_IMPORTED_MODULE_6__SegmentGroup__["a" /* default */];
-Segment.propTypes =  false ? {
+Segment.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** Attach segment to other content, like a header. */
-  attached: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['top', 'bottom'])]),
+  attached: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(['top', 'bottom'])]),
 
   /** A basic segment has no special formatting. */
-  basic: PropTypes.bool,
+  basic: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** A segment can be circular. */
-  circular: PropTypes.bool,
+  circular: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** A segment can clear floated content. */
-  clearing: PropTypes.bool,
+  clearing: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Segment can be colored. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].COLORS),
 
   /** A segment may take up only as much space as is necessary. */
-  compact: PropTypes.bool,
+  compact: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A segment may show its content is disabled. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Segment content can be floated to the left or right. */
-  floated: PropTypes.oneOf(SUI.FLOATS),
+  floated: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].FLOATS),
 
   /** A segment can have its colors inverted for contrast. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A segment may show its content is being loaded. */
-  loading: PropTypes.bool,
+  loading: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A segment can increase its padding. */
-  padded: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['very'])]),
+  padded: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(['very'])]),
 
   /** Formatted to look like a pile of pages. */
-  piled: PropTypes.bool,
+  piled: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A segment may be formatted to raise above the page. */
-  raised: PropTypes.bool,
+  raised: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A segment can be formatted to appear less noticeable. */
-  secondary: PropTypes.bool,
+  secondary: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A segment can have different sizes. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium')),
+  size: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].SIZES, 'medium')),
 
   /** Formatted to show it contains multiple pages. */
-  stacked: PropTypes.bool,
+  stacked: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A segment can be formatted to appear even less noticeable. */
-  tertiary: PropTypes.bool,
+  tertiary: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Formats content to be aligned as part of a vertical group. */
-  textAlign: PropTypes.oneOf(_without(SUI.TEXT_ALIGNMENTS, 'justified')),
+  textAlign: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].TEXT_ALIGNMENTS, 'justified')),
 
   /** Formats content to be aligned vertically. */
-  vertical: PropTypes.bool
+  vertical: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (Segment);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -56808,7 +57366,7 @@ Segment.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -56839,47 +57397,48 @@ function SegmentGroup(props) {
       raised = props.raised,
       size = props.size,
       stacked = props.stacked;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(horizontal, 'horizontal'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(piled, 'piled'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(raised, 'raised'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(stacked, 'stacked'), 'segments', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(SegmentGroup, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(SegmentGroup, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(horizontal, 'horizontal'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(piled, 'piled'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(raised, 'raised'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(stacked, 'stacked'), 'segments', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(SegmentGroup, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(SegmentGroup, props);
   return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 SegmentGroup.handledProps = ["as", "children", "className", "compact", "content", "horizontal", "piled", "raised", "size", "stacked"];
-SegmentGroup.propTypes =  false ? {
+SegmentGroup.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** A segment may take up only as much space as is necessary. */
-  compact: PropTypes.bool,
+  compact: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Formats content to be aligned horizontally. */
-  horizontal: PropTypes.bool,
+  horizontal: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Formatted to look like a pile of pages. */
-  piled: PropTypes.bool,
+  piled: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A segment group may be formatted to raise above the page. */
-  raised: PropTypes.bool,
+  raised: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A segment group can have different sizes. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium')),
+  size: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].SIZES, 'medium')),
 
   /** Formatted to show it contains multiple pages. */
-  stacked: PropTypes.bool
+  stacked: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (SegmentGroup);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -56898,7 +57457,7 @@ SegmentGroup.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__);
@@ -56996,9 +57555,9 @@ function (_Component) {
           icon = _this$props.icon,
           link = _this$props.link,
           title = _this$props.title;
-      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(completed, 'completed'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(link, 'link'), 'step', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getUnhandledProps */])(Step, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["p" /* getElementType */])(Step, this.props, this.computeElementType);
+      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(completed, 'completed'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(link, 'link'), 'step', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["r" /* getUnhandledProps */])(Step, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getElementType */])(Step, this.props, this.computeElementType);
 
       if (!__WEBPACK_IMPORTED_MODULE_12__lib__["c" /* childrenUtils */].isNil(children)) {
         return __WEBPACK_IMPORTED_MODULE_11_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -57044,39 +57603,39 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(St
 
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Step, "handledProps", ["active", "as", "children", "className", "completed", "content", "description", "disabled", "href", "icon", "link", "onClick", "ordered", "title"]);
 
-Step.propTypes =  false ? {
+Step.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].as,
 
   /** A step can be highlighted as active. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string,
 
   /** A step can show that a user has completed it. */
-  completed: PropTypes.bool,
+  completed: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Shorthand for StepDescription. */
-  description: customPropTypes.itemShorthand,
+  description: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Show that the Loader is inactive. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Render as an `a` tag instead of a `div` and adds the href attribute. */
-  href: PropTypes.string,
+  href: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string,
 
   /** Shorthand for Icon. */
-  icon: customPropTypes.itemShorthand,
+  icon: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A step can be link. */
-  link: PropTypes.bool,
+  link: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /**
    * Called on click. When passed, the component will render as an `a`
@@ -57085,13 +57644,13 @@ Step.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /** A step can show a ordered sequence of steps. Passed from StepGroup. */
-  ordered: PropTypes.bool,
+  ordered: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Shorthand for StepTitle. */
-  title: customPropTypes.itemShorthand
+  title: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand
 } : {};
 Step.create = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["l" /* createShorthandFactory */])(Step, function (content) {
   return {
@@ -57099,6 +57658,7 @@ Step.create = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["l" /* createShorthandF
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (Step);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -57106,7 +57666,7 @@ Step.create = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["l" /* createShorthandF
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -57135,8 +57695,8 @@ function StepContent(props) {
       description = props.description,
       title = props.title;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('content', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(StepContent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(StepContent, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(StepContent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(StepContent, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -57160,24 +57720,24 @@ function StepContent(props) {
 }
 
 StepContent.handledProps = ["as", "children", "className", "content", "description", "title"];
-StepContent.propTypes =  false ? {
+StepContent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Shorthand for StepDescription. */
-  description: customPropTypes.itemShorthand,
+  description: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for StepTitle. */
-  title: customPropTypes.itemShorthand
+  title: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand
 } : {};
 StepContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(StepContent, function (content) {
   return {
@@ -57185,6 +57745,7 @@ StepContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShor
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (StepContent);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -57192,7 +57753,7 @@ StepContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShor
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -57212,26 +57773,26 @@ function StepDescription(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('description', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(StepDescription, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(StepDescription, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(StepDescription, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(StepDescription, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 StepDescription.handledProps = ["as", "children", "className", "content"];
-StepDescription.propTypes =  false ? {
+StepDescription.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 StepDescription.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(StepDescription, function (content) {
   return {
@@ -57239,6 +57800,7 @@ StepDescription.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* create
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (StepDescription);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -57246,7 +57808,7 @@ StepDescription.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* create
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/toConsumableArray.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/toConsumableArray.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__);
@@ -57280,7 +57842,7 @@ StepDescription.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* create
 
 
 
-var numberMap =  false ? _pickBy(numberToWordMap, function (val, key) {
+var numberMap = process.env.NODE_ENV !== "production" ? __WEBPACK_IMPORTED_MODULE_6_lodash_pickBy___default()(__WEBPACK_IMPORTED_MODULE_10__lib__["x" /* numberToWordMap */], function (val, key) {
   return key <= 8;
 }) : {};;
 /**
@@ -57300,9 +57862,9 @@ function StepGroup(props) {
       unstackable = props.unstackable,
       vertical = props.vertical,
       widths = props.widths;
-  var classes = __WEBPACK_IMPORTED_MODULE_7_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_10__lib__["y" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_10__lib__["y" /* useKeyOnly */])(ordered, 'ordered'), Object(__WEBPACK_IMPORTED_MODULE_10__lib__["y" /* useKeyOnly */])(unstackable, 'unstackable'), Object(__WEBPACK_IMPORTED_MODULE_10__lib__["y" /* useKeyOnly */])(vertical, 'vertical'), Object(__WEBPACK_IMPORTED_MODULE_10__lib__["z" /* useKeyOrValueAndKey */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_10__lib__["C" /* useValueAndKey */])(stackable, 'stackable'), Object(__WEBPACK_IMPORTED_MODULE_10__lib__["E" /* useWidthProp */])(widths), 'steps', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["q" /* getUnhandledProps */])(StepGroup, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["p" /* getElementType */])(StepGroup, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_7_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_10__lib__["A" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_10__lib__["A" /* useKeyOnly */])(ordered, 'ordered'), Object(__WEBPACK_IMPORTED_MODULE_10__lib__["A" /* useKeyOnly */])(unstackable, 'unstackable'), Object(__WEBPACK_IMPORTED_MODULE_10__lib__["A" /* useKeyOnly */])(vertical, 'vertical'), Object(__WEBPACK_IMPORTED_MODULE_10__lib__["B" /* useKeyOrValueAndKey */])(attached, 'attached'), Object(__WEBPACK_IMPORTED_MODULE_10__lib__["E" /* useValueAndKey */])(stackable, 'stackable'), Object(__WEBPACK_IMPORTED_MODULE_10__lib__["G" /* useWidthProp */])(widths), 'steps', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["r" /* getUnhandledProps */])(StepGroup, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["q" /* getElementType */])(StepGroup, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_10__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_9_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default()({}, rest, {
@@ -57324,47 +57886,48 @@ function StepGroup(props) {
 }
 
 StepGroup.handledProps = ["as", "attached", "children", "className", "content", "fluid", "items", "ordered", "size", "stackable", "unstackable", "vertical", "widths"];
-StepGroup.propTypes =  false ? {
+StepGroup.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_10__lib__["m" /* customPropTypes */].as,
 
   /** Steps can be attached to other elements. */
-  attached: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['top', 'bottom'])]),
+  attached: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.oneOf(['top', 'bottom'])]),
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_10__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A fluid step takes up the width of its container. */
-  fluid: PropTypes.bool,
+  fluid: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.bool,
 
   /** Shorthand array of props for Step. */
-  items: customPropTypes.collectionShorthand,
+  items: __WEBPACK_IMPORTED_MODULE_10__lib__["m" /* customPropTypes */].collectionShorthand,
 
   /** A step can show a ordered sequence of steps. */
-  ordered: PropTypes.bool,
+  ordered: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.bool,
 
   /** Steps can have different sizes. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium')),
+  size: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_10__lib__["b" /* SUI */].SIZES, 'medium')),
 
   /** A step can stack vertically only on smaller screens. */
-  stackable: PropTypes.oneOf(['tablet']),
+  stackable: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.oneOf(['tablet']),
 
   /** A step can prevent itself from stacking on mobile. */
-  unstackable: PropTypes.bool,
+  unstackable: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.bool,
 
   /** A step can be displayed stacked vertically. */
-  vertical: PropTypes.bool,
+  vertical: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.bool,
 
   /** Steps can be divided evenly inside their parent. */
-  widths: PropTypes.oneOf(_toConsumableArray(_keys(numberMap)).concat(_toConsumableArray(_keys(numberMap).map(Number)), _toConsumableArray(_values(numberMap))))
+  widths: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray___default()(__WEBPACK_IMPORTED_MODULE_3_lodash_keys___default()(numberMap)).concat(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray___default()(__WEBPACK_IMPORTED_MODULE_3_lodash_keys___default()(numberMap).map(Number)), __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray___default()(__WEBPACK_IMPORTED_MODULE_2_lodash_values___default()(numberMap))))
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (StepGroup);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -57372,7 +57935,7 @@ StepGroup.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -57395,26 +57958,26 @@ function StepTitle(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('title', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(StepTitle, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(StepTitle, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(StepTitle, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(StepTitle, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 StepTitle.handledProps = ["as", "children", "className", "content"];
-StepTitle.propTypes =  false ? {
+StepTitle.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 StepTitle.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(StepTitle, function (content) {
   return {
@@ -57422,6 +57985,7 @@ StepTitle.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorth
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (StepTitle);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -58085,7 +58649,7 @@ StepTitle.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorth
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export getAutoControlledStateValue */
+/* WEBPACK VAR INJECTION */(function(process) {/* unused harmony export getAutoControlledStateValue */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AutoControlledComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__);
@@ -58208,12 +58772,12 @@ function (_Component) {
     __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_assertThisInitialized___default()(_this)), "trySetState", function (maybeState, state) {
       var autoControlledProps = _this.constructor.autoControlledProps;
 
-      if (false) {
+      if (process.env.NODE_ENV !== 'production') {
         var name = _this.constructor.name; // warn about failed attempts to setState for keys not listed in autoControlledProps
 
-        var illegalKeys = _difference(_keys(maybeState), autoControlledProps);
+        var illegalKeys = __WEBPACK_IMPORTED_MODULE_8_lodash_difference___default()(__WEBPACK_IMPORTED_MODULE_13_lodash_keys___default()(maybeState), autoControlledProps);
 
-        if (!_isEmpty(illegalKeys)) {
+        if (!__WEBPACK_IMPORTED_MODULE_12_lodash_isEmpty___default()(illegalKeys)) {
           console.error(["".concat(name, " called trySetState() with controlled props: \"").concat(illegalKeys, "\"."), 'State will not be set.', 'Only props in static autoControlledProps will be set on state.'].join(' '));
         }
       }
@@ -58234,7 +58798,7 @@ function (_Component) {
 
     var _state = __WEBPACK_IMPORTED_MODULE_17_lodash_invoke___default()(__WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_assertThisInitialized___default()(_this)), 'getInitialAutoControlledState', _this.props) || {};
 
-    if (false) {
+    if (process.env.NODE_ENV !== 'production') {
       var _this$constructor = _this.constructor,
           defaultProps = _this$constructor.defaultProps,
           name = _this$constructor.name,
@@ -58245,15 +58809,15 @@ function (_Component) {
       } // require propTypes
 
 
-      _each(_autoControlledProps, function (prop) {
+      __WEBPACK_IMPORTED_MODULE_16_lodash_each___default()(_autoControlledProps, function (prop) {
         var defaultProp = getDefaultPropName(prop); // regular prop
 
-        if (!_has(propTypes, defaultProp)) {
+        if (!__WEBPACK_IMPORTED_MODULE_15_lodash_has___default()(propTypes, defaultProp)) {
           console.error("".concat(name, " is missing \"").concat(defaultProp, "\" propTypes validation for auto controlled prop \"").concat(prop, "\"."));
         } // its default prop
 
 
-        if (!_has(propTypes, prop)) {
+        if (!__WEBPACK_IMPORTED_MODULE_15_lodash_has___default()(propTypes, prop)) {
           console.error("".concat(name, " is missing propTypes validation for auto controlled prop \"").concat(prop, "\"."));
         }
       }); // prevent autoControlledProps in defaultProps
@@ -58268,9 +58832,9 @@ function (_Component) {
       // https://babeljs.io/blog/2015/06/07/react-on-es6-plus#property-initializers
 
 
-      var illegalDefaults = _intersection(_autoControlledProps, _keys(defaultProps));
+      var illegalDefaults = __WEBPACK_IMPORTED_MODULE_14_lodash_intersection___default()(_autoControlledProps, __WEBPACK_IMPORTED_MODULE_13_lodash_keys___default()(defaultProps));
 
-      if (!_isEmpty(illegalDefaults)) {
+      if (!__WEBPACK_IMPORTED_MODULE_12_lodash_isEmpty___default()(illegalDefaults)) {
         console.error(['Do not set defaultProps for autoControlledProps. You can set defaults by', 'setting state in the constructor or using an ES7 property initializer', '(https://babeljs.io/blog/2015/06/07/react-on-es6-plus#property-initializers)', "See ".concat(name, " props: \"").concat(illegalDefaults, "\".")].join(' '));
       } // prevent listing defaultProps in autoControlledProps
       //
@@ -58278,11 +58842,11 @@ function (_Component) {
       // Listing defaults in autoControlledProps would result in allowing defaultDefaultValue props.
 
 
-      var illegalAutoControlled = _filter(_autoControlledProps, function (prop) {
-        return _startsWith(prop, 'default');
+      var illegalAutoControlled = __WEBPACK_IMPORTED_MODULE_11_lodash_filter___default()(_autoControlledProps, function (prop) {
+        return __WEBPACK_IMPORTED_MODULE_10_lodash_startsWith___default()(prop, 'default');
       });
 
-      if (!_isEmpty(illegalAutoControlled)) {
+      if (!__WEBPACK_IMPORTED_MODULE_12_lodash_isEmpty___default()(illegalAutoControlled)) {
         console.error(['Do not add default props to autoControlledProps.', 'Default props are automatically handled.', "See ".concat(name, " autoControlledProps: \"").concat(illegalAutoControlled, "\".")].join(' '));
       }
     } // Auto controlled props are copied to state.
@@ -58294,11 +58858,11 @@ function (_Component) {
     var initialAutoControlledState = _autoControlledProps.reduce(function (acc, prop) {
       acc[prop] = getAutoControlledStateValue(prop, _this.props, _state, true);
 
-      if (false) {
+      if (process.env.NODE_ENV !== 'production') {
         var defaultPropName = getDefaultPropName(prop);
         var _name = _this.constructor.name; // prevent defaultFoo={} along side foo={}
 
-        if (!_isUndefined(_this.props[defaultPropName]) && !_isUndefined(_this.props[prop])) {
+        if (!__WEBPACK_IMPORTED_MODULE_9_lodash_isUndefined___default()(_this.props[defaultPropName]) && !__WEBPACK_IMPORTED_MODULE_9_lodash_isUndefined___default()(_this.props[prop])) {
           console.error("".concat(_name, " prop \"").concat(prop, "\" is auto controlled. Specify either ").concat(defaultPropName, " or ").concat(prop, ", but not both."));
         }
       }
@@ -58341,6 +58905,7 @@ function (_Component) {
 }(__WEBPACK_IMPORTED_MODULE_18_react__["Component"]);
 
 
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -59014,19 +59579,20 @@ var createInnerSuffix = function createInnerSuffix(innerGroupEnd, lastGroupStart
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export as */
-/* unused harmony export domNode */
-/* unused harmony export suggest */
-/* unused harmony export disallow */
-/* unused harmony export every */
-/* unused harmony export some */
-/* unused harmony export givenProps */
-/* unused harmony export demand */
-/* unused harmony export multipleProp */
-/* unused harmony export contentShorthand */
-/* unused harmony export itemShorthand */
-/* unused harmony export collectionShorthand */
-/* unused harmony export deprecate */
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "as", function() { return as; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "domNode", function() { return domNode; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "suggest", function() { return suggest; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "disallow", function() { return disallow; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "every", function() { return every; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "some", function() { return some; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "givenProps", function() { return givenProps; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "demand", function() { return demand; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "multipleProp", function() { return multipleProp; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "contentShorthand", function() { return contentShorthand; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "itemShorthand", function() { return itemShorthand; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "collectionShorthand", function() { return collectionShorthand; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deprecate", function() { return deprecate; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/toConsumableArray.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_toConsumableArray__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_fp_difference__ = __webpack_require__("./node_modules/lodash/fp/difference.js");
@@ -59419,12 +59985,12 @@ var deprecate = function deprecate(help, validator) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export makeDebugger */
+/* WEBPACK VAR INJECTION */(function(process) {/* unused harmony export makeDebugger */
 /* unused harmony export debug */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__isBrowser__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/isBrowser.js");
 
 
-if (Object(__WEBPACK_IMPORTED_MODULE_0__isBrowser__["a" /* default */])() && "production" !== 'production' && "production" !== 'test') {
+if (Object(__WEBPACK_IMPORTED_MODULE_0__isBrowser__["a" /* default */])() && process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
   // Heads Up!
   // https://github.com/visionmedia/debug/pull/331
   //
@@ -59463,6 +60029,7 @@ var makeDebugger = function makeDebugger(namespace) {};
  */
 
 var debug = makeDebugger('log');
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -59554,7 +60121,7 @@ var doesNodeContainClick = function doesNodeContainClick(node, e) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["g"] = createShorthand;
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (immutable) */ __webpack_exports__["g"] = createShorthand;
 /* harmony export (immutable) */ __webpack_exports__["h"] = createShorthandFactory;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return createHTMLDivision; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return createHTMLIframe; });
@@ -59640,8 +60207,8 @@ function createShorthand(Component, mapValueToProps, val) {
 
 
   if (!valIsFunction && !valIsReactElement && !valIsPropsObject && !valIsPrimitiveValue) {
-    if (false) {
-      console.error(['Shorthand value must be a string|number|array|object|ReactElement|function.', ' Use null|undefined|boolean for none', " Received ".concat(_typeof(val), ".")].join(''));
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(['Shorthand value must be a string|number|array|object|ReactElement|function.', ' Use null|undefined|boolean for none', " Received ".concat(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_typeof___default()(val), ".")].join(''));
     }
 
     return null;
@@ -59760,6 +60327,7 @@ var createHTMLParagraph = createShorthandFactory('p', function (val) {
     children: val
   };
 });
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -59889,25 +60457,25 @@ var partitionHTMLProps = function partitionHTMLProps(props) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__AutoControlledComponent__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/AutoControlledComponent.js");
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__AutoControlledComponent__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__childMapping__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/childMapping.js");
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "o", function() { return __WEBPACK_IMPORTED_MODULE_1__childMapping__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "t", function() { return __WEBPACK_IMPORTED_MODULE_1__childMapping__["b"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "p", function() { return __WEBPACK_IMPORTED_MODULE_1__childMapping__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "u", function() { return __WEBPACK_IMPORTED_MODULE_1__childMapping__["b"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__childrenUtils__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/childrenUtils.js");
 /* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_2__childrenUtils__; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/classNameBuilders.js");
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "y", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "z", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["b"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "C", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["e"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "A", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["c"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "B", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["d"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "D", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["f"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "E", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["g"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "A", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "B", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["b"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "E", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["e"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "C", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["c"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "D", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["d"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "F", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["f"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "G", function() { return __WEBPACK_IMPORTED_MODULE_3__classNameBuilders__["g"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__customPropTypes__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/customPropTypes.js");
-/* unused harmony reexport customPropTypes */
+/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "m", function() { return __WEBPACK_IMPORTED_MODULE_4__customPropTypes__; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__debug__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/debug.js");
 /* unused harmony reexport debug */
 /* unused harmony reexport makeDebugger */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__eventStack__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/eventStack/index.js");
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "n", function() { return __WEBPACK_IMPORTED_MODULE_6__eventStack__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "o", function() { return __WEBPACK_IMPORTED_MODULE_6__eventStack__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__factories__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/factories.js");
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_7__factories__["a"]; });
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "e", function() { return __WEBPACK_IMPORTED_MODULE_7__factories__["b"]; });
@@ -59918,18 +60486,18 @@ var partitionHTMLProps = function partitionHTMLProps(props) {
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "k", function() { return __WEBPACK_IMPORTED_MODULE_7__factories__["g"]; });
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "l", function() { return __WEBPACK_IMPORTED_MODULE_7__factories__["h"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__getUnhandledProps__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/getUnhandledProps.js");
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "q", function() { return __WEBPACK_IMPORTED_MODULE_8__getUnhandledProps__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "r", function() { return __WEBPACK_IMPORTED_MODULE_8__getUnhandledProps__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__getElementType__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/getElementType.js");
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "p", function() { return __WEBPACK_IMPORTED_MODULE_9__getElementType__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "q", function() { return __WEBPACK_IMPORTED_MODULE_9__getElementType__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__htmlPropsUtils__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/htmlPropsUtils.js");
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "r", function() { return __WEBPACK_IMPORTED_MODULE_10__htmlPropsUtils__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "s", function() { return __WEBPACK_IMPORTED_MODULE_10__htmlPropsUtils__["a"]; });
 /* unused harmony reexport htmlInputEvents */
 /* unused harmony reexport htmlInputProps */
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "w", function() { return __WEBPACK_IMPORTED_MODULE_10__htmlPropsUtils__["b"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "y", function() { return __WEBPACK_IMPORTED_MODULE_10__htmlPropsUtils__["b"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__isBrowser__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/isBrowser.js");
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "s", function() { return __WEBPACK_IMPORTED_MODULE_11__isBrowser__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "t", function() { return __WEBPACK_IMPORTED_MODULE_11__isBrowser__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__doesNodeContainClick__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/doesNodeContainClick.js");
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "m", function() { return __WEBPACK_IMPORTED_MODULE_12__doesNodeContainClick__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "n", function() { return __WEBPACK_IMPORTED_MODULE_12__doesNodeContainClick__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__leven__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/leven.js");
 /* unused harmony reexport leven */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__createPaginationItems__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/createPaginationItems/index.js");
@@ -59937,16 +60505,16 @@ var partitionHTMLProps = function partitionHTMLProps(props) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__SUI__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/SUI.js");
 /* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_15__SUI__; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__numberToWord__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/numberToWord.js");
-/* unused harmony reexport numberToWordMap */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "x", function() { return __WEBPACK_IMPORTED_MODULE_16__numberToWord__["b"]; });
 /* unused harmony reexport numberToWord */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__normalizeOffset__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/normalizeOffset.js");
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "u", function() { return __WEBPACK_IMPORTED_MODULE_17__normalizeOffset__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "v", function() { return __WEBPACK_IMPORTED_MODULE_17__normalizeOffset__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__normalizeTransitionDuration__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/normalizeTransitionDuration.js");
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "v", function() { return __WEBPACK_IMPORTED_MODULE_18__normalizeTransitionDuration__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "w", function() { return __WEBPACK_IMPORTED_MODULE_18__normalizeTransitionDuration__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__objectDiff__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/objectDiff.js");
 /* unused harmony reexport objectDiff */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__shallowEqual__ = __webpack_require__("./node_modules/semantic-ui-react/dist/es/lib/shallowEqual.js");
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "x", function() { return __WEBPACK_IMPORTED_MODULE_20__shallowEqual__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "z", function() { return __WEBPACK_IMPORTED_MODULE_20__shallowEqual__["a"]; });
 
 
 
@@ -60011,7 +60579,7 @@ var isBrowser = function isBrowser() {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-// Copy of sindre's leven, wrapped in dead code elimination for production
+/* WEBPACK VAR INJECTION */(function(process) {// Copy of sindre's leven, wrapped in dead code elimination for production
 // https://github.com/sindresorhus/leven/blob/master/index.js
 
 /* eslint-disable complexity, import/no-mutable-exports, no-multi-assign, no-nested-ternary, no-plusplus */
@@ -60019,7 +60587,7 @@ var leven = function leven() {
   return 0;
 };
 
-if (false) {
+if (process.env.NODE_ENV !== 'production') {
   var arr = [];
   var charCodeCache = [];
 
@@ -60058,6 +60626,7 @@ if (false) {
 }
 
 /* harmony default export */ __webpack_exports__["a"] = (leven);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -60194,7 +60763,7 @@ function numberToWord(value) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -60225,32 +60794,33 @@ function Accordion(props) {
       fluid = props.fluid,
       inverted = props.inverted,
       styled = props.styled;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(styled, 'styled'), className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(Accordion, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(styled, 'styled'), className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(Accordion, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__AccordionAccordion__["a" /* default */], __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }));
 }
 
 Accordion.handledProps = ["className", "fluid", "inverted", "styled"];
-Accordion.propTypes =  false ? {
+Accordion.propTypes = process.env.NODE_ENV !== "production" ? {
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Format to take up the width of its container. */
-  fluid: PropTypes.bool,
+  fluid: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Format for dark backgrounds. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Adds some basic styling to accordion panels. */
-  styled: PropTypes.bool
+  styled: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool
 } : {};
 Accordion.Accordion = __WEBPACK_IMPORTED_MODULE_5__AccordionAccordion__["a" /* default */];
 Accordion.Content = __WEBPACK_IMPORTED_MODULE_6__AccordionContent__["a" /* default */];
 Accordion.Panel = __WEBPACK_IMPORTED_MODULE_7__AccordionPanel__["a" /* default */];
 Accordion.Title = __WEBPACK_IMPORTED_MODULE_8__AccordionTitle__["a" /* default */];
 /* unused harmony default export */ var _unused_webpack_default_export = (Accordion);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -60258,7 +60828,7 @@ Accordion.Title = __WEBPACK_IMPORTED_MODULE_8__AccordionTitle__["a" /* default *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AccordionAccordion; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AccordionAccordion; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_toConsumableArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/toConsumableArray.js");
@@ -60378,8 +60948,8 @@ function (_Component) {
           children = _this$props.children,
           panels = _this$props.panels;
       var classes = __WEBPACK_IMPORTED_MODULE_13_classnames___default()('accordion', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_16__lib__["q" /* getUnhandledProps */])(AccordionAccordion, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_16__lib__["p" /* getElementType */])(AccordionAccordion, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_16__lib__["r" /* getUnhandledProps */])(AccordionAccordion, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_16__lib__["q" /* getElementType */])(AccordionAccordion, this.props);
       return __WEBPACK_IMPORTED_MODULE_15_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         className: classes
       }), __WEBPACK_IMPORTED_MODULE_16__lib__["c" /* childrenUtils */].isNil(children) ? __WEBPACK_IMPORTED_MODULE_9_lodash_map___default()(panels, function (panel, index) {
@@ -60406,24 +60976,24 @@ __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Ac
 __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(AccordionAccordion, "handledProps", ["activeIndex", "as", "children", "className", "defaultActiveIndex", "exclusive", "onTitleClick", "panels"]);
 
 
-AccordionAccordion.propTypes =  false ? {
+AccordionAccordion.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_16__lib__["m" /* customPropTypes */].as,
 
   /** Index of the currently active panel. */
-  activeIndex: customPropTypes.every([customPropTypes.disallow(['children']), PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.number), PropTypes.number])]),
+  activeIndex: __WEBPACK_IMPORTED_MODULE_16__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_16__lib__["m" /* customPropTypes */].disallow(['children']), __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.number), __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.number])]),
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.string,
 
   /** Initial activeIndex value. */
-  defaultActiveIndex: customPropTypes.every([customPropTypes.disallow(['children']), PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.number), PropTypes.number])]),
+  defaultActiveIndex: __WEBPACK_IMPORTED_MODULE_16__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_16__lib__["m" /* customPropTypes */].disallow(['children']), __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.number), __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.number])]),
 
   /** Only allow one panel open at a time. */
-  exclusive: PropTypes.bool,
+  exclusive: __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.bool,
 
   /**
    * Called when a panel title is clicked.
@@ -60431,12 +61001,12 @@ AccordionAccordion.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All item props.
    */
-  onTitleClick: customPropTypes.every([customPropTypes.disallow(['children']), PropTypes.func]),
+  onTitleClick: __WEBPACK_IMPORTED_MODULE_16__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_16__lib__["m" /* customPropTypes */].disallow(['children']), __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.func]),
 
   /** Shorthand array of props for Accordion. */
-  panels: customPropTypes.every([customPropTypes.disallow(['children']), PropTypes.arrayOf(PropTypes.shape({
-    content: customPropTypes.itemShorthand,
-    title: customPropTypes.itemShorthand
+  panels: __WEBPACK_IMPORTED_MODULE_16__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_16__lib__["m" /* customPropTypes */].disallow(['children']), __WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_14_prop_types___default.a.shape({
+    content: __WEBPACK_IMPORTED_MODULE_16__lib__["m" /* customPropTypes */].itemShorthand,
+    title: __WEBPACK_IMPORTED_MODULE_16__lib__["m" /* customPropTypes */].itemShorthand
   }))])
 } : {};
 AccordionAccordion.create = Object(__WEBPACK_IMPORTED_MODULE_16__lib__["l" /* createShorthandFactory */])(AccordionAccordion, function (content) {
@@ -60444,6 +61014,7 @@ AccordionAccordion.create = Object(__WEBPACK_IMPORTED_MODULE_16__lib__["l" /* cr
     content: content
   };
 });
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -60451,7 +61022,7 @@ AccordionAccordion.create = Object(__WEBPACK_IMPORTED_MODULE_16__lib__["l" /* cr
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -60474,30 +61045,30 @@ function AccordionContent(props) {
       children = props.children,
       className = props.className,
       content = props.content;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('content', Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(active, 'active'), className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(AccordionContent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(AccordionContent, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('content', Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(active, 'active'), className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(AccordionContent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(AccordionContent, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 AccordionContent.handledProps = ["active", "as", "children", "className", "content"];
-AccordionContent.propTypes =  false ? {
+AccordionContent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Whether or not the content is visible. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 AccordionContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(AccordionContent, function (content) {
   return {
@@ -60505,6 +61076,7 @@ AccordionContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* creat
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (AccordionContent);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -60512,7 +61084,7 @@ AccordionContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* creat
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_classCallCheck__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_createClass__ = __webpack_require__("./node_modules/@babel/runtime/helpers/createClass.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_createClass___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_createClass__);
@@ -60614,15 +61186,15 @@ function (_Component) {
 
 __WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_defineProperty___default()(AccordionPanel, "handledProps", ["active", "content", "index", "onTitleClick", "title"]);
 
-AccordionPanel.propTypes =  false ? {
+AccordionPanel.propTypes = process.env.NODE_ENV !== "production" ? {
   /** Whether or not the title is in the open state. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.bool,
 
   /** A shorthand for Accordion.Content. */
-  content: customPropTypes.itemShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_10__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A panel index. */
-  index: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  index: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.string]),
 
   /**
    * Called when a panel title is clicked.
@@ -60630,13 +61202,14 @@ AccordionPanel.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All item props.
    */
-  onTitleClick: PropTypes.func,
+  onTitleClick: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.func,
 
   /** A shorthand for Accordion.Title. */
-  title: customPropTypes.itemShorthand
+  title: __WEBPACK_IMPORTED_MODULE_10__lib__["m" /* customPropTypes */].itemShorthand
 } : {};
 AccordionPanel.create = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["l" /* createShorthandFactory */])(AccordionPanel, null);
 /* harmony default export */ __webpack_exports__["a"] = (AccordionPanel);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -60644,7 +61217,7 @@ AccordionPanel.create = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["l" /* create
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AccordionTitle; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AccordionTitle; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -60725,9 +61298,9 @@ function (_Component) {
           children = _this$props.children,
           className = _this$props.className,
           content = _this$props.content;
-      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(active, 'active'), 'title', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getUnhandledProps */])(AccordionTitle, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["p" /* getElementType */])(AccordionTitle, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(active, 'active'), 'title', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["r" /* getUnhandledProps */])(AccordionTitle, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getElementType */])(AccordionTitle, this.props);
 
       if (__WEBPACK_IMPORTED_MODULE_8_lodash_isNil___default()(content)) {
         return __WEBPACK_IMPORTED_MODULE_12_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -60751,24 +61324,24 @@ function (_Component) {
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(AccordionTitle, "handledProps", ["active", "as", "children", "className", "content", "index", "onClick"]);
 
 
-AccordionTitle.propTypes =  false ? {
+AccordionTitle.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].as,
 
   /** Whether or not the title is in the open state. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** AccordionTitle index inside Accordion. */
-  index: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  index: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.number]),
 
   /**
    * Called on click.
@@ -60776,13 +61349,14 @@ AccordionTitle.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClick: PropTypes.func
+  onClick: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func
 } : {};
 AccordionTitle.create = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["l" /* createShorthandFactory */])(AccordionTitle, function (content) {
   return {
     content: content
   };
 });
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -60790,7 +61364,7 @@ AccordionTitle.create = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["l" /* create
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Checkbox; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Checkbox; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_slicedToArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/slicedToArray.js");
@@ -60966,14 +61540,14 @@ function (_Component) {
       var _this$state3 = this.state,
           checked = _this$state3.checked,
           indeterminate = _this$state3.indeterminate;
-      var classes = __WEBPACK_IMPORTED_MODULE_12_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(checked, 'checked'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(indeterminate, 'indeterminate'), // auto apply fitted class to compact white space when there is no label
+      var classes = __WEBPACK_IMPORTED_MODULE_12_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(checked, 'checked'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(indeterminate, 'indeterminate'), // auto apply fitted class to compact white space when there is no label
       // https://semantic-ui.com/modules/checkbox.html#fitted
-      Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(__WEBPACK_IMPORTED_MODULE_11_lodash_isNil___default()(label), 'fitted'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(radio, 'radio'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(readOnly, 'read-only'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(slider, 'slider'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(toggle, 'toggle'), 'checkbox', className);
-      var unhandled = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["q" /* getUnhandledProps */])(Checkbox, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["p" /* getElementType */])(Checkbox, this.props);
+      Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(__WEBPACK_IMPORTED_MODULE_11_lodash_isNil___default()(label), 'fitted'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(radio, 'radio'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(readOnly, 'read-only'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(slider, 'slider'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(toggle, 'toggle'), 'checkbox', className);
+      var unhandled = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["r" /* getUnhandledProps */])(Checkbox, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["q" /* getElementType */])(Checkbox, this.props);
 
-      var _partitionHTMLProps = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["w" /* partitionHTMLProps */])(unhandled, {
-        htmlProps: __WEBPACK_IMPORTED_MODULE_15__lib__["r" /* htmlInputAttrs */]
+      var _partitionHTMLProps = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* partitionHTMLProps */])(unhandled, {
+        htmlProps: __WEBPACK_IMPORTED_MODULE_15__lib__["s" /* htmlInputAttrs */]
       }),
           _partitionHTMLProps2 = __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_slicedToArray___default()(_partitionHTMLProps, 2),
           htmlInputProps = _partitionHTMLProps2[0],
@@ -61019,39 +61593,39 @@ __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(Ch
 __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(Checkbox, "handledProps", ["as", "checked", "className", "defaultChecked", "defaultIndeterminate", "disabled", "fitted", "id", "indeterminate", "label", "name", "onChange", "onClick", "onMouseDown", "radio", "readOnly", "slider", "tabIndex", "toggle", "type", "value"]);
 
 
-Checkbox.propTypes =  false ? {
+Checkbox.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].as,
 
   /** Whether or not checkbox is checked. */
-  checked: PropTypes.bool,
+  checked: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string,
 
   /** The initial value of checked. */
-  defaultChecked: PropTypes.bool,
+  defaultChecked: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** Whether or not checkbox is indeterminate. */
-  defaultIndeterminate: PropTypes.bool,
+  defaultIndeterminate: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** A checkbox can appear disabled and be unable to change states */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** Removes padding for a label. Auto applied when there is no label. */
-  fitted: PropTypes.bool,
+  fitted: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** A unique identifier. */
-  id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  id: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string]),
 
   /** Whether or not checkbox is indeterminate. */
-  indeterminate: PropTypes.bool,
+  indeterminate: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** The text of the associated label element. */
-  label: customPropTypes.itemShorthand,
+  label: __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** The HTML input name. */
-  name: PropTypes.string,
+  name: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string,
 
   /**
    * Called when the user attempts to change the checked state.
@@ -61059,7 +61633,7 @@ Checkbox.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props and proposed checked/indeterminate state.
    */
-  onChange: PropTypes.func,
+  onChange: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.func,
 
   /**
    * Called when the checkbox or label is clicked.
@@ -61067,7 +61641,7 @@ Checkbox.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props and current checked/indeterminate state.
    */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.func,
 
   /**
    * Called when the user presses down on the mouse.
@@ -61075,29 +61649,30 @@ Checkbox.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props and current checked/indeterminate state.
    */
-  onMouseDown: PropTypes.func,
+  onMouseDown: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.func,
 
   /** Format as a radio element. This means it is an exclusive option. */
-  radio: customPropTypes.every([PropTypes.bool, customPropTypes.disallow(['slider', 'toggle'])]),
+  radio: __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].disallow(['slider', 'toggle'])]),
 
   /** A checkbox can be read-only and unable to change states. */
-  readOnly: PropTypes.bool,
+  readOnly: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** Format to emphasize the current selection state. */
-  slider: customPropTypes.every([PropTypes.bool, customPropTypes.disallow(['radio', 'toggle'])]),
+  slider: __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].disallow(['radio', 'toggle'])]),
 
   /** A checkbox can receive focus. */
-  tabIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  tabIndex: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string]),
 
   /** Format to show an on or off choice. */
-  toggle: customPropTypes.every([PropTypes.bool, customPropTypes.disallow(['radio', 'slider'])]),
+  toggle: __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].disallow(['radio', 'slider'])]),
 
   /** HTML input type, either checkbox or radio. */
-  type: PropTypes.oneOf(['checkbox', 'radio']),
+  type: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOf(['checkbox', 'radio']),
 
   /** The HTML input value. */
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+  value: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string, __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.number])
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -61116,7 +61691,7 @@ Checkbox.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Dimmer; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Dimmer; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -61178,14 +61753,14 @@ function (_Component) {
     _this = __WEBPACK_IMPORTED_MODULE_3__babel_runtime_helpers_possibleConstructorReturn___default()(this, (_getPrototypeOf2 = __WEBPACK_IMPORTED_MODULE_4__babel_runtime_helpers_getPrototypeOf___default()(Dimmer)).call.apply(_getPrototypeOf2, [this].concat(args)));
 
     __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handlePortalMount", function () {
-      if (!Object(__WEBPACK_IMPORTED_MODULE_10__lib__["s" /* isBrowser */])()) return; // Heads up, IE doesn't support second argument in add()
+      if (!Object(__WEBPACK_IMPORTED_MODULE_10__lib__["t" /* isBrowser */])()) return; // Heads up, IE doesn't support second argument in add()
 
       document.body.classList.add('dimmed');
       document.body.classList.add('dimmable');
     });
 
     __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handlePortalUnmount", function () {
-      if (!Object(__WEBPACK_IMPORTED_MODULE_10__lib__["s" /* isBrowser */])()) return; // Heads up, IE doesn't support second argument in add()
+      if (!Object(__WEBPACK_IMPORTED_MODULE_10__lib__["t" /* isBrowser */])()) return; // Heads up, IE doesn't support second argument in add()
 
       document.body.classList.remove('dimmed');
       document.body.classList.remove('dimmable');
@@ -61200,7 +61775,7 @@ function (_Component) {
       var _this$props = this.props,
           active = _this$props.active,
           page = _this$props.page;
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["q" /* getUnhandledProps */])(Dimmer, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["r" /* getUnhandledProps */])(Dimmer, this.props);
 
       if (page) {
         return __WEBPACK_IMPORTED_MODULE_9_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_11__addons_Portal__["a" /* default */], {
@@ -61233,18 +61808,19 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Di
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Dimmer, "handledProps", ["active", "page"]);
 
 
-Dimmer.propTypes =  false ? {
+Dimmer.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An active dimmer will dim its parent container. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.bool,
 
   /** A dimmer can be formatted to be fixed to the page. */
-  page: PropTypes.bool
+  page: __WEBPACK_IMPORTED_MODULE_8_prop_types___default.a.bool
 } : {};
 Dimmer.create = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["l" /* createShorthandFactory */])(Dimmer, function (value) {
   return {
     content: value
   };
 });
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -61252,7 +61828,7 @@ Dimmer.create = Object(__WEBPACK_IMPORTED_MODULE_10__lib__["l" /* createShorthan
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -61276,35 +61852,36 @@ function DimmerDimmable(props) {
       children = props.children,
       content = props.content,
       dimmed = props.dimmed;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(blurring, 'blurring'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(dimmed, 'dimmed'), 'dimmable', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(DimmerDimmable, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(DimmerDimmable, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(blurring, 'blurring'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(dimmed, 'dimmed'), 'dimmable', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(DimmerDimmable, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(DimmerDimmable, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 DimmerDimmable.handledProps = ["as", "blurring", "children", "className", "content", "dimmed"];
-DimmerDimmable.propTypes =  false ? {
+DimmerDimmable.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** A dimmable element can blur its contents. */
-  blurring: PropTypes.bool,
+  blurring: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Controls whether or not the dim is displayed. */
-  dimmed: PropTypes.bool
+  dimmed: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (DimmerDimmable);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -61312,7 +61889,7 @@ DimmerDimmable.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DimmerInner; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DimmerInner; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -61376,7 +61953,7 @@ function (_Component) {
     __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handleClick", function (e) {
       __WEBPACK_IMPORTED_MODULE_8_lodash_invoke___default()(_this.props, 'onClick', e, _this.props);
 
-      if (_this.contentRef && _this.contentRef !== e.target && Object(__WEBPACK_IMPORTED_MODULE_12__lib__["m" /* doesNodeContainClick */])(_this.contentRef, e)) {
+      if (_this.contentRef && _this.contentRef !== e.target && Object(__WEBPACK_IMPORTED_MODULE_12__lib__["n" /* doesNodeContainClick */])(_this.contentRef, e)) {
         return;
       }
 
@@ -61432,9 +62009,9 @@ function (_Component) {
           page = _this$props.page,
           simple = _this$props.simple,
           verticalAlign = _this$props.verticalAlign;
-      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(active, 'active transition visible'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(page, 'page'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(simple, 'simple'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["D" /* useVerticalAlignProp */])(verticalAlign), 'dimmer', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getUnhandledProps */])(DimmerInner, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["p" /* getElementType */])(DimmerInner, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(active, 'active transition visible'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(page, 'page'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(simple, 'simple'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["F" /* useVerticalAlignProp */])(verticalAlign), 'dimmer', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["r" /* getUnhandledProps */])(DimmerInner, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getElementType */])(DimmerInner, this.props);
       var childrenContent = __WEBPACK_IMPORTED_MODULE_12__lib__["c" /* childrenUtils */].isNil(children) ? content : children;
       return __WEBPACK_IMPORTED_MODULE_11_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         className: classes,
@@ -61453,24 +62030,24 @@ function (_Component) {
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(DimmerInner, "handledProps", ["active", "as", "children", "className", "content", "disabled", "inverted", "onClick", "onClickOutside", "page", "simple", "verticalAlign"]);
 
 
-DimmerInner.propTypes =  false ? {
+DimmerInner.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].as,
 
   /** An active dimmer will dim its parent container. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A disabled dimmer cannot be activated */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /**
    * Called on click.
@@ -61478,7 +62055,7 @@ DimmerInner.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /**
    * Handles click outside Dimmer's content, but inside Dimmer area.
@@ -61486,20 +62063,21 @@ DimmerInner.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClickOutside: PropTypes.func,
+  onClickOutside: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /** A dimmer can be formatted to have its colors inverted. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** A dimmer can be formatted to be fixed to the page. */
-  page: PropTypes.bool,
+  page: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** A dimmer can be controlled with simple prop. */
-  simple: PropTypes.bool,
+  simple: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** A dimmer can have its content top or bottom aligned. */
-  verticalAlign: PropTypes.oneOf(['bottom', 'top'])
+  verticalAlign: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.oneOf(['bottom', 'top'])
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -61518,7 +62096,7 @@ DimmerInner.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Dropdown; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Dropdown; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
@@ -61801,27 +62379,27 @@ function (_Component) {
     __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_assertThisInitialized___default()(_this)), "closeOnDocumentClick", function (e) {
       if (!_this.props.closeOnBlur) return; // If event happened in the dropdown, ignore it
 
-      if (_this.ref && Object(__WEBPACK_IMPORTED_MODULE_38__lib__["m" /* doesNodeContainClick */])(_this.ref, e)) return;
+      if (_this.ref && Object(__WEBPACK_IMPORTED_MODULE_38__lib__["n" /* doesNodeContainClick */])(_this.ref, e)) return;
 
       _this.close();
     });
 
     __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_assertThisInitialized___default()(_this)), "attachHandlersOnOpen", function () {
-      __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].sub('keydown', [_this.closeOnEscape, _this.moveSelectionOnKeyDown, _this.selectItemOnEnter, _this.removeItemOnBackspace]);
-      __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].sub('click', _this.closeOnDocumentClick);
-      __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].unsub('keydown', [_this.openOnArrow, _this.openOnSpace]);
+      __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].sub('keydown', [_this.closeOnEscape, _this.moveSelectionOnKeyDown, _this.selectItemOnEnter, _this.removeItemOnBackspace]);
+      __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].sub('click', _this.closeOnDocumentClick);
+      __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].unsub('keydown', [_this.openOnArrow, _this.openOnSpace]);
     });
 
     __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handleMouseDown", function (e) {
       _this.isMouseDown = true;
-      __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].sub('mouseup', _this.handleDocumentMouseUp);
+      __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].sub('mouseup', _this.handleDocumentMouseUp);
 
       __WEBPACK_IMPORTED_MODULE_30_lodash_invoke___default()(_this.props, 'onMouseDown', e, _this.props);
     });
 
     __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handleDocumentMouseUp", function () {
       _this.isMouseDown = false;
-      __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].unsub('mouseup', _this.handleDocumentMouseUp);
+      __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].unsub('mouseup', _this.handleDocumentMouseUp);
     });
 
     __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handleClick", function (e) {
@@ -62483,7 +63061,7 @@ function (_Component) {
 
       if (!__WEBPACK_IMPORTED_MODULE_38__lib__["c" /* childrenUtils */].isNil(children)) {
         var menuChild = __WEBPACK_IMPORTED_MODULE_37_react__["Children"].only(children);
-        var className = __WEBPACK_IMPORTED_MODULE_34_classnames___default()(direction, Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(open, 'visible'), menuChild.props.className);
+        var className = __WEBPACK_IMPORTED_MODULE_34_classnames___default()(direction, Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(open, 'visible'), menuChild.props.className);
         return Object(__WEBPACK_IMPORTED_MODULE_37_react__["cloneElement"])(menuChild, __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread___default()({
           className: className
         }, ariaOptions));
@@ -62527,11 +63105,11 @@ function (_Component) {
       __WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_get___default()(__WEBPACK_IMPORTED_MODULE_5__babel_runtime_helpers_getPrototypeOf___default()(Dropdown.prototype), "componentWillReceiveProps", this).call(this, nextProps);
 
       /* eslint-disable no-console */
-      if (false) {
+      if (process.env.NODE_ENV !== 'production') {
         // in development, validate value type matches dropdown type
         var isNextValueArray = Array.isArray(nextProps.value);
 
-        var hasValue = _has(nextProps, 'value');
+        var hasValue = __WEBPACK_IMPORTED_MODULE_32_lodash_has___default()(nextProps, 'value');
 
         if (hasValue && nextProps.multiple && !isNextValueArray) {
           console.error('Dropdown `value` must be an array when `multiple` is set.' + " Received type: `".concat(Object.prototype.toString.call(nextProps.value), "`."));
@@ -62542,7 +63120,7 @@ function (_Component) {
       /* eslint-enable no-console */
 
 
-      if (!Object(__WEBPACK_IMPORTED_MODULE_38__lib__["x" /* shallowEqual */])(nextProps.value, this.props.value)) {
+      if (!Object(__WEBPACK_IMPORTED_MODULE_38__lib__["z" /* shallowEqual */])(nextProps.value, this.props.value)) {
         this.setValue(nextProps.value);
         this.setSelectedIndex(nextProps.value);
       } // The selected index is only dependent on option keys/values.
@@ -62557,7 +63135,7 @@ function (_Component) {
   }, {
     key: "shouldComponentUpdate",
     value: function shouldComponentUpdate(nextProps, nextState) {
-      return !Object(__WEBPACK_IMPORTED_MODULE_38__lib__["x" /* shallowEqual */])(nextProps, this.props) || !Object(__WEBPACK_IMPORTED_MODULE_38__lib__["x" /* shallowEqual */])(nextState, this.state);
+      return !Object(__WEBPACK_IMPORTED_MODULE_38__lib__["z" /* shallowEqual */])(nextProps, this.props) || !Object(__WEBPACK_IMPORTED_MODULE_38__lib__["z" /* shallowEqual */])(nextState, this.state);
     }
   }, {
     key: "componentDidUpdate",
@@ -62575,12 +63153,12 @@ function (_Component) {
         }
 
         if (!this.state.open) {
-          __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].sub('keydown', [this.openOnArrow, this.openOnSpace]);
+          __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].sub('keydown', [this.openOnArrow, this.openOnSpace]);
         } else {
-          __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].sub('keydown', [this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
+          __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].sub('keydown', [this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
         }
 
-        __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].sub('keydown', this.removeItemOnBackspace);
+        __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].sub('keydown', this.removeItemOnBackspace);
       } else if (prevState.focus && !this.state.focus) {
         var closeOnBlur = this.props.closeOnBlur;
 
@@ -62588,7 +63166,7 @@ function (_Component) {
           this.close();
         }
 
-        __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].unsub('keydown', [this.openOnArrow, this.openOnSpace, this.moveSelectionOnKeyDown, this.selectItemOnEnter, this.removeItemOnBackspace]);
+        __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].unsub('keydown', [this.openOnArrow, this.openOnSpace, this.moveSelectionOnKeyDown, this.selectItemOnEnter, this.removeItemOnBackspace]);
       } // opened / closed
 
 
@@ -62598,19 +63176,19 @@ function (_Component) {
         this.scrollSelectedItemIntoView();
       } else if (prevState.open && !this.state.open) {
         this.handleClose();
-        __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].unsub('keydown', [this.closeOnEscape, this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
-        __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].unsub('click', this.closeOnDocumentClick);
+        __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].unsub('keydown', [this.closeOnEscape, this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
+        __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].unsub('click', this.closeOnDocumentClick);
 
         if (!this.state.focus) {
-          __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].unsub('keydown', this.removeItemOnBackspace);
+          __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].unsub('keydown', this.removeItemOnBackspace);
         }
       }
     }
   }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
-      __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].unsub('keydown', [this.openOnArrow, this.openOnSpace, this.moveSelectionOnKeyDown, this.selectItemOnEnter, this.removeItemOnBackspace, this.closeOnEscape]);
-      __WEBPACK_IMPORTED_MODULE_38__lib__["n" /* eventStack */].unsub('click', this.closeOnDocumentClick);
+      __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].unsub('keydown', [this.openOnArrow, this.openOnSpace, this.moveSelectionOnKeyDown, this.selectItemOnEnter, this.removeItemOnBackspace, this.closeOnEscape]);
+      __WEBPACK_IMPORTED_MODULE_38__lib__["o" /* eventStack */].unsub('click', this.closeOnDocumentClick);
     } // ----------------------------------------
     // Document Event Handlers
     // ----------------------------------------
@@ -62663,13 +63241,13 @@ function (_Component) {
           open = _this$state7.open,
           upward = _this$state7.upward; // Classes
 
-      var classes = __WEBPACK_IMPORTED_MODULE_34_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(open, 'active visible'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(button, 'button'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(floating, 'floating'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(inline, 'inline'), // TODO: consider augmentation to render Dropdowns as Button/Menu, solves icon/link item issues
+      var classes = __WEBPACK_IMPORTED_MODULE_34_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(open, 'active visible'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(button, 'button'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(compact, 'compact'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(floating, 'floating'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(inline, 'inline'), // TODO: consider augmentation to render Dropdowns as Button/Menu, solves icon/link item issues
       // https://github.com/Semantic-Org/Semantic-UI-React/issues/401#issuecomment-240487229
       // TODO: the icon class is only required when a dropdown is a button
       // useKeyOnly(icon, 'icon'),
-      Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(labeled, 'labeled'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(item, 'item'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(multiple, 'multiple'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(search, 'search'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(selection, 'selection'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(simple, 'simple'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(scrolling, 'scrolling'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["y" /* useKeyOnly */])(upward, 'upward'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["z" /* useKeyOrValueAndKey */])(pointing, 'pointing'), 'dropdown', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_38__lib__["q" /* getUnhandledProps */])(Dropdown, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_38__lib__["p" /* getElementType */])(Dropdown, this.props);
+      Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(labeled, 'labeled'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(item, 'item'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(multiple, 'multiple'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(search, 'search'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(selection, 'selection'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(simple, 'simple'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(scrolling, 'scrolling'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["A" /* useKeyOnly */])(upward, 'upward'), Object(__WEBPACK_IMPORTED_MODULE_38__lib__["B" /* useKeyOrValueAndKey */])(pointing, 'pointing'), 'dropdown', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_38__lib__["r" /* getUnhandledProps */])(Dropdown, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_38__lib__["q" /* getElementType */])(Dropdown, this.props);
       var ariaOptions = this.getDropdownAriaOptions(ElementType, this.props);
       return __WEBPACK_IMPORTED_MODULE_37_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, ariaOptions, {
         className: classes,
@@ -62724,111 +63302,111 @@ __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(Dr
 __WEBPACK_IMPORTED_MODULE_9__babel_runtime_helpers_defineProperty___default()(Dropdown, "handledProps", ["additionLabel", "additionPosition", "allowAdditions", "as", "basic", "button", "children", "className", "closeOnBlur", "closeOnChange", "compact", "deburr", "defaultOpen", "defaultSearchQuery", "defaultSelectedLabel", "defaultUpward", "defaultValue", "direction", "disabled", "error", "floating", "fluid", "header", "icon", "inline", "item", "labeled", "lazyLoad", "loading", "minCharacters", "multiple", "noResultsMessage", "onAddItem", "onBlur", "onChange", "onClick", "onClose", "onFocus", "onLabelClick", "onMouseDown", "onOpen", "onSearchChange", "open", "openOnFocus", "options", "placeholder", "pointing", "renderLabel", "scrolling", "search", "searchInput", "searchQuery", "selectOnBlur", "selectOnNavigation", "selectedLabel", "selection", "simple", "tabIndex", "text", "trigger", "upward", "value", "wrapSelection"]);
 
 
-Dropdown.propTypes =  false ? {
+Dropdown.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].as,
 
   /** Label prefixed to an option added by a user. */
-  additionLabel: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
+  additionLabel: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.element, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string]),
 
   /** Position of the `Add: ...` option in the dropdown list ('top' or 'bottom'). */
-  additionPosition: PropTypes.oneOf(['top', 'bottom']),
+  additionPosition: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOf(['top', 'bottom']),
 
   /**
    * Allow user additions to the list of options (boolean).
    * Requires the use of `selection`, `options` and `search`.
    */
-  allowAdditions: customPropTypes.every([customPropTypes.demand(['options', 'selection', 'search']), PropTypes.bool]),
+  allowAdditions: __WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].demand(['options', 'selection', 'search']), __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool]),
 
   /** A Dropdown can reduce its complexity. */
-  basic: PropTypes.bool,
+  basic: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** Format the Dropdown to appear as a button. */
-  button: PropTypes.bool,
+  button: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: customPropTypes.every([customPropTypes.disallow(['options', 'selection']), customPropTypes.givenProps({
-    children: PropTypes.any.isRequired
-  }, PropTypes.element.isRequired)]),
+  children: __WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].disallow(['options', 'selection']), __WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].givenProps({
+    children: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.any.isRequired
+  }, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.element.isRequired)]),
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string,
 
   /** Whether or not the menu should close when the dropdown is blurred. */
-  closeOnBlur: PropTypes.bool,
+  closeOnBlur: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /**
    * Whether or not the menu should close when a value is selected from the dropdown.
    * By default, multiple selection dropdowns will remain open on change, while single
    * selection dropdowns will close on change.
    */
-  closeOnChange: PropTypes.bool,
+  closeOnChange: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** A compact dropdown has no minimum width. */
-  compact: PropTypes.bool,
+  compact: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** Whether or not the dropdown should strip diacritics in options and input search */
-  deburr: PropTypes.bool,
+  deburr: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** Initial value of open. */
-  defaultOpen: PropTypes.bool,
+  defaultOpen: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** Initial value of searchQuery. */
-  defaultSearchQuery: PropTypes.string,
+  defaultSearchQuery: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string,
 
   /** Currently selected label in multi-select. */
-  defaultSelectedLabel: customPropTypes.every([customPropTypes.demand(['multiple']), PropTypes.oneOfType([PropTypes.number, PropTypes.string])]),
+  defaultSelectedLabel: __WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].demand(['multiple']), __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string])]),
 
   /** Initial value of upward. */
-  defaultUpward: PropTypes.bool,
+  defaultUpward: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** Initial value or value array if multiple. */
-  defaultValue: PropTypes.oneOfType([PropTypes.number, PropTypes.string, PropTypes.bool, PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]))]),
+  defaultValue: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool]))]),
 
   /** A dropdown menu can open to the left or to the right. */
-  direction: PropTypes.oneOf(['left', 'right']),
+  direction: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOf(['left', 'right']),
 
   /** A disabled dropdown menu or item does not allow user interaction. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** An errored dropdown can alert a user to a problem. */
-  error: PropTypes.bool,
+  error: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** A dropdown menu can contain floated content. */
-  floating: PropTypes.bool,
+  floating: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** A dropdown can take the full width of its parent */
-  fluid: PropTypes.bool,
+  fluid: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** A dropdown menu can contain a header. */
-  header: PropTypes.node,
+  header: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.node,
 
   /** Shorthand for Icon. */
-  icon: PropTypes.oneOfType([PropTypes.node, PropTypes.object]),
+  icon: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.node, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.object]),
 
   /** A dropdown can be formatted to appear inline in other content. */
-  inline: PropTypes.bool,
+  inline: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** A dropdown can be formatted as a Menu item. */
-  item: PropTypes.bool,
+  item: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** A dropdown can be labeled. */
-  labeled: PropTypes.bool,
+  labeled: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** A dropdown can defer rendering its options until it is open. */
-  lazyLoad: PropTypes.bool,
+  lazyLoad: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** A dropdown can show that it is currently loading data. */
-  loading: PropTypes.bool,
+  loading: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** The minimum characters for a search to begin showing results. */
-  minCharacters: PropTypes.number,
+  minCharacters: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.number,
 
   /** A selection dropdown can allow multiple selections. */
-  multiple: PropTypes.bool,
+  multiple: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** Message to display when there are no results. */
-  noResultsMessage: PropTypes.string,
+  noResultsMessage: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string,
 
   /**
    * Called when a user adds a new item. Use this to update the options list.
@@ -62836,7 +63414,7 @@ Dropdown.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props and the new item's value.
    */
-  onAddItem: PropTypes.func,
+  onAddItem: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.func,
 
   /**
    * Called on blur.
@@ -62844,7 +63422,7 @@ Dropdown.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onBlur: PropTypes.func,
+  onBlur: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.func,
 
   /**
    * Called when the user attempts to change the value.
@@ -62852,7 +63430,7 @@ Dropdown.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props and proposed value.
    */
-  onChange: PropTypes.func,
+  onChange: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.func,
 
   /**
    * Called on click.
@@ -62860,7 +63438,7 @@ Dropdown.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.func,
 
   /**
    * Called when a close event happens.
@@ -62868,7 +63446,7 @@ Dropdown.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClose: PropTypes.func,
+  onClose: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.func,
 
   /**
    * Called on focus.
@@ -62876,7 +63454,7 @@ Dropdown.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onFocus: PropTypes.func,
+  onFocus: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.func,
 
   /**
    * Called when a multi-select label is clicked.
@@ -62884,7 +63462,7 @@ Dropdown.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All label props.
    */
-  onLabelClick: PropTypes.func,
+  onLabelClick: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.func,
 
   /**
    * Called on mousedown.
@@ -62892,7 +63470,7 @@ Dropdown.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onMouseDown: PropTypes.func,
+  onMouseDown: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.func,
 
   /**
    * Called when an open event happens.
@@ -62900,7 +63478,7 @@ Dropdown.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onOpen: PropTypes.func,
+  onOpen: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.func,
 
   /**
    * Called on search input change.
@@ -62908,22 +63486,22 @@ Dropdown.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props, includes current value of searchQuery.
    */
-  onSearchChange: PropTypes.func,
+  onSearchChange: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.func,
 
   /** Controls whether or not the dropdown menu is displayed. */
-  open: PropTypes.bool,
+  open: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** Whether or not the menu should open when the dropdown is focused. */
-  openOnFocus: PropTypes.bool,
+  openOnFocus: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** Array of Dropdown.Item props e.g. `{ text: '', value: '' }` */
-  options: customPropTypes.every([customPropTypes.disallow(['children']), PropTypes.arrayOf(PropTypes.shape(DropdownItem.propTypes))]),
+  options: __WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].disallow(['children']), __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.shape(__WEBPACK_IMPORTED_MODULE_42__DropdownItem__["a" /* default */].propTypes))]),
 
   /** Placeholder text. */
-  placeholder: PropTypes.string,
+  placeholder: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string,
 
   /** A dropdown can be formatted so that its menu is pointing. */
-  pointing: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['left', 'right', 'top', 'top left', 'top right', 'bottom', 'bottom left', 'bottom right'])]),
+  pointing: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOf(['left', 'right', 'top', 'top left', 'top right', 'bottom', 'bottom left', 'bottom right'])]),
 
   /**
    * Mapped over the active items and returns shorthand for the active item Labels.
@@ -62934,63 +63512,64 @@ Dropdown.propTypes =  false ? {
    * @param {object} defaultLabelProps - The default props for an active item Label.
    * @returns {*} Shorthand for a Label.
    */
-  renderLabel: PropTypes.func,
+  renderLabel: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.func,
 
   /** A dropdown can have its menu scroll. */
-  scrolling: PropTypes.bool,
+  scrolling: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /**
    * A selection dropdown can allow a user to search through a large list of choices.
    * Pass a function here to replace the default search.
    */
-  search: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
+  search: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.func]),
 
   /** A shorthand for a search input. */
-  searchInput: PropTypes.oneOfType([PropTypes.array, PropTypes.node, PropTypes.object]),
+  searchInput: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.array, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.node, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.object]),
 
   /** Current value of searchQuery. Creates a controlled component. */
-  searchQuery: PropTypes.string,
+  searchQuery: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string,
   // TODO 'searchInMenu' or 'search='in menu' or ???  How to handle this markup and functionality?
 
   /** Define whether the highlighted item should be selected on blur. */
-  selectOnBlur: PropTypes.bool,
+  selectOnBlur: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /**
    * Whether or not to change the value when navigating the menu using arrow keys.
    * Setting to false will require enter or left click to confirm a choice.
    */
-  selectOnNavigation: PropTypes.bool,
+  selectOnNavigation: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** Currently selected label in multi-select. */
-  selectedLabel: customPropTypes.every([customPropTypes.demand(['multiple']), PropTypes.oneOfType([PropTypes.string, PropTypes.number])]),
+  selectedLabel: __WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].demand(['multiple']), __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.number])]),
 
   /** A dropdown can be used to select between choices in a form. */
-  selection: customPropTypes.every([customPropTypes.disallow(['children']), customPropTypes.demand(['options']), PropTypes.bool]),
+  selection: __WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].disallow(['children']), __WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].demand(['options']), __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool]),
 
   /** A simple dropdown can open without Javascript. */
-  simple: PropTypes.bool,
+  simple: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /** A dropdown can receive focus. */
-  tabIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  tabIndex: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string]),
 
   /** The text displayed in the dropdown, usually for the active item. */
-  text: PropTypes.string,
+  text: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string,
 
   /** Custom element to trigger the menu to become visible. Takes place of 'text'. */
-  trigger: customPropTypes.every([customPropTypes.disallow(['selection', 'text']), PropTypes.node]),
+  trigger: __WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_38__lib__["m" /* customPropTypes */].disallow(['selection', 'text']), __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.node]),
 
   /** Current value or value array if multiple. Creates a controlled component. */
-  value: PropTypes.oneOfType([PropTypes.bool, PropTypes.string, PropTypes.number, PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.bool, PropTypes.string, PropTypes.number]))]),
+  value: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.string, __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.number]))]),
 
   /** Controls whether the dropdown will open upward. */
-  upward: PropTypes.bool,
+  upward: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool,
 
   /**
    * A dropdown will go to the last element when ArrowUp is pressed on the first,
    * or go to the first when ArrowDown is pressed on the last( aka infinite selection )
    */
-  wrapSelection: PropTypes.bool
+  wrapSelection: __WEBPACK_IMPORTED_MODULE_36_prop_types___default.a.bool
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -62998,7 +63577,7 @@ Dropdown.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -63019,22 +63598,23 @@ Dropdown.propTypes =  false ? {
 function DropdownDivider(props) {
   var className = props.className;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('divider', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(DropdownDivider, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(DropdownDivider, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(DropdownDivider, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(DropdownDivider, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }));
 }
 
 DropdownDivider.handledProps = ["as", "className"];
-DropdownDivider.propTypes =  false ? {
+DropdownDivider.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Additional classes. */
-  className: PropTypes.string
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (DropdownDivider);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -63042,7 +63622,7 @@ DropdownDivider.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -63068,8 +63648,8 @@ function DropdownHeader(props) {
       content = props.content,
       icon = props.icon;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('header', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(DropdownHeader, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(DropdownHeader, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(DropdownHeader, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(DropdownHeader, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -63085,21 +63665,21 @@ function DropdownHeader(props) {
 }
 
 DropdownHeader.handledProps = ["as", "children", "className", "content", "icon"];
-DropdownHeader.propTypes =  false ? {
+DropdownHeader.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function) */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Shorthand for Icon. */
-  icon: customPropTypes.itemShorthand
+  icon: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand
 } : {};
 DropdownHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(DropdownHeader, function (content) {
   return {
@@ -63107,6 +63687,7 @@ DropdownHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createS
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (DropdownHeader);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -63114,7 +63695,7 @@ DropdownHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createS
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__);
@@ -63206,11 +63787,11 @@ function (_Component) {
           label = _this$props.label,
           selected = _this$props.selected,
           text = _this$props.text;
-      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(selected, 'selected'), 'item', className); // add default dropdown icon if item contains another menu
+      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(selected, 'selected'), 'item', className); // add default dropdown icon if item contains another menu
 
       var iconName = __WEBPACK_IMPORTED_MODULE_8_lodash_isNil___default()(icon) ? __WEBPACK_IMPORTED_MODULE_12__lib__["c" /* childrenUtils */].someByType(children, 'DropdownMenu') && 'dropdown' : icon;
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getUnhandledProps */])(DropdownItem, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["p" /* getElementType */])(DropdownItem, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["r" /* getUnhandledProps */])(DropdownItem, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getElementType */])(DropdownItem, this.props);
       var ariaOptions = {
         role: 'option',
         'aria-disabled': disabled,
@@ -63269,39 +63850,39 @@ function (_Component) {
 
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(DropdownItem, "handledProps", ["active", "as", "children", "className", "content", "description", "disabled", "flag", "icon", "image", "label", "onClick", "selected", "text", "value"]);
 
-DropdownItem.propTypes =  false ? {
+DropdownItem.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].as,
 
   /** Style as the currently chosen item. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Additional text with less emphasis. */
-  description: customPropTypes.itemShorthand,
+  description: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A dropdown item can be disabled. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Shorthand for Flag. */
-  flag: customPropTypes.itemShorthand,
+  flag: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for Icon. */
-  icon: customPropTypes.itemShorthand,
+  icon: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for Image. */
-  image: customPropTypes.itemShorthand,
+  image: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for Label. */
-  label: customPropTypes.itemShorthand,
+  label: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand,
 
   /**
    * Called on click.
@@ -63309,24 +63890,25 @@ DropdownItem.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /**
    * The item currently selected by keyboard shortcut.
    * This is not the active item.
    */
-  selected: PropTypes.bool,
+  selected: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Display text. */
-  text: customPropTypes.contentShorthand,
+  text: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Stored value. */
-  value: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.string])
+  value: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string])
 } : {};
 DropdownItem.create = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["l" /* createShorthandFactory */])(DropdownItem, function (opts) {
   return opts;
 });
 /* harmony default export */ __webpack_exports__["a"] = (DropdownItem);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -63334,7 +63916,7 @@ DropdownItem.create = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["l" /* createSh
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -63359,38 +63941,39 @@ function DropdownMenu(props) {
       direction = props.direction,
       open = props.open,
       scrolling = props.scrolling;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(direction, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(open, 'visible'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(scrolling, 'scrolling'), 'menu transition', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(DropdownMenu, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(DropdownMenu, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(direction, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(open, 'visible'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(scrolling, 'scrolling'), 'menu transition', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(DropdownMenu, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(DropdownMenu, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 DropdownMenu.handledProps = ["as", "children", "className", "content", "direction", "open", "scrolling"];
-DropdownMenu.propTypes =  false ? {
+DropdownMenu.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A dropdown menu can open to the left or to the right. */
-  direction: PropTypes.oneOf(['left', 'right']),
+  direction: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(['left', 'right']),
 
   /** Whether or not the dropdown menu is displayed. */
-  open: PropTypes.bool,
+  open: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** A dropdown menu can scroll. */
-  scrolling: PropTypes.bool
+  scrolling: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (DropdownMenu);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -63398,7 +63981,7 @@ DropdownMenu.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__);
@@ -63489,7 +64072,7 @@ function (_Component) {
           type = _this$props.type,
           value = _this$props.value;
       var classes = __WEBPACK_IMPORTED_MODULE_11_classnames___default()('search', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["q" /* getUnhandledProps */])(DropdownSearchInput, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["r" /* getUnhandledProps */])(DropdownSearchInput, this.props);
       return __WEBPACK_IMPORTED_MODULE_13_react___default.a.createElement("input", __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         "aria-autocomplete": "list",
         autoComplete: autoComplete,
@@ -63513,27 +64096,27 @@ __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Dr
 
 __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(DropdownSearchInput, "handledProps", ["as", "autoComplete", "className", "inputRef", "tabIndex", "type", "value"]);
 
-DropdownSearchInput.propTypes =  false ? {
+DropdownSearchInput.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].as,
 
   /** An input can have the auto complete. */
-  autoComplete: PropTypes.string,
+  autoComplete: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string,
 
   /** A ref handler for input. */
-  inputRef: PropTypes.func,
+  inputRef: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.func,
 
   /** An input can receive focus. */
-  tabIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  tabIndex: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string]),
 
   /** The HTML input type. */
-  type: PropTypes.string,
+  type: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string,
 
   /** Stored value. */
-  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
+  value: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string])
 } : {};
 DropdownSearchInput.create = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["l" /* createShorthandFactory */])(DropdownSearchInput, function (type) {
   return {
@@ -63541,6 +64124,7 @@ DropdownSearchInput.create = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["l" /* c
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (DropdownSearchInput);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -63559,7 +64143,7 @@ DropdownSearchInput.create = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["l" /* c
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export default */
+/* WEBPACK VAR INJECTION */(function(process) {/* unused harmony export default */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
@@ -63671,9 +64255,9 @@ function (_Component) {
           icon = _this$props2.icon,
           placeholder = _this$props2.placeholder;
       var active = this.state.active;
-      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()('ui', aspectRatio, Object(__WEBPACK_IMPORTED_MODULE_12__lib__["y" /* useKeyOnly */])(active, 'active'), 'embed', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getUnhandledProps */])(Embed, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["p" /* getElementType */])(Embed, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()('ui', aspectRatio, Object(__WEBPACK_IMPORTED_MODULE_12__lib__["A" /* useKeyOnly */])(active, 'active'), 'embed', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["r" /* getUnhandledProps */])(Embed, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getElementType */])(Embed, this.props);
       var iconShorthand = icon !== undefined ? icon : 'video play';
       return __WEBPACK_IMPORTED_MODULE_11_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         className: classes,
@@ -63726,48 +64310,48 @@ __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Em
 __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Embed, "handledProps", ["active", "as", "aspectRatio", "autoplay", "brandedUI", "children", "className", "color", "content", "defaultActive", "hd", "icon", "id", "iframe", "onClick", "placeholder", "source", "url"]);
 
 
-Embed.propTypes =  false ? {
+Embed.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].as,
 
   /** An embed can be active. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** An embed can specify an alternative aspect ratio. */
-  aspectRatio: PropTypes.oneOf(['4:3', '16:9', '21:9']),
+  aspectRatio: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.oneOf(['4:3', '16:9', '21:9']),
 
   /** Setting to true or false will force autoplay. */
-  autoplay: customPropTypes.every([customPropTypes.demand(['source']), PropTypes.bool]),
+  autoplay: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].demand(['source']), __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool]),
 
   /** Whether to show networks branded UI like title cards, or after video calls to action. */
-  brandedUI: customPropTypes.every([customPropTypes.demand(['source']), PropTypes.bool]),
+  brandedUI: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].demand(['source']), __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool]),
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string,
 
   /** Specifies a default chrome color with Vimeo or YouTube. */
-  color: customPropTypes.every([customPropTypes.demand(['source']), PropTypes.string]),
+  color: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].demand(['source']), __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string]),
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Initial value of active. */
-  defaultActive: PropTypes.bool,
+  defaultActive: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Whether to prefer HD content. */
-  hd: customPropTypes.every([customPropTypes.demand(['source']), PropTypes.bool]),
+  hd: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].demand(['source']), __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool]),
 
   /** Specifies an icon to use with placeholder content. */
-  icon: customPropTypes.itemShorthand,
+  icon: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Specifies an id for source. */
-  id: customPropTypes.every([customPropTypes.demand(['source']), PropTypes.string]),
+  id: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].demand(['source']), __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string]),
 
   /** Shorthand for HTML iframe. */
-  iframe: customPropTypes.every([customPropTypes.demand(['source']), customPropTypes.itemShorthand]),
+  iframe: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].demand(['source']), __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].itemShorthand]),
 
   /**
    * Сalled on click.
@@ -63775,17 +64359,18 @@ Embed.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props and proposed value.
    */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /** A placeholder image for embed. */
-  placeholder: PropTypes.string,
+  placeholder: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string,
 
   /** Specifies a source to use. */
-  source: customPropTypes.every([customPropTypes.disallow(['sourceUrl']), PropTypes.oneOf(['youtube', 'vimeo'])]),
+  source: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].disallow(['sourceUrl']), __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.oneOf(['youtube', 'vimeo'])]),
 
   /** Specifies a url to use for embed. */
-  url: customPropTypes.every([customPropTypes.disallow(['source']), PropTypes.string])
+  url: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].disallow(['source']), __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string])
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -63804,7 +64389,7 @@ Embed.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__);
@@ -63898,7 +64483,7 @@ function (_Component) {
     _this = __WEBPACK_IMPORTED_MODULE_4__babel_runtime_helpers_possibleConstructorReturn___default()(this, (_getPrototypeOf2 = __WEBPACK_IMPORTED_MODULE_5__babel_runtime_helpers_getPrototypeOf___default()(Modal)).call.apply(_getPrototypeOf2, [this].concat(args)));
 
     __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(_this)), "getMountNode", function () {
-      return Object(__WEBPACK_IMPORTED_MODULE_17__lib__["s" /* isBrowser */])() ? _this.props.mountNode || document.body : null;
+      return Object(__WEBPACK_IMPORTED_MODULE_17__lib__["t" /* isBrowser */])() ? _this.props.mountNode || document.body : null;
     });
 
     __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handleActionsOverrides", function (predefinedProps) {
@@ -63923,7 +64508,7 @@ function (_Component) {
 
     __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handleDocumentClick", function (e) {
       var closeOnDimmerClick = _this.props.closeOnDimmerClick;
-      if (!closeOnDimmerClick || Object(__WEBPACK_IMPORTED_MODULE_17__lib__["m" /* doesNodeContainClick */])(_this.ref, e)) return;
+      if (!closeOnDimmerClick || Object(__WEBPACK_IMPORTED_MODULE_17__lib__["n" /* doesNodeContainClick */])(_this.ref, e)) return;
 
       __WEBPACK_IMPORTED_MODULE_13_lodash_invoke___default()(_this.props, 'onClose', e, _this.props);
 
@@ -63959,7 +64544,7 @@ function (_Component) {
 
       _this.setPositionAndClassNames();
 
-      __WEBPACK_IMPORTED_MODULE_17__lib__["n" /* eventStack */].sub('click', _this.handleDocumentClick, {
+      __WEBPACK_IMPORTED_MODULE_17__lib__["o" /* eventStack */].sub('click', _this.handleDocumentClick, {
         pool: eventPool,
         target: _this.dimmerRef
       });
@@ -63970,7 +64555,7 @@ function (_Component) {
     __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handlePortalUnmount", function (e) {
       var eventPool = _this.props.eventPool;
       cancelAnimationFrame(_this.animationRequestId);
-      __WEBPACK_IMPORTED_MODULE_17__lib__["n" /* eventStack */].unsub('click', _this.handleDocumentClick, {
+      __WEBPACK_IMPORTED_MODULE_17__lib__["o" /* eventStack */].unsub('click', _this.handleDocumentClick, {
         pool: eventPool,
         target: _this.dimmerRef
       });
@@ -64050,8 +64635,8 @@ function (_Component) {
           marginTop = _this$state.marginTop,
           mountClasses = _this$state.mountClasses,
           scrolling = _this$state.scrolling;
-      var classes = __WEBPACK_IMPORTED_MODULE_14_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_17__lib__["y" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_17__lib__["y" /* useKeyOnly */])(scrolling, 'scrolling'), 'modal transition visible active', className);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_17__lib__["p" /* getElementType */])(Modal, _this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_14_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_17__lib__["A" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_17__lib__["A" /* useKeyOnly */])(scrolling, 'scrolling'), 'modal transition visible active', className);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_17__lib__["q" /* getElementType */])(Modal, _this.props);
       var closeIconName = closeIcon === true ? 'close' : closeIcon;
       var closeIconJSX = __WEBPACK_IMPORTED_MODULE_18__elements_Icon__["a" /* default */].create(closeIconName, {
         overrideProps: _this.handleIconOverrides
@@ -64113,11 +64698,11 @@ function (_Component) {
           trigger = _this$props2.trigger;
       var mountNode = this.getMountNode(); // Short circuit when server side rendering
 
-      if (!Object(__WEBPACK_IMPORTED_MODULE_17__lib__["s" /* isBrowser */])()) {
+      if (!Object(__WEBPACK_IMPORTED_MODULE_17__lib__["t" /* isBrowser */])()) {
         return Object(__WEBPACK_IMPORTED_MODULE_16_react__["isValidElement"])(trigger) ? trigger : null;
       }
 
-      var unhandled = Object(__WEBPACK_IMPORTED_MODULE_17__lib__["q" /* getUnhandledProps */])(Modal, this.props);
+      var unhandled = Object(__WEBPACK_IMPORTED_MODULE_17__lib__["r" /* getUnhandledProps */])(Modal, this.props);
       var portalPropNames = __WEBPACK_IMPORTED_MODULE_20__addons_Portal__["a" /* default */].handledProps;
 
       var rest = __WEBPACK_IMPORTED_MODULE_11_lodash_reduce___default()(unhandled, function (acc, val, key) {
@@ -64180,51 +64765,51 @@ __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Mo
 
 __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Modal, "handledProps", ["actions", "as", "basic", "centered", "children", "className", "closeIcon", "closeOnDimmerClick", "closeOnDocumentClick", "content", "defaultOpen", "dimmer", "eventPool", "header", "mountNode", "onActionClick", "onClose", "onMount", "onOpen", "onUnmount", "open", "size", "style", "trigger"]);
 
-Modal.propTypes =  false ? {
+Modal.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_17__lib__["m" /* customPropTypes */].as,
 
   /** Shorthand for Modal.Actions. Typically an array of button shorthand. */
-  actions: customPropTypes.itemShorthand,
+  actions: __WEBPACK_IMPORTED_MODULE_17__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A modal can reduce its complexity */
-  basic: PropTypes.bool,
+  basic: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.bool,
 
   /** A modal can be vertically centered in the viewport */
-  centered: PropTypes.bool,
+  centered: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.string,
 
   /** Shorthand for the close icon. Closes the modal on click. */
-  closeIcon: PropTypes.oneOfType([PropTypes.node, PropTypes.object, PropTypes.bool]),
+  closeIcon: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.node, __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.object, __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.bool]),
 
   /** Whether or not the Modal should close when the dimmer is clicked. */
-  closeOnDimmerClick: PropTypes.bool,
+  closeOnDimmerClick: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.bool,
 
   /** Whether or not the Modal should close when the document is clicked. */
-  closeOnDocumentClick: PropTypes.bool,
+  closeOnDocumentClick: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.bool,
 
   /** Simple text content for the Modal. */
-  content: customPropTypes.itemShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_17__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Initial value of open. */
-  defaultOpen: PropTypes.bool,
+  defaultOpen: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.bool,
 
   /** A Modal can appear in a dimmer. */
-  dimmer: PropTypes.oneOf([true, 'inverted', 'blurring']),
+  dimmer: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.oneOf([true, 'inverted', 'blurring']),
 
   /** Event pool namespace that is used to handle component events */
-  eventPool: PropTypes.string,
+  eventPool: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.string,
 
   /** Modal displayed above the content in bold. */
-  header: customPropTypes.itemShorthand,
+  header: __WEBPACK_IMPORTED_MODULE_17__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** The node where the modal should mount. Defaults to document.body. */
-  mountNode: PropTypes.any,
+  mountNode: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.any,
 
   /**
    * Action onClick handler when using shorthand `actions`.
@@ -64232,7 +64817,7 @@ Modal.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onActionClick: PropTypes.func,
+  onActionClick: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.func,
 
   /**
    * Called when a close event happens.
@@ -64240,7 +64825,7 @@ Modal.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClose: PropTypes.func,
+  onClose: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.func,
 
   /**
    * Called when the portal is mounted on the DOM.
@@ -64248,7 +64833,7 @@ Modal.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onMount: PropTypes.func,
+  onMount: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.func,
 
   /**
    * Called when an open event happens.
@@ -64256,7 +64841,7 @@ Modal.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onOpen: PropTypes.func,
+  onOpen: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.func,
 
   /**
    * Called when the portal is unmounted from the DOM.
@@ -64264,19 +64849,19 @@ Modal.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onUnmount: PropTypes.func,
+  onUnmount: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.func,
 
   /** Controls whether or not the Modal is displayed. */
-  open: PropTypes.bool,
+  open: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.bool,
 
   /** A modal can vary in size */
-  size: PropTypes.oneOf(['fullscreen', 'large', 'mini', 'small', 'tiny']),
+  size: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.oneOf(['fullscreen', 'large', 'mini', 'small', 'tiny']),
 
   /** Custom styles. */
-  style: PropTypes.object,
+  style: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.object,
 
   /** Element to be rendered in-place where the portal is defined. */
-  trigger: PropTypes.node
+  trigger: __WEBPACK_IMPORTED_MODULE_15_prop_types___default.a.node
   /**
    * NOTE: Any unhandled props that are defined in Portal are passed-through
    * to the wrapping Portal.
@@ -64284,6 +64869,7 @@ Modal.propTypes =  false ? {
 
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (Modal);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -64291,7 +64877,7 @@ Modal.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ModalActions; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ModalActions; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -64381,8 +64967,8 @@ function (_Component) {
           className = _this$props.className,
           content = _this$props.content;
       var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()('actions', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getUnhandledProps */])(ModalActions, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["p" /* getElementType */])(ModalActions, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["r" /* getUnhandledProps */])(ModalActions, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getElementType */])(ModalActions, this.props);
 
       if (!__WEBPACK_IMPORTED_MODULE_13__lib__["c" /* childrenUtils */].isNil(children)) {
         return __WEBPACK_IMPORTED_MODULE_12_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -64412,21 +64998,21 @@ function (_Component) {
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(ModalActions, "handledProps", ["actions", "as", "children", "className", "content", "onActionClick"]);
 
 
-ModalActions.propTypes =  false ? {
+ModalActions.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].as,
 
   /** Array of shorthand buttons. */
-  actions: customPropTypes.collectionShorthand,
+  actions: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].collectionShorthand,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].contentShorthand,
 
   /**
    * Action onClick handler when using shorthand `actions`.
@@ -64434,13 +65020,14 @@ ModalActions.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props from the clicked action.
    */
-  onActionClick: customPropTypes.every([customPropTypes.disallow(['children']), PropTypes.func])
+  onActionClick: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].disallow(['children']), __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func])
 } : {};
 ModalActions.create = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["l" /* createShorthandFactory */])(ModalActions, function (actions) {
   return {
     actions: actions
   };
 });
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -64448,7 +65035,7 @@ ModalActions.create = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["l" /* createSh
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -64472,33 +65059,33 @@ function ModalContent(props) {
       content = props.content,
       image = props.image,
       scrolling = props.scrolling;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(className, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(image, 'image'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(scrolling, 'scrolling'), 'content');
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ModalContent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ModalContent, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(className, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(image, 'image'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(scrolling, 'scrolling'), 'content');
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ModalContent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ModalContent, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 ModalContent.handledProps = ["as", "children", "className", "content", "image", "scrolling"];
-ModalContent.propTypes =  false ? {
+ModalContent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A modal can contain image content. */
-  image: PropTypes.bool,
+  image: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** A modal can use the entire size of the screen. */
-  scrolling: PropTypes.bool
+  scrolling: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool
 } : {};
 ModalContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(ModalContent, function (content) {
   return {
@@ -64506,6 +65093,7 @@ ModalContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createSho
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (ModalContent);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -64513,7 +65101,7 @@ ModalContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createSho
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -64536,28 +65124,29 @@ function ModalDescription(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('description', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ModalDescription, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ModalDescription, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ModalDescription, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ModalDescription, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 ModalDescription.handledProps = ["as", "children", "className", "content"];
-ModalDescription.propTypes =  false ? {
+ModalDescription.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (ModalDescription);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -64565,7 +65154,7 @@ ModalDescription.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -64588,26 +65177,26 @@ function ModalHeader(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(className, 'header');
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ModalHeader, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ModalHeader, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ModalHeader, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ModalHeader, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 ModalHeader.handledProps = ["as", "children", "className", "content"];
-ModalHeader.propTypes =  false ? {
+ModalHeader.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 ModalHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(ModalHeader, function (content) {
   return {
@@ -64615,6 +65204,7 @@ ModalHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShor
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (ModalHeader);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -64633,7 +65223,7 @@ ModalHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShor
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export POSITIONS */
+/* WEBPACK VAR INJECTION */(function(process) {/* unused harmony export POSITIONS */
 /* unused harmony export default */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__);
@@ -64736,7 +65326,7 @@ function (_Component) {
         closed: true
       });
 
-      __WEBPACK_IMPORTED_MODULE_21__lib__["n" /* eventStack */].unsub('scroll', _this.hideOnScroll, {
+      __WEBPACK_IMPORTED_MODULE_21__lib__["o" /* eventStack */].unsub('scroll', _this.hideOnScroll, {
         target: window
       });
       setTimeout(function () {
@@ -64760,7 +65350,7 @@ function (_Component) {
 
     __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handlePortalMount", function (e) {
       var hideOnScroll = _this.props.hideOnScroll;
-      if (hideOnScroll) __WEBPACK_IMPORTED_MODULE_21__lib__["n" /* eventStack */].sub('scroll', _this.hideOnScroll, {
+      if (hideOnScroll) __WEBPACK_IMPORTED_MODULE_21__lib__["o" /* eventStack */].sub('scroll', _this.hideOnScroll, {
         target: window
       });
 
@@ -64773,7 +65363,7 @@ function (_Component) {
 
     __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handlePortalUnmount", function (e) {
       var hideOnScroll = _this.props.hideOnScroll;
-      if (hideOnScroll) __WEBPACK_IMPORTED_MODULE_21__lib__["n" /* eventStack */].unsub('scroll', _this.hideOnScroll, {
+      if (hideOnScroll) __WEBPACK_IMPORTED_MODULE_21__lib__["o" /* eventStack */].unsub('scroll', _this.hideOnScroll, {
         target: window
       });
 
@@ -64827,7 +65417,7 @@ function (_Component) {
       };
       var context = this.getContext(); // Do not access window/document when server side rendering
 
-      if (!Object(__WEBPACK_IMPORTED_MODULE_21__lib__["s" /* isBrowser */])()) return style;
+      if (!Object(__WEBPACK_IMPORTED_MODULE_21__lib__["t" /* isBrowser */])()) return style;
       var _this$props2 = this.props,
           horizontalOffset = _this$props2.horizontalOffset,
           verticalOffset = _this$props2.verticalOffset;
@@ -65011,9 +65601,9 @@ function (_Component) {
 
       var style = __WEBPACK_IMPORTED_MODULE_11_lodash_assign___default()({}, this.state.style, this.props.style);
 
-      var classes = __WEBPACK_IMPORTED_MODULE_18_classnames___default()('ui', position, size, Object(__WEBPACK_IMPORTED_MODULE_21__lib__["z" /* useKeyOrValueAndKey */])(wide, 'wide'), Object(__WEBPACK_IMPORTED_MODULE_21__lib__["y" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_21__lib__["y" /* useKeyOnly */])(flowing, 'flowing'), Object(__WEBPACK_IMPORTED_MODULE_21__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), 'popup transition visible', className);
+      var classes = __WEBPACK_IMPORTED_MODULE_18_classnames___default()('ui', position, size, Object(__WEBPACK_IMPORTED_MODULE_21__lib__["B" /* useKeyOrValueAndKey */])(wide, 'wide'), Object(__WEBPACK_IMPORTED_MODULE_21__lib__["A" /* useKeyOnly */])(basic, 'basic'), Object(__WEBPACK_IMPORTED_MODULE_21__lib__["A" /* useKeyOnly */])(flowing, 'flowing'), Object(__WEBPACK_IMPORTED_MODULE_21__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), 'popup transition visible', className);
       if (closed) return trigger;
-      var unhandled = Object(__WEBPACK_IMPORTED_MODULE_21__lib__["q" /* getUnhandledProps */])(Popup, this.props);
+      var unhandled = Object(__WEBPACK_IMPORTED_MODULE_21__lib__["r" /* getUnhandledProps */])(Popup, this.props);
       var portalPropNames = __WEBPACK_IMPORTED_MODULE_22__addons_Portal__["a" /* default */].handledProps;
 
       var rest = __WEBPACK_IMPORTED_MODULE_10_lodash_reduce___default()(unhandled, function (acc, val, key) {
@@ -65023,7 +65613,7 @@ function (_Component) {
 
       var portalProps = __WEBPACK_IMPORTED_MODULE_9_lodash_pick___default()(unhandled, portalPropNames);
 
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_21__lib__["p" /* getElementType */])(Popup, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_21__lib__["q" /* getElementType */])(Popup, this.props);
       var popupJSX = __WEBPACK_IMPORTED_MODULE_20_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default()({}, rest, {
         className: classes,
         style: style,
@@ -65063,52 +65653,52 @@ __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Po
 __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Popup, "handledProps", ["as", "basic", "children", "className", "content", "context", "flowing", "header", "hideOnScroll", "horizontalOffset", "hoverable", "inverted", "keepInViewPort", "on", "onClose", "onMount", "onOpen", "onUnmount", "position", "size", "style", "trigger", "verticalOffset", "wide"]);
 
 
-Popup.propTypes =  false ? {
+Popup.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_21__lib__["m" /* customPropTypes */].as,
 
   /** Display the popup without the pointing arrow. */
-  basic: PropTypes.bool,
+  basic: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.string,
 
   /** Simple text content for the popover. */
-  content: customPropTypes.itemShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_21__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Existing element the pop-up should be bound to. */
-  context: PropTypes.object,
+  context: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.object,
 
   /** A flowing Popup has no maximum width and continues to flow to fit its content. */
-  flowing: PropTypes.bool,
+  flowing: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.bool,
 
   /** Takes up the entire width of its offset container. */
   // TODO: implement the Popup fluid layout
   // fluid: PropTypes.bool,
 
   /** Header displayed above the content in bold. */
-  header: customPropTypes.itemShorthand,
+  header: __WEBPACK_IMPORTED_MODULE_21__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Hide the Popup when scrolling the window. */
-  hideOnScroll: PropTypes.bool,
+  hideOnScroll: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.bool,
 
   /** Whether the popup should not close on hover. */
-  hoverable: PropTypes.bool,
+  hoverable: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.bool,
 
   /** Invert the colors of the Popup. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.bool,
 
   /** Horizontal offset in pixels to be applied to the Popup. */
-  horizontalOffset: PropTypes.number,
+  horizontalOffset: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.number,
 
   /** Vertical offset in pixels to be applied to the Popup. */
-  verticalOffset: PropTypes.number,
+  verticalOffset: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.number,
 
   /** Events triggering the popup. */
-  on: PropTypes.oneOfType([PropTypes.oneOf(['hover', 'click', 'focus']), PropTypes.arrayOf(PropTypes.oneOf(['hover', 'click', 'focus']))]),
+  on: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.oneOf(['hover', 'click', 'focus']), __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.oneOf(['hover', 'click', 'focus']))]),
 
   /**
    * Called when a close event happens.
@@ -65116,7 +65706,7 @@ Popup.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClose: PropTypes.func,
+  onClose: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.func,
 
   /**
    * Called when the portal is mounted on the DOM.
@@ -65124,7 +65714,7 @@ Popup.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onMount: PropTypes.func,
+  onMount: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.func,
 
   /**
    * Called when an open event happens.
@@ -65132,7 +65722,7 @@ Popup.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onOpen: PropTypes.func,
+  onOpen: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.func,
 
   /**
    * Called when the portal is unmounted from the DOM.
@@ -65140,26 +65730,27 @@ Popup.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onUnmount: PropTypes.func,
+  onUnmount: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.func,
 
   /** Position for the popover. */
-  position: PropTypes.oneOf(POSITIONS),
+  position: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.oneOf(POSITIONS),
 
   /** Popup size. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium', 'big', 'massive')),
+  size: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_17_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_21__lib__["b" /* SUI */].SIZES, 'medium', 'big', 'massive')),
 
   /** Custom Popup style. */
-  style: PropTypes.object,
+  style: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.object,
 
   /** Element to be rendered in-place where the popup is defined. */
-  trigger: PropTypes.node,
+  trigger: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.node,
 
   /** Popup width. */
-  wide: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['very'])]),
+  wide: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.oneOf(['very'])]),
 
   /** Element to be rendered within the confines of the viewport whenever possible. */
-  keepInViewPort: PropTypes.bool
+  keepInViewPort: __WEBPACK_IMPORTED_MODULE_19_prop_types___default.a.bool
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -65167,7 +65758,7 @@ Popup.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = PopupContent;
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (immutable) */ __webpack_exports__["a"] = PopupContent;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
@@ -65191,31 +65782,32 @@ function PopupContent(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('content', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(PopupContent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(PopupContent, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(PopupContent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(PopupContent, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 PopupContent.handledProps = ["as", "children", "className", "content"];
-PopupContent.propTypes =  false ? {
+PopupContent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** The content of the Popup */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Classes to add to the Popup content className. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 PopupContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(PopupContent, function (children) {
   return {
     children: children
   };
 });
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -65223,7 +65815,7 @@ PopupContent.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createSho
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = PopupHeader;
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (immutable) */ __webpack_exports__["a"] = PopupHeader;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
@@ -65247,31 +65839,32 @@ function PopupHeader(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('header', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(PopupHeader, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(PopupHeader, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(PopupHeader, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(PopupHeader, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 PopupHeader.handledProps = ["as", "children", "className", "content"];
-PopupHeader.propTypes =  false ? {
+PopupHeader.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 PopupHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(PopupHeader, function (children) {
   return {
     children: children
   };
 });
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -65290,7 +65883,7 @@ PopupHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShor
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__);
@@ -65452,9 +66045,9 @@ function (_Component) {
           size = _this$props7.size,
           success = _this$props7.success,
           warning = _this$props7.warning;
-      var classes = __WEBPACK_IMPORTED_MODULE_12_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(active || indicating, 'active'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(indicating, 'indicating'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(success || this.isAutoSuccess(), 'success'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(warning, 'warning'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["C" /* useValueAndKey */])(attached, 'attached'), 'progress', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["q" /* getUnhandledProps */])(Progress, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["p" /* getElementType */])(Progress, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_12_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(active || indicating, 'active'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(error, 'error'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(indicating, 'indicating'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(success || this.isAutoSuccess(), 'success'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(warning, 'warning'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["E" /* useValueAndKey */])(attached, 'attached'), 'progress', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["r" /* getUnhandledProps */])(Progress, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["q" /* getElementType */])(Progress, this.props);
       var percent = this.getPercent() || 0;
       return __WEBPACK_IMPORTED_MODULE_14_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         className: classes,
@@ -65473,71 +66066,72 @@ function (_Component) {
 
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Progress, "handledProps", ["active", "as", "attached", "autoSuccess", "children", "className", "color", "content", "disabled", "error", "indicating", "inverted", "label", "percent", "precision", "progress", "size", "success", "total", "value", "warning"]);
 
-Progress.propTypes =  false ? {
+Progress.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].as,
 
   /** A progress bar can show activity. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** A progress bar can attach to and show the progress of an element (i.e. Card or Segment). */
-  attached: PropTypes.oneOf(['top', 'bottom']),
+  attached: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOf(['top', 'bottom']),
 
   /** Whether success state should automatically trigger when progress completes. */
-  autoSuccess: PropTypes.bool,
+  autoSuccess: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string,
 
   /** A progress bar can have different colors. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_15__lib__["b" /* SUI */].COLORS),
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A progress bar be disabled. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** A progress bar can show a error state. */
-  error: PropTypes.bool,
+  error: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** An indicating progress bar visually indicates the current level of progress of a task. */
-  indicating: PropTypes.bool,
+  indicating: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** A progress bar can have its colors inverted. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** Can be set to either to display progress as percent or ratio. */
-  label: customPropTypes.itemShorthand,
+  label: __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Current percent complete. */
-  percent: customPropTypes.every([customPropTypes.disallow(['total', 'value']), PropTypes.oneOfType([PropTypes.number, PropTypes.string])]),
+  percent: __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].disallow(['total', 'value']), __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string])]),
 
   /** Decimal point precision for calculated progress. */
-  precision: PropTypes.number,
+  precision: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.number,
 
   /** A progress bar can contain a text value indicating current progress. */
-  progress: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['percent', 'ratio', 'value'])]),
+  progress: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOf(['percent', 'ratio', 'value'])]),
 
   /** A progress bar can vary in size. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'mini', 'huge', 'massive')),
+  size: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_11_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_15__lib__["b" /* SUI */].SIZES, 'mini', 'huge', 'massive')),
 
   /** A progress bar can show a success state. */
-  success: PropTypes.bool,
+  success: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** For use with value. Together, these will calculate the percent. Mutually excludes percent. */
-  total: customPropTypes.every([customPropTypes.demand(['value']), customPropTypes.disallow(['percent']), PropTypes.oneOfType([PropTypes.number, PropTypes.string])]),
+  total: __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].demand(['value']), __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].disallow(['percent']), __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string])]),
 
   /** For use with total. Together, these will calculate the percent. Mutually excludes percent. */
-  value: customPropTypes.every([customPropTypes.disallow(['percent']), PropTypes.oneOfType([PropTypes.number, PropTypes.string])]),
+  value: __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].disallow(['percent']), __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string])]),
 
   /** A progress bar can show a warning state. */
-  warning: PropTypes.bool
+  warning: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool
 } : {};
 /* unused harmony default export */ var _unused_webpack_default_export = (Progress);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -65556,7 +66150,7 @@ Progress.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export default */
+/* WEBPACK VAR INJECTION */(function(process) {/* unused harmony export default */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
@@ -65703,9 +66297,9 @@ function (_Component) {
           rating = _this$state.rating,
           selectedIndex = _this$state.selectedIndex,
           isSelecting = _this$state.isSelecting;
-      var classes = __WEBPACK_IMPORTED_MODULE_12_classnames___default()('ui', icon, size, Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["y" /* useKeyOnly */])(isSelecting && !disabled && selectedIndex >= 0, 'selected'), 'rating', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["q" /* getUnhandledProps */])(Rating, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["p" /* getElementType */])(Rating, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_12_classnames___default()('ui', icon, size, Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(disabled, 'disabled'), Object(__WEBPACK_IMPORTED_MODULE_15__lib__["A" /* useKeyOnly */])(isSelecting && !disabled && selectedIndex >= 0, 'selected'), 'rating', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["r" /* getUnhandledProps */])(Rating, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["q" /* getElementType */])(Rating, this.props);
       return __WEBPACK_IMPORTED_MODULE_14_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         className: classes,
         role: "radiogroup",
@@ -65741,31 +66335,31 @@ __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Ra
 __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Rating, "handledProps", ["as", "className", "clearable", "defaultRating", "disabled", "icon", "maxRating", "onRate", "rating", "size"]);
 
 
-Rating.propTypes =  false ? {
+Rating.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].as,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string,
 
   /**
    * You can clear the rating by clicking on the current start rating.
    * By default a rating will be only clearable if there is 1 icon.
    * Setting to `true`/`false` will allow or disallow a user to clear their rating.
    */
-  clearable: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['auto'])]),
+  clearable: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOf(['auto'])]),
 
   /** The initial rating value. */
-  defaultRating: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  defaultRating: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string]),
 
   /** You can disable or enable interactive rating.  Makes a read-only rating. */
-  disabled: PropTypes.bool,
+  disabled: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.bool,
 
   /** A rating can use a set of star or heart icons. */
-  icon: PropTypes.oneOf(['star', 'heart']),
+  icon: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOf(['star', 'heart']),
 
   /** The total number of icons. */
-  maxRating: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  maxRating: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string]),
 
   /**
    * Called after user selects a new rating.
@@ -65773,14 +66367,15 @@ Rating.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props and proposed rating.
    */
-  onRate: PropTypes.func,
+  onRate: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.func,
 
   /** The current number of active icons. */
-  rating: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  rating: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string]),
 
   /** A progress bar can vary in size. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium', 'big'))
+  size: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_11_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_15__lib__["b" /* SUI */].SIZES, 'medium', 'big'))
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -65788,7 +66383,7 @@ Rating.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return RatingIcon; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return RatingIcon; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -65886,9 +66481,9 @@ function (_Component) {
           active = _this$props.active,
           className = _this$props.className,
           selected = _this$props.selected;
-      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["y" /* useKeyOnly */])(selected, 'selected'), 'icon', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getUnhandledProps */])(RatingIcon, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["p" /* getElementType */])(RatingIcon, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_9_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_13__lib__["A" /* useKeyOnly */])(selected, 'selected'), 'icon', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["r" /* getUnhandledProps */])(RatingIcon, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_13__lib__["q" /* getElementType */])(RatingIcon, this.props);
       return __WEBPACK_IMPORTED_MODULE_12_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
         className: classes,
         onClick: this.handleClick,
@@ -65910,18 +66505,18 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Ra
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(RatingIcon, "handledProps", ["active", "as", "className", "index", "onClick", "onKeyUp", "onMouseEnter", "selected"]);
 
 
-RatingIcon.propTypes =  false ? {
+RatingIcon.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_13__lib__["m" /* customPropTypes */].as,
 
   /** Indicates activity of an icon. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string,
 
   /** An index of icon inside Rating. */
-  index: PropTypes.number,
+  index: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.number,
 
   /**
    * Called on click.
@@ -65929,7 +66524,7 @@ RatingIcon.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /**
    * Called on keyup.
@@ -65937,7 +66532,7 @@ RatingIcon.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onKeyUp: PropTypes.func,
+  onKeyUp: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /**
    * Called on mouseenter.
@@ -65945,11 +66540,12 @@ RatingIcon.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onMouseEnter: PropTypes.func,
+  onMouseEnter: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /** Indicates selection of an icon. */
-  selected: PropTypes.bool
+  selected: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -65968,7 +66564,7 @@ RatingIcon.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export default */
+/* WEBPACK VAR INJECTION */(function(process) {/* unused harmony export default */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_slicedToArray__ = __webpack_require__("./node_modules/@babel/runtime/helpers/slicedToArray.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_slicedToArray___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_slicedToArray__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
@@ -66140,12 +66736,12 @@ function (_Component) {
 
       __WEBPACK_IMPORTED_MODULE_18_lodash_invoke___default()(_this.props, 'onMouseDown', e, _this.props);
 
-      __WEBPACK_IMPORTED_MODULE_24__lib__["n" /* eventStack */].sub('mouseup', _this.handleDocumentMouseUp);
+      __WEBPACK_IMPORTED_MODULE_24__lib__["o" /* eventStack */].sub('mouseup', _this.handleDocumentMouseUp);
     });
 
     __WEBPACK_IMPORTED_MODULE_11__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_10__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_10__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handleDocumentMouseUp", function () {
       _this.isMouseDown = false;
-      __WEBPACK_IMPORTED_MODULE_24__lib__["n" /* eventStack */].unsub('mouseup', _this.handleDocumentMouseUp);
+      __WEBPACK_IMPORTED_MODULE_24__lib__["o" /* eventStack */].unsub('mouseup', _this.handleDocumentMouseUp);
     });
 
     __WEBPACK_IMPORTED_MODULE_11__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_10__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_10__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handleInputClick", function (e) {
@@ -66258,7 +66854,7 @@ function (_Component) {
 
     __WEBPACK_IMPORTED_MODULE_11__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_10__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_10__babel_runtime_helpers_assertThisInitialized___default()(_this)), "scrollSelectedItemIntoView", function () {
       // Do not access document when server side rendering
-      if (!Object(__WEBPACK_IMPORTED_MODULE_24__lib__["s" /* isBrowser */])()) return;
+      if (!Object(__WEBPACK_IMPORTED_MODULE_24__lib__["t" /* isBrowser */])()) return;
       var menu = document.querySelector('.ui.search.active.visible .results.visible');
       var item = menu.querySelector('.result.active');
       if (!item) return;
@@ -66415,14 +67011,14 @@ function (_Component) {
     value: function componentWillReceiveProps(nextProps) {
       __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_get___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_getPrototypeOf___default()(Search.prototype), "componentWillReceiveProps", this).call(this, nextProps);
 
-      if (!Object(__WEBPACK_IMPORTED_MODULE_24__lib__["x" /* shallowEqual */])(nextProps.value, this.props.value)) {
+      if (!Object(__WEBPACK_IMPORTED_MODULE_24__lib__["z" /* shallowEqual */])(nextProps.value, this.props.value)) {
         this.setValue(nextProps.value);
       }
     }
   }, {
     key: "shouldComponentUpdate",
     value: function shouldComponentUpdate(nextProps, nextState) {
-      return !Object(__WEBPACK_IMPORTED_MODULE_24__lib__["x" /* shallowEqual */])(nextProps, this.props) || !Object(__WEBPACK_IMPORTED_MODULE_24__lib__["x" /* shallowEqual */])(nextState, this.state);
+      return !Object(__WEBPACK_IMPORTED_MODULE_24__lib__["z" /* shallowEqual */])(nextProps, this.props) || !Object(__WEBPACK_IMPORTED_MODULE_24__lib__["z" /* shallowEqual */])(nextState, this.state);
     }
   }, {
     key: "componentDidUpdate",
@@ -66435,32 +67031,32 @@ function (_Component) {
         }
 
         if (this.state.open) {
-          __WEBPACK_IMPORTED_MODULE_24__lib__["n" /* eventStack */].sub('keydown', [this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
+          __WEBPACK_IMPORTED_MODULE_24__lib__["o" /* eventStack */].sub('keydown', [this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
         }
       } else if (prevState.focus && !this.state.focus) {
         if (!this.isMouseDown) {
           this.close();
         }
 
-        __WEBPACK_IMPORTED_MODULE_24__lib__["n" /* eventStack */].unsub('keydown', [this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
+        __WEBPACK_IMPORTED_MODULE_24__lib__["o" /* eventStack */].unsub('keydown', [this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
       } // opened / closed
 
 
       if (!prevState.open && this.state.open) {
         this.open();
-        __WEBPACK_IMPORTED_MODULE_24__lib__["n" /* eventStack */].sub('click', this.closeOnDocumentClick);
-        __WEBPACK_IMPORTED_MODULE_24__lib__["n" /* eventStack */].sub('keydown', [this.closeOnEscape, this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
+        __WEBPACK_IMPORTED_MODULE_24__lib__["o" /* eventStack */].sub('click', this.closeOnDocumentClick);
+        __WEBPACK_IMPORTED_MODULE_24__lib__["o" /* eventStack */].sub('keydown', [this.closeOnEscape, this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
       } else if (prevState.open && !this.state.open) {
         this.close();
-        __WEBPACK_IMPORTED_MODULE_24__lib__["n" /* eventStack */].unsub('click', this.closeOnDocumentClick);
-        __WEBPACK_IMPORTED_MODULE_24__lib__["n" /* eventStack */].unsub('keydown', [this.closeOnEscape, this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
+        __WEBPACK_IMPORTED_MODULE_24__lib__["o" /* eventStack */].unsub('click', this.closeOnDocumentClick);
+        __WEBPACK_IMPORTED_MODULE_24__lib__["o" /* eventStack */].unsub('keydown', [this.closeOnEscape, this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
       }
     }
   }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
-      __WEBPACK_IMPORTED_MODULE_24__lib__["n" /* eventStack */].unsub('click', this.closeOnDocumentClick);
-      __WEBPACK_IMPORTED_MODULE_24__lib__["n" /* eventStack */].unsub('keydown', [this.closeOnEscape, this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
+      __WEBPACK_IMPORTED_MODULE_24__lib__["o" /* eventStack */].unsub('click', this.closeOnDocumentClick);
+      __WEBPACK_IMPORTED_MODULE_24__lib__["o" /* eventStack */].unsub('keydown', [this.closeOnEscape, this.moveSelectionOnKeyDown, this.selectItemOnEnter]);
     } // ----------------------------------------
     // Document Event Handlers
     // ----------------------------------------
@@ -66480,12 +67076,12 @@ function (_Component) {
           loading = _this$props6.loading,
           size = _this$props6.size; // Classes
 
-      var classes = __WEBPACK_IMPORTED_MODULE_20_classnames___default()('ui', open && 'active visible', size, searchClasses, Object(__WEBPACK_IMPORTED_MODULE_24__lib__["y" /* useKeyOnly */])(category, 'category'), Object(__WEBPACK_IMPORTED_MODULE_24__lib__["y" /* useKeyOnly */])(focus, 'focus'), Object(__WEBPACK_IMPORTED_MODULE_24__lib__["y" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_24__lib__["y" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_24__lib__["C" /* useValueAndKey */])(aligned, 'aligned'), 'search', className);
-      var unhandled = Object(__WEBPACK_IMPORTED_MODULE_24__lib__["q" /* getUnhandledProps */])(Search, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_24__lib__["p" /* getElementType */])(Search, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_20_classnames___default()('ui', open && 'active visible', size, searchClasses, Object(__WEBPACK_IMPORTED_MODULE_24__lib__["A" /* useKeyOnly */])(category, 'category'), Object(__WEBPACK_IMPORTED_MODULE_24__lib__["A" /* useKeyOnly */])(focus, 'focus'), Object(__WEBPACK_IMPORTED_MODULE_24__lib__["A" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_24__lib__["A" /* useKeyOnly */])(loading, 'loading'), Object(__WEBPACK_IMPORTED_MODULE_24__lib__["E" /* useValueAndKey */])(aligned, 'aligned'), 'search', className);
+      var unhandled = Object(__WEBPACK_IMPORTED_MODULE_24__lib__["r" /* getUnhandledProps */])(Search, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_24__lib__["q" /* getElementType */])(Search, this.props);
 
-      var _partitionHTMLProps = Object(__WEBPACK_IMPORTED_MODULE_24__lib__["w" /* partitionHTMLProps */])(unhandled, {
-        htmlProps: __WEBPACK_IMPORTED_MODULE_24__lib__["r" /* htmlInputAttrs */]
+      var _partitionHTMLProps = Object(__WEBPACK_IMPORTED_MODULE_24__lib__["y" /* partitionHTMLProps */])(unhandled, {
+        htmlProps: __WEBPACK_IMPORTED_MODULE_24__lib__["s" /* htmlInputAttrs */]
       }),
           _partitionHTMLProps2 = __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_slicedToArray___default()(_partitionHTMLProps, 2),
           htmlInputProps = _partitionHTMLProps2[0],
@@ -66522,49 +67118,49 @@ __WEBPACK_IMPORTED_MODULE_11__babel_runtime_helpers_defineProperty___default()(S
 __WEBPACK_IMPORTED_MODULE_11__babel_runtime_helpers_defineProperty___default()(Search, "handledProps", ["aligned", "as", "category", "categoryRenderer", "className", "defaultOpen", "defaultValue", "fluid", "icon", "input", "loading", "minCharacters", "noResultsDescription", "noResultsMessage", "onBlur", "onFocus", "onMouseDown", "onResultSelect", "onSearchChange", "onSelectionChange", "open", "resultRenderer", "results", "selectFirstResult", "showNoResults", "size", "value"]);
 
 
-Search.propTypes =  false ? {
+Search.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_24__lib__["m" /* customPropTypes */].as,
   // ------------------------------------
   // Behavior
   // ------------------------------------
 
   /** Initial value of open. */
-  defaultOpen: PropTypes.bool,
+  defaultOpen: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.bool,
 
   /** Initial value. */
-  defaultValue: PropTypes.string,
+  defaultValue: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.string,
 
   /** Shorthand for Icon. */
-  icon: PropTypes.oneOfType([PropTypes.node, PropTypes.object]),
+  icon: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.node, __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.object]),
 
   /** Minimum characters to query for results */
-  minCharacters: PropTypes.number,
+  minCharacters: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.number,
 
   /** Additional text for "No Results" message with less emphasis. */
-  noResultsDescription: PropTypes.node,
+  noResultsDescription: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.node,
 
   /** Message to display when there are no results. */
-  noResultsMessage: PropTypes.node,
+  noResultsMessage: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.node,
 
   /** Controls whether or not the results menu is displayed. */
-  open: PropTypes.bool,
+  open: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.bool,
 
   /**
    * One of:
    * - array of Search.Result props e.g. `{ title: '', description: '' }` or
    * - object of categories e.g. `{ name: '', results: [{ title: '', description: '' }]`
    */
-  results: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.shape(SearchResult.propTypes)), PropTypes.shape(SearchCategory.propTypes)]),
+  results: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.shape(__WEBPACK_IMPORTED_MODULE_27__SearchResult__["a" /* default */].propTypes)), __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.shape(__WEBPACK_IMPORTED_MODULE_26__SearchCategory__["a" /* default */].propTypes)]),
 
   /** Whether the search should automatically select the first result after searching. */
-  selectFirstResult: PropTypes.bool,
+  selectFirstResult: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.bool,
 
   /** Whether a "no results" message should be shown if no results are found. */
-  showNoResults: PropTypes.bool,
+  showNoResults: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.bool,
 
   /** Current value of the search input. Creates a controlled component. */
-  value: PropTypes.string,
+  value: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.string,
   // ------------------------------------
   // Rendering
   // ------------------------------------
@@ -66575,7 +67171,7 @@ Search.propTypes =  false ? {
    * @param {object} props - The SearchCategory props object.
    * @returns {*} - Renderable SearchCategory contents.
    */
-  categoryRenderer: PropTypes.func,
+  categoryRenderer: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.func,
 
   /**
    * Renders the SearchResult contents.
@@ -66583,7 +67179,7 @@ Search.propTypes =  false ? {
    * @param {object} props - The SearchResult props object.
    * @returns {*} - Renderable SearchResult contents.
    */
-  resultRenderer: PropTypes.func,
+  resultRenderer: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.func,
   // ------------------------------------
   // Callbacks
   // ------------------------------------
@@ -66594,7 +67190,7 @@ Search.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onBlur: PropTypes.func,
+  onBlur: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.func,
 
   /**
    * Called on focus.
@@ -66602,7 +67198,7 @@ Search.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onFocus: PropTypes.func,
+  onFocus: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.func,
 
   /**
    * Called on mousedown.
@@ -66610,7 +67206,7 @@ Search.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onMouseDown: PropTypes.func,
+  onMouseDown: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.func,
 
   /**
    * Called when a result is selected.
@@ -66618,7 +67214,7 @@ Search.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onResultSelect: PropTypes.func,
+  onResultSelect: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.func,
 
   /**
    * Called on search input change.
@@ -66626,7 +67222,7 @@ Search.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props, includes current value of search input.
    */
-  onSearchChange: PropTypes.func,
+  onSearchChange: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.func,
 
   /**
    * Called when the active selection index is changed.
@@ -66634,32 +67230,33 @@ Search.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onSelectionChange: PropTypes.func,
+  onSelectionChange: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.func,
   // ------------------------------------
   // Style
   // ------------------------------------
 
   /** A search can have its results aligned to its left or right container edge. */
-  aligned: PropTypes.string,
+  aligned: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.string,
 
   /** A search can display results from remote content ordered by categories. */
-  category: PropTypes.bool,
+  category: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.bool,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.string,
 
   /** A search can have its results take up the width of its container. */
-  fluid: PropTypes.bool,
+  fluid: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.bool,
 
   /** A search input can take up the width of its container. */
-  input: customPropTypes.itemShorthand,
+  input: __WEBPACK_IMPORTED_MODULE_24__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A search can show a loading indicator. */
-  loading: PropTypes.bool,
+  loading: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.bool,
 
   /** A search can have different sizes. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium'))
+  size: __WEBPACK_IMPORTED_MODULE_22_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_19_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_24__lib__["b" /* SUI */].SIZES, 'medium'))
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -66667,7 +67264,7 @@ Search.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -66688,9 +67285,9 @@ function SearchCategory(props) {
       className = props.className,
       content = props.content,
       renderer = props.renderer;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(active, 'active'), 'category', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(SearchCategory, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(SearchCategory, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(active, 'active'), 'category', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(SearchCategory, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(SearchCategory, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement("div", {
@@ -66707,24 +67304,24 @@ SearchCategory.defaultProps = {
     return name;
   }
 };
-SearchCategory.propTypes =  false ? {
+SearchCategory.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** The item currently selected by keyboard shortcut. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Display name. */
-  name: PropTypes.string,
+  name: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /**
    * Renders the category contents.
@@ -66732,12 +67329,13 @@ SearchCategory.propTypes =  false ? {
    * @param {object} props - The SearchCategory props object.
    * @returns {*} - Renderable category contents.
    */
-  renderer: PropTypes.func,
+  renderer: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.func,
 
   /** Array of Search.Result props. */
-  results: PropTypes.array
+  results: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.array
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (SearchCategory);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -66745,7 +67343,7 @@ SearchCategory.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SearchResult; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SearchResult; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -66845,9 +67443,9 @@ function (_Component) {
           active = _this$props.active,
           className = _this$props.className,
           renderer = _this$props.renderer;
-      var classes = __WEBPACK_IMPORTED_MODULE_8_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_11__lib__["y" /* useKeyOnly */])(active, 'active'), 'result', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_11__lib__["q" /* getUnhandledProps */])(SearchResult, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_11__lib__["p" /* getElementType */])(SearchResult, this.props); // Note: You technically only need the 'content' wrapper when there's an
+      var classes = __WEBPACK_IMPORTED_MODULE_8_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_11__lib__["A" /* useKeyOnly */])(active, 'active'), 'result', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_11__lib__["r" /* getUnhandledProps */])(SearchResult, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_11__lib__["q" /* getElementType */])(SearchResult, this.props); // Note: You technically only need the 'content' wrapper when there's an
       // image. However, optionally wrapping it makes this function a lot more
       // complicated and harder to read. Since always wrapping it doesn't affect
       // the style in any way let's just do that.
@@ -66869,27 +67467,27 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Se
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(SearchResult, "handledProps", ["active", "as", "className", "content", "description", "id", "image", "onClick", "price", "renderer", "title"]);
 
 
-SearchResult.propTypes =  false ? {
+SearchResult.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_11__lib__["m" /* customPropTypes */].as,
 
   /** The item currently selected by keyboard shortcut. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.bool,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_11__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Additional text with less emphasis. */
-  description: PropTypes.string,
+  description: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.string,
 
   /** A unique identifier. */
-  id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  id: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.string]),
 
   /** Add an image to the item. */
-  image: PropTypes.string,
+  image: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.string,
 
   /**
    * Called on click.
@@ -66897,10 +67495,10 @@ SearchResult.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.func,
 
   /** Customized text for price. */
-  price: PropTypes.string,
+  price: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.string,
 
   /**
    * Renders the result contents.
@@ -66908,11 +67506,12 @@ SearchResult.propTypes =  false ? {
    * @param {object} props - The SearchResult props object.
    * @returns {*} - Renderable result contents.
    */
-  renderer: PropTypes.func,
+  renderer: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.func,
 
   /** Display title. */
-  title: PropTypes.string.isRequired
+  title: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.string.isRequired
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -66920,7 +67519,7 @@ SearchResult.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -66940,28 +67539,29 @@ function SearchResults(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('results transition', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(SearchResults, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(SearchResults, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(SearchResults, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(SearchResults, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 SearchResults.handledProps = ["as", "children", "className", "content"];
-SearchResults.propTypes =  false ? {
+SearchResults.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (SearchResults);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -66980,7 +67580,7 @@ SearchResults.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__);
@@ -67084,7 +67684,7 @@ function (_Component) {
     });
 
     __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_assertThisInitialized___default()(_this)), "handleDocumentClick", function (e) {
-      if (!Object(__WEBPACK_IMPORTED_MODULE_14__lib__["m" /* doesNodeContainClick */])(_this.ref, e)) {
+      if (!Object(__WEBPACK_IMPORTED_MODULE_14__lib__["n" /* doesNodeContainClick */])(_this.ref, e)) {
         _this.skipNextCallback = true;
 
         __WEBPACK_IMPORTED_MODULE_9_lodash_invoke___default()(_this.props, 'onHide', e, __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread___default()({}, _this.props, {
@@ -67131,12 +67731,12 @@ function (_Component) {
   }, {
     key: "addListener",
     value: function addListener() {
-      __WEBPACK_IMPORTED_MODULE_14__lib__["n" /* eventStack */].sub('click', this.handleDocumentClick);
+      __WEBPACK_IMPORTED_MODULE_14__lib__["o" /* eventStack */].sub('click', this.handleDocumentClick);
     }
   }, {
     key: "removeListener",
     value: function removeListener() {
-      __WEBPACK_IMPORTED_MODULE_14__lib__["n" /* eventStack */].unsub('click', this.handleDocumentClick);
+      __WEBPACK_IMPORTED_MODULE_14__lib__["o" /* eventStack */].unsub('click', this.handleDocumentClick);
     }
   }, {
     key: "render",
@@ -67150,9 +67750,9 @@ function (_Component) {
           visible = _this$props2.visible,
           width = _this$props2.width;
       var animating = this.state.animating;
-      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()('ui', animation, direction, width, Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(animating, 'animating'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(visible, 'visible'), 'sidebar', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["q" /* getUnhandledProps */])(Sidebar, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["p" /* getElementType */])(Sidebar, this.props);
+      var classes = __WEBPACK_IMPORTED_MODULE_10_classnames___default()('ui', animation, direction, width, Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(animating, 'animating'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(visible, 'visible'), 'sidebar', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["r" /* getUnhandledProps */])(Sidebar, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["q" /* getElementType */])(Sidebar, this.props);
       return __WEBPACK_IMPORTED_MODULE_12_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_13__addons_Ref__["a" /* default */], {
         innerRef: this.handleRef
       }, __WEBPACK_IMPORTED_MODULE_12_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -67177,27 +67777,27 @@ __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Si
 
 __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Sidebar, "handledProps", ["animation", "as", "children", "className", "content", "direction", "duration", "onHidden", "onHide", "onShow", "onVisible", "visible", "width"]);
 
-Sidebar.propTypes =  false ? {
+Sidebar.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].as,
 
   /** Animation style. */
-  animation: PropTypes.oneOf(['overlay', 'push', 'scale down', 'uncover', 'slide out', 'slide along']),
+  animation: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(['overlay', 'push', 'scale down', 'uncover', 'slide out', 'slide along']),
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Direction the sidebar should appear on. */
-  direction: PropTypes.oneOf(['top', 'right', 'bottom', 'left']),
+  direction: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(['top', 'right', 'bottom', 'left']),
 
   /** Duration of sidebar animation. */
-  duration: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  duration: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.string]),
 
   /**
    * Called before a sidebar begins to animate out.
@@ -67205,7 +67805,7 @@ Sidebar.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onHide: PropTypes.func,
+  onHide: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /**
    * Called after a sidebar has finished animating out.
@@ -67213,7 +67813,7 @@ Sidebar.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onHidden: PropTypes.func,
+  onHidden: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /**
    * Called when a sidebar has finished animating in.
@@ -67221,7 +67821,7 @@ Sidebar.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onShow: PropTypes.func,
+  onShow: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /**
    * Called when a sidebar begins animating in.
@@ -67229,15 +67829,16 @@ Sidebar.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props.
    */
-  onVisible: PropTypes.func,
+  onVisible: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.func,
 
   /** Controls whether or not the sidebar is visible on the page. */
-  visible: PropTypes.bool,
+  visible: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.bool,
 
   /** Sidebar width. */
-  width: PropTypes.oneOf(['very thin', 'thin', 'wide', 'very wide'])
+  width: __WEBPACK_IMPORTED_MODULE_11_prop_types___default.a.oneOf(['very thin', 'thin', 'wide', 'very wide'])
 } : {};
 /* unused harmony default export */ var _unused_webpack_default_export = (Sidebar);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -67245,7 +67846,7 @@ Sidebar.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -67268,28 +67869,29 @@ function SidebarPushable(props) {
       children = props.children,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('pushable', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(SidebarPushable, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(SidebarPushable, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(SidebarPushable, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(SidebarPushable, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 SidebarPushable.handledProps = ["as", "children", "className", "content"];
-SidebarPushable.propTypes =  false ? {
+SidebarPushable.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (SidebarPushable);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -67297,7 +67899,7 @@ SidebarPushable.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -67320,32 +67922,33 @@ function SidebarPusher(props) {
       dimmed = props.dimmed,
       children = props.children,
       content = props.content;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('pusher', Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(dimmed, 'dimmed'), className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(SidebarPusher, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(SidebarPusher, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('pusher', Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(dimmed, 'dimmed'), className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(SidebarPusher, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(SidebarPusher, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 SidebarPusher.handledProps = ["as", "children", "className", "content", "dimmed"];
-SidebarPusher.propTypes =  false ? {
+SidebarPusher.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Controls whether or not the dim is displayed. */
-  dimmed: PropTypes.bool
+  dimmed: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (SidebarPusher);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -67364,7 +67967,7 @@ SidebarPusher.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export default */
+/* WEBPACK VAR INJECTION */(function(process) {/* unused harmony export default */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -67433,10 +68036,10 @@ function (_Component) {
       var scrollContext = props.scrollContext;
 
       if (scrollContext) {
-        __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].sub('resize', _this.handleUpdate, {
+        __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].sub('resize', _this.handleUpdate, {
           target: scrollContext
         });
-        __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].sub('scroll', _this.handleUpdate, {
+        __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].sub('scroll', _this.handleUpdate, {
           target: scrollContext
         });
       }
@@ -67446,10 +68049,10 @@ function (_Component) {
       var scrollContext = _this.props.scrollContext;
 
       if (scrollContext) {
-        __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].unsub('resize', _this.handleUpdate, {
+        __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].unsub('resize', _this.handleUpdate, {
           target: scrollContext
         });
-        __WEBPACK_IMPORTED_MODULE_12__lib__["n" /* eventStack */].unsub('scroll', _this.handleUpdate, {
+        __WEBPACK_IMPORTED_MODULE_12__lib__["o" /* eventStack */].unsub('scroll', _this.handleUpdate, {
           target: scrollContext
         });
       }
@@ -67595,7 +68198,7 @@ function (_Component) {
   __WEBPACK_IMPORTED_MODULE_2__babel_runtime_helpers_createClass___default()(Sticky, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      if (!Object(__WEBPACK_IMPORTED_MODULE_12__lib__["s" /* isBrowser */])()) return;
+      if (!Object(__WEBPACK_IMPORTED_MODULE_12__lib__["t" /* isBrowser */])()) return;
       var active = this.props.active;
 
       if (active) {
@@ -67635,7 +68238,7 @@ function (_Component) {
   }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
-      if (!Object(__WEBPACK_IMPORTED_MODULE_12__lib__["s" /* isBrowser */])()) return;
+      if (!Object(__WEBPACK_IMPORTED_MODULE_12__lib__["t" /* isBrowser */])()) return;
       var active = this.props.active;
 
       if (active) {
@@ -67675,8 +68278,8 @@ function (_Component) {
           bottom = _this$state2.bottom,
           bound = _this$state2.bound,
           sticky = _this$state2.sticky;
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getUnhandledProps */])(Sticky, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["p" /* getElementType */])(Sticky, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["r" /* getUnhandledProps */])(Sticky, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_12__lib__["q" /* getElementType */])(Sticky, this.props);
       var containerClasses = __WEBPACK_IMPORTED_MODULE_9_classnames___default()(sticky && 'ui', sticky && 'stuck-container', sticky && (bound ? 'bound-container' : 'fixed-container'), className);
       var elementClasses = __WEBPACK_IMPORTED_MODULE_9_classnames___default()('ui', sticky && (bound ? 'bound bottom' : 'fixed'), sticky && !bound && (bottom === null ? 'top' : 'bottom'), 'sticky');
       return __WEBPACK_IMPORTED_MODULE_11_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -67698,33 +68301,33 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(St
   active: true,
   bottomOffset: 0,
   offset: 0,
-  scrollContext: Object(__WEBPACK_IMPORTED_MODULE_12__lib__["s" /* isBrowser */])() ? window : null
+  scrollContext: Object(__WEBPACK_IMPORTED_MODULE_12__lib__["t" /* isBrowser */])() ? window : null
 });
 
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Sticky, "handledProps", ["active", "as", "bottomOffset", "children", "className", "context", "offset", "onBottom", "onStick", "onTop", "onUnstick", "pushing", "scrollContext"]);
 
 
-Sticky.propTypes =  false ? {
+Sticky.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_12__lib__["m" /* customPropTypes */].as,
 
   /** A Sticky can be active. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Offset in pixels from the bottom of the screen when fixing element to viewport. */
-  bottomOffset: PropTypes.number,
+  bottomOffset: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.number,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.string,
 
   /** Context which sticky element should stick to. */
-  context: PropTypes.object,
+  context: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.object,
 
   /** Offset in pixels from the top of the screen when fixing element to viewport. */
-  offset: PropTypes.number,
+  offset: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.number,
 
   /**
    * Callback when element is bound to bottom of parent container.
@@ -67732,7 +68335,7 @@ Sticky.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onBottom: PropTypes.func,
+  onBottom: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /**
    * Callback when element is fixed to page.
@@ -67740,7 +68343,7 @@ Sticky.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onStick: PropTypes.func,
+  onStick: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /**
    * Callback when element is bound to top of parent container.
@@ -67748,7 +68351,7 @@ Sticky.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onTop: PropTypes.func,
+  onTop: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /**
    * Callback when element is unfixed from page.
@@ -67756,14 +68359,15 @@ Sticky.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onUnstick: PropTypes.func,
+  onUnstick: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.func,
 
   /** Whether element should be "pushed" by the viewport, attaching to the bottom of the screen when scrolling up. */
-  pushing: PropTypes.bool,
+  pushing: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.bool,
 
   /** Context which sticky should attach onscroll events. */
-  scrollContext: PropTypes.object
+  scrollContext: __WEBPACK_IMPORTED_MODULE_10_prop_types___default.a.object
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -67782,7 +68386,7 @@ Sticky.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectWithoutProperties__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectWithoutProperties.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectWithoutProperties__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectWithoutProperties.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectWithoutProperties___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectWithoutProperties__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_objectSpread__);
@@ -67953,8 +68557,8 @@ function (_Component) {
     key: "render",
     value: function render() {
       var menu = this.renderMenu();
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["q" /* getUnhandledProps */])(Tab, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["p" /* getElementType */])(Tab, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["r" /* getUnhandledProps */])(Tab, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["q" /* getElementType */])(Tab, this.props);
 
       if (menu.props.vertical) {
         return __WEBPACK_IMPORTED_MODULE_13_react___default.a.createElement(ElementType, rest, this.renderVertical(menu));
@@ -67985,27 +68589,27 @@ __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Ta
 
 __WEBPACK_IMPORTED_MODULE_8__babel_runtime_helpers_defineProperty___default()(Tab, "handledProps", ["activeIndex", "as", "defaultActiveIndex", "grid", "menu", "menuPosition", "onTabChange", "panes", "renderActiveOnly"]);
 
-Tab.propTypes =  false ? {
+Tab.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].as,
 
   /** The initial activeIndex. */
-  defaultActiveIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  defaultActiveIndex: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string]),
 
   /** Index of the currently active tab. */
-  activeIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  activeIndex: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string]),
 
   /**
    * Shorthand props for the Menu.
    * tabular, if true, will derive final value from `menuPosition`, otherwise set 'left' or 'right' explicitly.
    */
-  menu: PropTypes.object,
+  menu: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.object,
 
   /** Align vertical menu */
-  menuPosition: PropTypes.oneOf(['left', 'right']),
+  menuPosition: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(['left', 'right']),
 
   /** Shorthand props for the Grid. */
-  grid: PropTypes.object,
+  grid: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.object,
 
   /**
    * Called on tab change.
@@ -68014,7 +68618,7 @@ Tab.propTypes =  false ? {
    * @param {object} data - All props and proposed new activeIndex.
    * @param {object} data.activeIndex - The new proposed activeIndex.
    */
-  onTabChange: PropTypes.func,
+  onTabChange: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.func,
 
   /**
    * Array of objects describing each Menu.Item and Tab.Pane:
@@ -68022,16 +68626,17 @@ Tab.propTypes =  false ? {
    * or
    * { menuItem: 'Home', pane: 'Welcome' }
    */
-  panes: PropTypes.arrayOf(PropTypes.shape({
-    menuItem: customPropTypes.itemShorthand,
-    pane: customPropTypes.itemShorthand,
-    render: PropTypes.func
+  panes: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.shape({
+    menuItem: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].itemShorthand,
+    pane: __WEBPACK_IMPORTED_MODULE_14__lib__["m" /* customPropTypes */].itemShorthand,
+    render: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.func
   })),
 
   /** A Tab can render only active pane. */
-  renderActiveOnly: PropTypes.bool
+  renderActiveOnly: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool
 } : {};
 /* unused harmony default export */ var _unused_webpack_default_export = (Tab);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -68039,7 +68644,7 @@ Tab.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -68065,9 +68670,9 @@ function TabPane(props) {
       className = props.className,
       content = props.content,
       loading = props.loading;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(loading, 'loading'), 'tab', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(TabPane, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(TabPane, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(active, 'active'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(loading, 'loading'), 'tab', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(TabPane, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(TabPane, props);
   var calculatedDefaultProps = {};
 
   if (ElementType === __WEBPACK_IMPORTED_MODULE_5__elements_Segment_Segment__["a" /* default */]) {
@@ -68084,24 +68689,24 @@ TabPane.defaultProps = {
   as: __WEBPACK_IMPORTED_MODULE_5__elements_Segment_Segment__["a" /* default */],
   active: true
 };
-TabPane.propTypes =  false ? {
+TabPane.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** A tab pane can be active. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A Tab.Pane can display a loading indicator. */
-  loading: PropTypes.bool
+  loading: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool
 } : {};
 TabPane.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(TabPane, function (content) {
   return {
@@ -68109,6 +68714,7 @@ TabPane.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthan
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (TabPane);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -68127,7 +68733,7 @@ TabPane.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthan
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Transition; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Transition; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -68211,7 +68817,7 @@ function (_Component) {
         animating: true
       }, function () {
         var durationType = TRANSITION_TYPE[status];
-        var durationValue = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["v" /* normalizeTransitionDuration */])(duration, durationType);
+        var durationValue = Object(__WEBPACK_IMPORTED_MODULE_14__lib__["w" /* normalizeTransitionDuration */])(duration, durationType);
 
         __WEBPACK_IMPORTED_MODULE_10_lodash_invoke___default()(_this.props, 'onStart', null, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread___default()({}, _this.props, {
           status: status
@@ -68270,10 +68876,10 @@ function (_Component) {
       var directional = __WEBPACK_IMPORTED_MODULE_8_lodash_includes___default()(__WEBPACK_IMPORTED_MODULE_14__lib__["b" /* SUI */].DIRECTIONAL_TRANSITIONS, animation);
 
       if (directional) {
-        return __WEBPACK_IMPORTED_MODULE_11_classnames___default()(animation, childClasses, Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(animating, 'animating'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(status === Transition.ENTERING, 'in'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(status === Transition.EXITING, 'out'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(status === Transition.EXITED, 'hidden'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(status !== Transition.EXITED, 'visible'), 'transition');
+        return __WEBPACK_IMPORTED_MODULE_11_classnames___default()(animation, childClasses, Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(animating, 'animating'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(status === Transition.ENTERING, 'in'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(status === Transition.EXITING, 'out'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(status === Transition.EXITED, 'hidden'), Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(status !== Transition.EXITED, 'visible'), 'transition');
       }
 
-      return __WEBPACK_IMPORTED_MODULE_11_classnames___default()(animation, childClasses, Object(__WEBPACK_IMPORTED_MODULE_14__lib__["y" /* useKeyOnly */])(animating, 'animating transition'));
+      return __WEBPACK_IMPORTED_MODULE_11_classnames___default()(animation, childClasses, Object(__WEBPACK_IMPORTED_MODULE_14__lib__["A" /* useKeyOnly */])(animating, 'animating transition'));
     });
 
     __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_assertThisInitialized___default()(__WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_assertThisInitialized___default()(_this)), "computeCompletedStatus", function () {
@@ -68344,7 +68950,7 @@ function (_Component) {
       var childStyle = __WEBPACK_IMPORTED_MODULE_9_lodash_get___default()(children, 'props.style');
 
       var type = TRANSITION_TYPE[status];
-      var animationDuration = type && "".concat(Object(__WEBPACK_IMPORTED_MODULE_14__lib__["v" /* normalizeTransitionDuration */])(duration, type), "ms");
+      var animationDuration = type && "".concat(Object(__WEBPACK_IMPORTED_MODULE_14__lib__["w" /* normalizeTransitionDuration */])(duration, type), "ms");
       return __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread___default()({}, childStyle, {
         animationDuration: animationDuration
       });
@@ -68444,24 +69050,24 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Tr
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Transition, "handledProps", ["animation", "children", "duration", "mountOnShow", "onComplete", "onHide", "onShow", "onStart", "reactKey", "transitionOnMount", "unmountOnHide", "visible"]);
 
 
-Transition.propTypes =  false ? {
+Transition.propTypes = process.env.NODE_ENV !== "production" ? {
   /** Named animation event to used. Must be defined in CSS. */
-  animation: PropTypes.oneOf(SUI.TRANSITIONS),
+  animation: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_14__lib__["b" /* SUI */].TRANSITIONS),
 
   /** Primary content. */
-  children: PropTypes.element.isRequired,
+  children: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.element.isRequired,
 
   /** Duration of the CSS transition animation in milliseconds. */
-  duration: PropTypes.oneOfType([PropTypes.number, PropTypes.shape({
-    hide: PropTypes.number,
-    show: PropTypes.number
-  }), PropTypes.string]),
+  duration: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.shape({
+    hide: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.number,
+    show: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.number
+  }), __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string]),
 
   /** Show the component; triggers the enter or exit animation. */
-  visible: PropTypes.bool,
+  visible: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** Wait until the first "enter" transition to mount the component (add it to the DOM). */
-  mountOnShow: PropTypes.bool,
+  mountOnShow: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /**
    * Callback on each transition that changes visibility to shown.
@@ -68469,7 +69075,7 @@ Transition.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props with status.
    */
-  onComplete: PropTypes.func,
+  onComplete: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.func,
 
   /**
    * Callback on each transition that changes visibility to hidden.
@@ -68477,7 +69083,7 @@ Transition.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props with status.
    */
-  onHide: PropTypes.func,
+  onHide: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.func,
 
   /**
    * Callback on each transition that changes visibility to shown.
@@ -68485,7 +69091,7 @@ Transition.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props with status.
    */
-  onShow: PropTypes.func,
+  onShow: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.func,
 
   /**
    * Callback on animation start.
@@ -68493,17 +69099,18 @@ Transition.propTypes =  false ? {
    * @param {null}
    * @param {object} data - All props with status.
    */
-  onStart: PropTypes.func,
+  onStart: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.func,
 
   /** React's key of the element. */
-  reactKey: PropTypes.string,
+  reactKey: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.string,
 
   /** Run the enter animation when the component mounts, if it is initially shown. */
-  transitionOnMount: PropTypes.bool,
+  transitionOnMount: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool,
 
   /** Unmount the component (remove it from the DOM) when it is not shown. */
-  unmountOnHide: PropTypes.bool
+  unmountOnHide: __WEBPACK_IMPORTED_MODULE_12_prop_types___default.a.bool
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -68511,7 +69118,7 @@ Transition.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return TransitionGroup; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return TransitionGroup; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectSpread.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectSpread__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -68619,7 +69226,7 @@ function (_React$Component) {
 
     var _children = _this.props.children;
     _this.state = {
-      children: __WEBPACK_IMPORTED_MODULE_12_lodash_mapValues___default()(Object(__WEBPACK_IMPORTED_MODULE_15__lib__["o" /* getChildMapping */])(_children), function (child) {
+      children: __WEBPACK_IMPORTED_MODULE_12_lodash_mapValues___default()(Object(__WEBPACK_IMPORTED_MODULE_15__lib__["p" /* getChildMapping */])(_children), function (child) {
         return _this.wrapChild(child);
       })
     };
@@ -68632,8 +69239,8 @@ function (_React$Component) {
       var _this2 = this;
 
       var prevMapping = this.state.children;
-      var nextMapping = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["o" /* getChildMapping */])(nextProps.children);
-      var children = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["t" /* mergeChildMappings */])(prevMapping, nextMapping);
+      var nextMapping = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["p" /* getChildMapping */])(nextProps.children);
+      var children = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["u" /* mergeChildMappings */])(prevMapping, nextMapping);
 
       __WEBPACK_IMPORTED_MODULE_11_lodash_forEach___default()(children, function (child, key) {
         var hasPrev = __WEBPACK_IMPORTED_MODULE_10_lodash_has___default()(prevMapping, key);
@@ -68681,8 +69288,8 @@ function (_React$Component) {
     key: "render",
     value: function render() {
       var children = this.state.children;
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["p" /* getElementType */])(TransitionGroup, this.props);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["q" /* getUnhandledProps */])(TransitionGroup, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["q" /* getElementType */])(TransitionGroup, this.props);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_15__lib__["r" /* getUnhandledProps */])(TransitionGroup, this.props);
       return __WEBPACK_IMPORTED_MODULE_14_react___default.a.createElement(ElementType, rest, __WEBPACK_IMPORTED_MODULE_8_lodash_values___default()(children));
     }
   }]);
@@ -68698,22 +69305,23 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Tr
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(TransitionGroup, "handledProps", ["animation", "as", "children", "duration"]);
 
 
-TransitionGroup.propTypes =  false ? {
+TransitionGroup.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_15__lib__["m" /* customPropTypes */].as,
 
   /** Named animation event to used. Must be defined in CSS. */
-  animation: PropTypes.oneOf(SUI.TRANSITIONS),
+  animation: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_15__lib__["b" /* SUI */].TRANSITIONS),
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.node,
 
   /** Duration of the CSS transition animation in milliseconds. */
-  duration: PropTypes.oneOfType([PropTypes.number, PropTypes.shape({
-    hide: PropTypes.number.isRequired,
-    show: PropTypes.number.isRequired
-  }), PropTypes.string])
+  duration: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.shape({
+    hide: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.number.isRequired,
+    show: __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.number.isRequired
+  }), __WEBPACK_IMPORTED_MODULE_13_prop_types___default.a.string])
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -68732,7 +69340,7 @@ TransitionGroup.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -68757,9 +69365,9 @@ function Advertisement(props) {
       content = props.content,
       test = props.test,
       unit = props.unit;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', unit, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(centered, 'centered'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(test, 'test'), 'ad', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(Advertisement, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(Advertisement, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('ui', unit, Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(centered, 'centered'), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(test, 'test'), 'ad', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(Advertisement, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(Advertisement, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes,
     "data-text": test
@@ -68767,29 +69375,30 @@ function Advertisement(props) {
 }
 
 Advertisement.handledProps = ["as", "centered", "children", "className", "content", "test", "unit"];
-Advertisement.propTypes =  false ? {
+Advertisement.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Center the advertisement. */
-  centered: PropTypes.bool,
+  centered: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Text to be displayed on the advertisement. */
-  test: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.string]),
+  test: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.number, __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string]),
 
   /** Varies the size of the advertisement. */
-  unit: PropTypes.oneOf(['medium rectangle', 'large rectangle', 'vertical rectangle', 'small rectangle', 'mobile banner', 'banner', 'vertical banner', 'top banner', 'half banner', 'button', 'square button', 'small button', 'skyscraper', 'wide skyscraper', 'leaderboard', 'large leaderboard', 'mobile leaderboard', 'billboard', 'panorama', 'netboard', 'half page', 'square', 'small square']).isRequired
+  unit: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(['medium rectangle', 'large rectangle', 'vertical rectangle', 'small rectangle', 'mobile banner', 'banner', 'vertical banner', 'top banner', 'half banner', 'button', 'square button', 'small button', 'skyscraper', 'wide skyscraper', 'leaderboard', 'large leaderboard', 'mobile leaderboard', 'billboard', 'panorama', 'netboard', 'half page', 'square', 'small square']).isRequired
 } : {};
 /* unused harmony default export */ var _unused_webpack_default_export = (Advertisement);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -68808,7 +69417,7 @@ Advertisement.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Card; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Card; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_classCallCheck__ = __webpack_require__("./node_modules/@babel/runtime/helpers/classCallCheck.js");
@@ -68905,9 +69514,9 @@ function (_Component) {
           meta = _this$props.meta,
           onClick = _this$props.onClick,
           raised = _this$props.raised;
-      var classes = __WEBPACK_IMPORTED_MODULE_8_classnames___default()('ui', color, Object(__WEBPACK_IMPORTED_MODULE_11__lib__["y" /* useKeyOnly */])(centered, 'centered'), Object(__WEBPACK_IMPORTED_MODULE_11__lib__["y" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_11__lib__["y" /* useKeyOnly */])(link, 'link'), Object(__WEBPACK_IMPORTED_MODULE_11__lib__["y" /* useKeyOnly */])(raised, 'raised'), 'card', className);
-      var rest = Object(__WEBPACK_IMPORTED_MODULE_11__lib__["q" /* getUnhandledProps */])(Card, this.props);
-      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_11__lib__["p" /* getElementType */])(Card, this.props, function () {
+      var classes = __WEBPACK_IMPORTED_MODULE_8_classnames___default()('ui', color, Object(__WEBPACK_IMPORTED_MODULE_11__lib__["A" /* useKeyOnly */])(centered, 'centered'), Object(__WEBPACK_IMPORTED_MODULE_11__lib__["A" /* useKeyOnly */])(fluid, 'fluid'), Object(__WEBPACK_IMPORTED_MODULE_11__lib__["A" /* useKeyOnly */])(link, 'link'), Object(__WEBPACK_IMPORTED_MODULE_11__lib__["A" /* useKeyOnly */])(raised, 'raised'), 'card', className);
+      var rest = Object(__WEBPACK_IMPORTED_MODULE_11__lib__["r" /* getUnhandledProps */])(Card, this.props);
+      var ElementType = Object(__WEBPACK_IMPORTED_MODULE_11__lib__["q" /* getElementType */])(Card, this.props, function () {
         if (onClick) return 'a';
       });
 
@@ -68959,48 +69568,48 @@ __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Ca
 __WEBPACK_IMPORTED_MODULE_7__babel_runtime_helpers_defineProperty___default()(Card, "handledProps", ["as", "centered", "children", "className", "color", "content", "description", "extra", "fluid", "header", "href", "image", "link", "meta", "onClick", "raised"]);
 
 
-Card.propTypes =  false ? {
+Card.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_11__lib__["m" /* customPropTypes */].as,
 
   /** A Card can center itself inside its container. */
-  centered: PropTypes.bool,
+  centered: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.string,
 
   /** A Card can be formatted to display different colors. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_11__lib__["b" /* SUI */].COLORS),
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_11__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Shorthand for CardDescription. */
-  description: customPropTypes.itemShorthand,
+  description: __WEBPACK_IMPORTED_MODULE_11__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for primary content of CardContent. */
-  extra: customPropTypes.contentShorthand,
+  extra: __WEBPACK_IMPORTED_MODULE_11__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A Card can be formatted to take up the width of its container. */
-  fluid: PropTypes.bool,
+  fluid: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.bool,
 
   /** Shorthand for CardHeader. */
-  header: customPropTypes.itemShorthand,
+  header: __WEBPACK_IMPORTED_MODULE_11__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Render as an `a` tag instead of a `div` and adds the href attribute. */
-  href: PropTypes.string,
+  href: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.string,
 
   /** A card can contain an Image component. */
-  image: customPropTypes.itemShorthand,
+  image: __WEBPACK_IMPORTED_MODULE_11__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A card can be formatted to link to other content. */
-  link: PropTypes.bool,
+  link: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.bool,
 
   /** Shorthand for CardMeta. */
-  meta: customPropTypes.itemShorthand,
+  meta: __WEBPACK_IMPORTED_MODULE_11__lib__["m" /* customPropTypes */].itemShorthand,
 
   /**
    * Called on click. When passed, the component renders as an `a`
@@ -69009,11 +69618,12 @@ Card.propTypes =  false ? {
    * @param {SyntheticEvent} event - React's original SyntheticEvent.
    * @param {object} data - All props.
    */
-  onClick: PropTypes.func,
+  onClick: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.func,
 
   /** A Card can be formatted to raise above the page. */
-  raised: PropTypes.bool
+  raised: __WEBPACK_IMPORTED_MODULE_9_prop_types___default.a.bool
 } : {};
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69021,7 +69631,7 @@ Card.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -69057,9 +69667,9 @@ function CardContent(props) {
       header = props.header,
       meta = props.meta,
       textAlign = props.textAlign;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(extra, 'extra'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useTextAlignProp */])(textAlign), 'content', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(CardContent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(CardContent, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(extra, 'extra'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["D" /* useTextAlignProp */])(textAlign), 'content', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(CardContent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(CardContent, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -69097,35 +69707,36 @@ function CardContent(props) {
 }
 
 CardContent.handledProps = ["as", "children", "className", "content", "description", "extra", "header", "meta", "textAlign"];
-CardContent.propTypes =  false ? {
+CardContent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Shorthand for CardDescription. */
-  description: customPropTypes.itemShorthand,
+  description: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A card can contain extra content meant to be formatted separately from the main content. */
-  extra: PropTypes.bool,
+  extra: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Shorthand for CardHeader. */
-  header: customPropTypes.itemShorthand,
+  header: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for CardMeta. */
-  meta: customPropTypes.itemShorthand,
+  meta: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** A card content can adjust its text alignment. */
-  textAlign: PropTypes.oneOf(_without(SUI.TEXT_ALIGNMENTS, 'justified'))
+  textAlign: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].TEXT_ALIGNMENTS, 'justified'))
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (CardContent);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69133,7 +69744,7 @@ CardContent.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -69159,32 +69770,33 @@ function CardDescription(props) {
       className = props.className,
       content = props.content,
       textAlign = props.textAlign;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useTextAlignProp */])(textAlign), 'description', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(CardDescription, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(CardDescription, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["D" /* useTextAlignProp */])(textAlign), 'description', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(CardDescription, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(CardDescription, props);
   return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 CardDescription.handledProps = ["as", "children", "className", "content", "textAlign"];
-CardDescription.propTypes =  false ? {
+CardDescription.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A card content can adjust its text alignment. */
-  textAlign: PropTypes.oneOf(_without(SUI.TEXT_ALIGNMENTS, 'justified'))
+  textAlign: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].TEXT_ALIGNMENTS, 'justified'))
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (CardDescription);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69192,7 +69804,7 @@ CardDescription.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -69228,9 +69840,9 @@ function CardGroup(props) {
       itemsPerRow = props.itemsPerRow,
       stackable = props.stackable,
       textAlign = props.textAlign;
-  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(centered, 'centered'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(doubling, 'doubling'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(stackable, 'stackable'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["B" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["E" /* useWidthProp */])(itemsPerRow), 'cards', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getUnhandledProps */])(CardGroup, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["p" /* getElementType */])(CardGroup, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(centered, 'centered'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(doubling, 'doubling'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(stackable, 'stackable'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["D" /* useTextAlignProp */])(textAlign), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["G" /* useWidthProp */])(itemsPerRow), 'cards', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["r" /* getUnhandledProps */])(CardGroup, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getElementType */])(CardGroup, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_6__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_5_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -69257,38 +69869,39 @@ function CardGroup(props) {
 }
 
 CardGroup.handledProps = ["as", "centered", "children", "className", "content", "doubling", "items", "itemsPerRow", "stackable", "textAlign"];
-CardGroup.propTypes =  false ? {
+CardGroup.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].as,
 
   /** A group of cards can center itself inside its container. */
-  centered: PropTypes.bool,
+  centered: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A group of cards can double its column width for mobile. */
-  doubling: PropTypes.bool,
+  doubling: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Shorthand array of props for Card. */
-  items: customPropTypes.collectionShorthand,
+  items: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].collectionShorthand,
 
   /** A group of cards can set how many cards should exist in a row. */
-  itemsPerRow: PropTypes.oneOf(SUI.WIDTHS),
+  itemsPerRow: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].WIDTHS),
 
   /** A group of cards can automatically stack rows to a single columns on mobile devices. */
-  stackable: PropTypes.bool,
+  stackable: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A card group can adjust its text alignment. */
-  textAlign: PropTypes.oneOf(_without(SUI.TEXT_ALIGNMENTS, 'justified'))
+  textAlign: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].TEXT_ALIGNMENTS, 'justified'))
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (CardGroup);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69296,7 +69909,7 @@ CardGroup.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -69322,32 +69935,33 @@ function CardHeader(props) {
       className = props.className,
       content = props.content,
       textAlign = props.textAlign;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useTextAlignProp */])(textAlign), 'header', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(CardHeader, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(CardHeader, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["D" /* useTextAlignProp */])(textAlign), 'header', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(CardHeader, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(CardHeader, props);
   return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 CardHeader.handledProps = ["as", "children", "className", "content", "textAlign"];
-CardHeader.propTypes =  false ? {
+CardHeader.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A card header can adjust its text alignment. */
-  textAlign: PropTypes.oneOf(_without(SUI.TEXT_ALIGNMENTS, 'justified'))
+  textAlign: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].TEXT_ALIGNMENTS, 'justified'))
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (CardHeader);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69355,7 +69969,7 @@ CardHeader.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -69381,32 +69995,33 @@ function CardMeta(props) {
       className = props.className,
       content = props.content,
       textAlign = props.textAlign;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["B" /* useTextAlignProp */])(textAlign), 'meta', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(CardMeta, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(CardMeta, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["D" /* useTextAlignProp */])(textAlign), 'meta', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(CardMeta, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(CardMeta, props);
   return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 CardMeta.handledProps = ["as", "children", "className", "content", "textAlign"];
-CardMeta.propTypes =  false ? {
+CardMeta.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A card meta can adjust its text alignment. */
-  textAlign: PropTypes.oneOf(_without(SUI.TEXT_ALIGNMENTS, 'justified'))
+  textAlign: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].TEXT_ALIGNMENTS, 'justified'))
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (CardMeta);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69414,7 +70029,7 @@ CardMeta.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -69453,30 +70068,30 @@ function Comment(props) {
       children = props.children,
       collapsed = props.collapsed,
       content = props.content;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(collapsed, 'collapsed'), 'comment', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(Comment, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(Comment, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(collapsed, 'collapsed'), 'comment', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(Comment, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(Comment, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 Comment.handledProps = ["as", "children", "className", "collapsed", "content"];
-Comment.propTypes =  false ? {
+Comment.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Comment can be collapsed, or hidden from view. */
-  collapsed: PropTypes.bool,
+  collapsed: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 Comment.Author = __WEBPACK_IMPORTED_MODULE_7__CommentAuthor__["a" /* default */];
 Comment.Action = __WEBPACK_IMPORTED_MODULE_5__CommentAction__["a" /* default */];
@@ -69487,6 +70102,7 @@ Comment.Group = __WEBPACK_IMPORTED_MODULE_10__CommentGroup__["a" /* default */];
 Comment.Metadata = __WEBPACK_IMPORTED_MODULE_11__CommentMetadata__["a" /* default */];
 Comment.Text = __WEBPACK_IMPORTED_MODULE_12__CommentText__["a" /* default */];
 /* unused harmony default export */ var _unused_webpack_default_export = (Comment);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69494,7 +70110,7 @@ Comment.Text = __WEBPACK_IMPORTED_MODULE_12__CommentText__["a" /* default */];
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -69517,9 +70133,9 @@ function CommentAction(props) {
       className = props.className,
       children = props.children,
       content = props.content;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(active, 'active'), className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(CommentAction, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(CommentAction, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(active, 'active'), className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(CommentAction, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(CommentAction, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
@@ -69529,23 +70145,24 @@ CommentAction.handledProps = ["active", "as", "children", "className", "content"
 CommentAction.defaultProps = {
   as: 'a'
 };
-CommentAction.propTypes =  false ? {
+CommentAction.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Style as the currently active action. */
-  active: PropTypes.bool,
+  active: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (CommentAction);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69553,7 +70170,7 @@ CommentAction.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -69576,28 +70193,29 @@ function CommentActions(props) {
       children = props.children,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('actions', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(CommentActions, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(CommentActions, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(CommentActions, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(CommentActions, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 CommentActions.handledProps = ["as", "children", "className", "content"];
-CommentActions.propTypes =  false ? {
+CommentActions.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (CommentActions);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69605,7 +70223,7 @@ CommentActions.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -69628,28 +70246,29 @@ function CommentAuthor(props) {
       children = props.children,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('author', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(CommentAuthor, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(CommentAuthor, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(CommentAuthor, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(CommentAuthor, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 CommentAuthor.handledProps = ["as", "children", "className", "content"];
-CommentAuthor.propTypes =  false ? {
+CommentAuthor.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (CommentAuthor);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69657,7 +70276,7 @@ CommentAuthor.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -69679,8 +70298,8 @@ function CommentAvatar(props) {
   var className = props.className,
       src = props.src;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('avatar', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(CommentAvatar, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(CommentAvatar, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(CommentAvatar, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(CommentAvatar, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), Object(__WEBPACK_IMPORTED_MODULE_4__lib__["f" /* createHTMLImage */])(src, {
@@ -69689,17 +70308,18 @@ function CommentAvatar(props) {
 }
 
 CommentAvatar.handledProps = ["as", "className", "src"];
-CommentAvatar.propTypes =  false ? {
+CommentAvatar.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Specifies the URL of the image. */
-  src: PropTypes.string
+  src: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (CommentAvatar);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69707,7 +70327,7 @@ CommentAvatar.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -69730,28 +70350,29 @@ function CommentContent(props) {
       children = props.children,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(className, 'content');
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(CommentContent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(CommentContent, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(CommentContent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(CommentContent, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 CommentContent.handledProps = ["as", "children", "className", "content"];
-CommentContent.propTypes =  false ? {
+CommentContent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (CommentContent);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69759,7 +70380,7 @@ CommentContent.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -69788,41 +70409,42 @@ function CommentGroup(props) {
       minimal = props.minimal,
       size = props.size,
       threaded = props.threaded;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(collapsed, 'collapsed'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(minimal, 'minimal'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(threaded, 'threaded'), 'comments', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(CommentGroup, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(CommentGroup, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', size, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(collapsed, 'collapsed'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(minimal, 'minimal'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(threaded, 'threaded'), 'comments', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(CommentGroup, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(CommentGroup, props);
   return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 CommentGroup.handledProps = ["as", "children", "className", "collapsed", "content", "minimal", "size", "threaded"];
-CommentGroup.propTypes =  false ? {
+CommentGroup.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** Comments can be collapsed, or hidden from view. */
-  collapsed: PropTypes.bool,
+  collapsed: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Comments can hide extra information unless a user shows intent to interact with a comment. */
-  minimal: PropTypes.bool,
+  minimal: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Comments can have different sizes. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'medium')),
+  size: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].SIZES, 'medium')),
 
   /** A comment list can be threaded to showing the relationship between conversations. */
-  threaded: PropTypes.bool
+  threaded: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (CommentGroup);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69830,7 +70452,7 @@ CommentGroup.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -69853,28 +70475,29 @@ function CommentMetadata(props) {
       children = props.children,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('metadata', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(CommentMetadata, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(CommentMetadata, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(CommentMetadata, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(CommentMetadata, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 CommentMetadata.handledProps = ["as", "children", "className", "content"];
-CommentMetadata.propTypes =  false ? {
+CommentMetadata.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (CommentMetadata);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69882,7 +70505,7 @@ CommentMetadata.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -69905,28 +70528,29 @@ function CommentText(props) {
       children = props.children,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(className, 'text');
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(CommentText, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(CommentText, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(CommentText, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(CommentText, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 CommentText.handledProps = ["as", "children", "className", "content"];
-CommentText.propTypes =  false ? {
+CommentText.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (CommentText);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -69945,7 +70569,7 @@ CommentText.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectWithoutProperties__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectWithoutProperties.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectWithoutProperties__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectWithoutProperties.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectWithoutProperties___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectWithoutProperties__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__);
@@ -69996,8 +70620,8 @@ function Feed(props) {
       events = props.events,
       size = props.size;
   var classes = __WEBPACK_IMPORTED_MODULE_4_classnames___default()('ui', size, 'feed', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_7__lib__["q" /* getUnhandledProps */])(Feed, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_7__lib__["p" /* getElementType */])(Feed, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_7__lib__["r" /* getUnhandledProps */])(Feed, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_7__lib__["q" /* getElementType */])(Feed, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_7__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_6_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default()({}, rest, {
@@ -70027,21 +70651,21 @@ function Feed(props) {
 }
 
 Feed.handledProps = ["as", "children", "className", "events", "size"];
-Feed.propTypes =  false ? {
+Feed.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_7__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.string,
 
   /** Shorthand array of props for FeedEvent. */
-  events: customPropTypes.collectionShorthand,
+  events: __WEBPACK_IMPORTED_MODULE_7__lib__["m" /* customPropTypes */].collectionShorthand,
 
   /** A feed can have different sizes. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'mini', 'tiny', 'medium', 'big', 'huge', 'massive'))
+  size: __WEBPACK_IMPORTED_MODULE_5_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_2_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_7__lib__["b" /* SUI */].SIZES, 'mini', 'tiny', 'medium', 'big', 'huge', 'massive'))
 } : {};
 Feed.Content = __WEBPACK_IMPORTED_MODULE_8__FeedContent__["a" /* default */];
 Feed.Date = __WEBPACK_IMPORTED_MODULE_9__FeedDate__["a" /* default */];
@@ -70053,6 +70677,7 @@ Feed.Meta = __WEBPACK_IMPORTED_MODULE_14__FeedMeta__["a" /* default */];
 Feed.Summary = __WEBPACK_IMPORTED_MODULE_15__FeedSummary__["a" /* default */];
 Feed.User = __WEBPACK_IMPORTED_MODULE_16__FeedUser__["a" /* default */];
 /* unused harmony default export */ var _unused_webpack_default_export = (Feed);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -70060,7 +70685,7 @@ Feed.User = __WEBPACK_IMPORTED_MODULE_16__FeedUser__["a" /* default */];
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -70093,8 +70718,8 @@ function FeedContent(props) {
       meta = props.meta,
       summary = props.summary;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('content', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(FeedContent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(FeedContent, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(FeedContent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(FeedContent, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -70139,35 +70764,36 @@ function FeedContent(props) {
 }
 
 FeedContent.handledProps = ["as", "children", "className", "content", "date", "extraImages", "extraText", "meta", "summary"];
-FeedContent.propTypes =  false ? {
+FeedContent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** An event can contain a date. */
-  date: customPropTypes.itemShorthand,
+  date: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for FeedExtra with images. */
-  extraImages: FeedExtra.propTypes.images,
+  extraImages: __WEBPACK_IMPORTED_MODULE_6__FeedExtra__["a" /* default */].propTypes.images,
 
   /** Shorthand for FeedExtra with text. */
-  extraText: customPropTypes.itemShorthand,
+  extraText: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for FeedMeta. */
-  meta: customPropTypes.itemShorthand,
+  meta: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for FeedSummary. */
-  summary: customPropTypes.itemShorthand
+  summary: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (FeedContent);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -70175,7 +70801,7 @@ FeedContent.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -70198,28 +70824,29 @@ function FeedDate(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('date', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(FeedDate, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(FeedDate, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(FeedDate, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(FeedDate, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 FeedDate.handledProps = ["as", "children", "className", "content"];
-FeedDate.propTypes =  false ? {
+FeedDate.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (FeedDate);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -70227,7 +70854,7 @@ FeedDate.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -70261,8 +70888,8 @@ function FeedEvent(props) {
       meta = props.meta,
       summary = props.summary;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('event', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(FeedEvent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(FeedEvent, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(FeedEvent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(FeedEvent, props);
   var hasContentProp = content || date || extraImages || extraText || meta || summary;
   var contentProps = {
     content: content,
@@ -70290,41 +70917,42 @@ function FeedEvent(props) {
 }
 
 FeedEvent.handledProps = ["as", "children", "className", "content", "date", "extraImages", "extraText", "icon", "image", "meta", "summary"];
-FeedEvent.propTypes =  false ? {
+FeedEvent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for FeedContent. */
-  content: customPropTypes.itemShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for FeedDate. */
-  date: customPropTypes.itemShorthand,
+  date: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for FeedExtra with images. */
-  extraImages: customPropTypes.itemShorthand,
+  extraImages: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for FeedExtra with content. */
-  extraText: customPropTypes.itemShorthand,
+  extraText: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** An event can contain icon label. */
-  icon: customPropTypes.itemShorthand,
+  icon: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** An event can contain image label. */
-  image: customPropTypes.itemShorthand,
+  image: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for FeedMeta. */
-  meta: customPropTypes.itemShorthand,
+  meta: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for FeedSummary. */
-  summary: customPropTypes.itemShorthand
+  summary: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (FeedEvent);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -70332,7 +70960,7 @@ FeedEvent.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_map__ = __webpack_require__("./node_modules/lodash/map.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_map__);
@@ -70359,9 +70987,9 @@ function FeedExtra(props) {
       content = props.content,
       images = props.images,
       text = props.text;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(images, 'images'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(content || text, 'text'), 'extra', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(FeedExtra, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(FeedExtra, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(images, 'images'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(content || text, 'text'), 'extra', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(FeedExtra, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(FeedExtra, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -70383,26 +71011,27 @@ function FeedExtra(props) {
 }
 
 FeedExtra.handledProps = ["as", "children", "className", "content", "images", "text"];
-FeedExtra.propTypes =  false ? {
+FeedExtra.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** An event can contain additional information like a set of images. */
-  images: customPropTypes.every([customPropTypes.disallow(['text']), PropTypes.oneOfType([PropTypes.bool, customPropTypes.collectionShorthand])]),
+  images: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].every([__WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].disallow(['text']), __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].collectionShorthand])]),
 
   /** An event can contain additional text information. */
-  text: PropTypes.bool
+  text: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (FeedExtra);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -70410,7 +71039,7 @@ FeedExtra.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -70437,8 +71066,8 @@ function FeedLabel(props) {
       icon = props.icon,
       image = props.image;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('label', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(FeedLabel, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(FeedLabel, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(FeedLabel, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(FeedLabel, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -70454,26 +71083,27 @@ function FeedLabel(props) {
 }
 
 FeedLabel.handledProps = ["as", "children", "className", "content", "icon", "image"];
-FeedLabel.propTypes =  false ? {
+FeedLabel.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** An event can contain icon label. */
-  icon: customPropTypes.itemShorthand,
+  icon: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** An event can contain image label. */
-  image: customPropTypes.itemShorthand
+  image: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (FeedLabel);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -70481,7 +71111,7 @@ FeedLabel.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -70507,8 +71137,8 @@ function FeedLike(props) {
       content = props.content,
       icon = props.icon;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('like', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(FeedLike, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(FeedLike, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(FeedLike, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(FeedLike, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -70527,23 +71157,24 @@ FeedLike.handledProps = ["as", "children", "className", "content", "icon"];
 FeedLike.defaultProps = {
   as: 'a'
 };
-FeedLike.propTypes =  false ? {
+FeedLike.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Shorthand for icon. Mutually exclusive with children. */
-  icon: customPropTypes.itemShorthand
+  icon: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (FeedLike);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -70551,7 +71182,7 @@ FeedLike.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -70577,8 +71208,8 @@ function FeedMeta(props) {
       content = props.content,
       like = props.like;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('meta', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(FeedMeta, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(FeedMeta, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(FeedMeta, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(FeedMeta, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -70598,23 +71229,24 @@ function FeedMeta(props) {
 }
 
 FeedMeta.handledProps = ["as", "children", "className", "content", "like"];
-FeedMeta.propTypes =  false ? {
+FeedMeta.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Shorthand for FeedLike. */
-  like: customPropTypes.itemShorthand
+  like: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (FeedMeta);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -70622,7 +71254,7 @@ FeedMeta.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -70651,8 +71283,8 @@ function FeedSummary(props) {
       date = props.date,
       user = props.user;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('summary', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(FeedSummary, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(FeedSummary, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(FeedSummary, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(FeedSummary, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -70678,26 +71310,27 @@ function FeedSummary(props) {
 }
 
 FeedSummary.handledProps = ["as", "children", "className", "content", "date", "user"];
-FeedSummary.propTypes =  false ? {
+FeedSummary.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Shorthand for FeedDate. */
-  date: customPropTypes.itemShorthand,
+  date: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for FeedUser. */
-  user: customPropTypes.itemShorthand
+  user: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (FeedSummary);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -70705,7 +71338,7 @@ FeedSummary.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -70728,31 +71361,32 @@ function FeedUser(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('user', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(FeedUser, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(FeedUser, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(FeedUser, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(FeedUser, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 FeedUser.handledProps = ["as", "children", "className", "content"];
-FeedUser.propTypes =  false ? {
+FeedUser.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 FeedUser.defaultProps = {
   as: 'a'
 };
 /* harmony default export */ __webpack_exports__["a"] = (FeedUser);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -70771,7 +71405,7 @@ FeedUser.defaultProps = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -70813,8 +71447,8 @@ function Item(props) {
       image = props.image,
       meta = props.meta;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('item', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(Item, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(Item, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(Item, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(Item, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -70843,35 +71477,36 @@ Item.Group = __WEBPACK_IMPORTED_MODULE_8__ItemGroup__["a" /* default */];
 Item.Header = __WEBPACK_IMPORTED_MODULE_9__ItemHeader__["a" /* default */];
 Item.Image = __WEBPACK_IMPORTED_MODULE_10__ItemImage__["a" /* default */];
 Item.Meta = __WEBPACK_IMPORTED_MODULE_11__ItemMeta__["a" /* default */];
-Item.propTypes =  false ? {
+Item.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for ItemContent component. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Shorthand for ItemDescription component. */
-  description: customPropTypes.itemShorthand,
+  description: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for ItemExtra component. */
-  extra: customPropTypes.itemShorthand,
+  extra: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for ItemHeader component. */
-  header: customPropTypes.itemShorthand,
+  header: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for ItemImage component. */
-  image: customPropTypes.itemShorthand,
+  image: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for ItemMeta component. */
-  meta: customPropTypes.itemShorthand
+  meta: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (Item);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -70879,7 +71514,7 @@ Item.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -70914,9 +71549,9 @@ function ItemContent(props) {
       header = props.header,
       meta = props.meta,
       verticalAlign = props.verticalAlign;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["D" /* useVerticalAlignProp */])(verticalAlign), 'content', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ItemContent, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ItemContent, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["F" /* useVerticalAlignProp */])(verticalAlign), 'content', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ItemContent, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ItemContent, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -70938,35 +71573,36 @@ function ItemContent(props) {
 }
 
 ItemContent.handledProps = ["as", "children", "className", "content", "description", "extra", "header", "meta", "verticalAlign"];
-ItemContent.propTypes =  false ? {
+ItemContent.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Shorthand for ItemDescription component. */
-  description: customPropTypes.itemShorthand,
+  description: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for ItemExtra component. */
-  extra: customPropTypes.itemShorthand,
+  extra: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for ItemHeader component. */
-  header: customPropTypes.itemShorthand,
+  header: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Shorthand for ItemMeta component. */
-  meta: customPropTypes.itemShorthand,
+  meta: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].itemShorthand,
 
   /** Content can specify its vertical alignment. */
-  verticalAlign: PropTypes.oneOf(SUI.VERTICAL_ALIGNMENTS)
+  verticalAlign: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_4__lib__["b" /* SUI */].VERTICAL_ALIGNMENTS)
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (ItemContent);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -70974,7 +71610,7 @@ ItemContent.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -70997,26 +71633,26 @@ function ItemDescription(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('description', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ItemDescription, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ItemDescription, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ItemDescription, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ItemDescription, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 ItemDescription.handledProps = ["as", "children", "className", "content"];
-ItemDescription.propTypes =  false ? {
+ItemDescription.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 ItemDescription.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(ItemDescription, function (content) {
   return {
@@ -71024,6 +71660,7 @@ ItemDescription.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* create
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (ItemDescription);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -71031,7 +71668,7 @@ ItemDescription.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* create
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -71054,26 +71691,26 @@ function ItemExtra(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('extra', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ItemExtra, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ItemExtra, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ItemExtra, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ItemExtra, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 ItemExtra.handledProps = ["as", "children", "className", "content"];
-ItemExtra.propTypes =  false ? {
+ItemExtra.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 ItemExtra.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(ItemExtra, function (content) {
   return {
@@ -71081,6 +71718,7 @@ ItemExtra.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorth
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (ItemExtra);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -71088,7 +71726,7 @@ ItemExtra.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorth
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectWithoutProperties__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectWithoutProperties.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectWithoutProperties__ = __webpack_require__("./node_modules/@babel/runtime/helpers/objectWithoutProperties.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectWithoutProperties___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_objectWithoutProperties__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends__);
@@ -71123,9 +71761,9 @@ function ItemGroup(props) {
       link = props.link,
       relaxed = props.relaxed,
       unstackable = props.unstackable;
-  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(divided, 'divided'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(link, 'link'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(unstackable, 'unstackable'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["z" /* useKeyOrValueAndKey */])(relaxed, 'relaxed'), 'items', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getUnhandledProps */])(ItemGroup, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["p" /* getElementType */])(ItemGroup, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()('ui', Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(divided, 'divided'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(link, 'link'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(unstackable, 'unstackable'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["B" /* useKeyOrValueAndKey */])(relaxed, 'relaxed'), 'items', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["r" /* getUnhandledProps */])(ItemGroup, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getElementType */])(ItemGroup, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_6__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_5_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_1__babel_runtime_helpers_extends___default()({}, rest, {
@@ -71155,35 +71793,36 @@ function ItemGroup(props) {
 }
 
 ItemGroup.handledProps = ["as", "children", "className", "content", "divided", "items", "link", "relaxed", "unstackable"];
-ItemGroup.propTypes =  false ? {
+ItemGroup.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Items can be divided to better distinguish between grouped content. */
-  divided: PropTypes.bool,
+  divided: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Shorthand array of props for Item. */
-  items: customPropTypes.collectionShorthand,
+  items: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].collectionShorthand,
 
   /** An item can be formatted so that the entire contents link to another page. */
-  link: PropTypes.bool,
+  link: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A group of items can relax its padding to provide more negative space. */
-  relaxed: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['very'])]),
+  relaxed: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool, __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(['very'])]),
 
   /** Prevent items from stacking on mobile. */
-  unstackable: PropTypes.bool
+  unstackable: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (ItemGroup);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -71191,7 +71830,7 @@ ItemGroup.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -71214,26 +71853,26 @@ function ItemHeader(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('header', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ItemHeader, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ItemHeader, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ItemHeader, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ItemHeader, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 ItemHeader.handledProps = ["as", "children", "className", "content"];
-ItemHeader.propTypes =  false ? {
+ItemHeader.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 ItemHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(ItemHeader, function (content) {
   return {
@@ -71241,6 +71880,7 @@ ItemHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShort
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (ItemHeader);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -71248,7 +71888,7 @@ ItemHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShort
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react__);
@@ -71264,7 +71904,7 @@ ItemHeader.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShort
 
 function ItemImage(props) {
   var size = props.size;
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["q" /* getUnhandledProps */])(ItemImage, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["r" /* getUnhandledProps */])(ItemImage, props);
   return __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__elements_Image__["a" /* default */], __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     size: size,
     ui: !!size,
@@ -71273,9 +71913,9 @@ function ItemImage(props) {
 }
 
 ItemImage.handledProps = ["size"];
-ItemImage.propTypes =  false ? {
+ItemImage.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An image may appear at different sizes. */
-  size: Image.propTypes.size
+  size: __WEBPACK_IMPORTED_MODULE_3__elements_Image__["a" /* default */].propTypes.size
 } : {};
 ItemImage.create = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["l" /* createShorthandFactory */])(ItemImage, function (src) {
   return {
@@ -71283,6 +71923,7 @@ ItemImage.create = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["l" /* createShorth
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (ItemImage);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -71290,7 +71931,7 @@ ItemImage.create = Object(__WEBPACK_IMPORTED_MODULE_2__lib__["l" /* createShorth
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -71313,26 +71954,26 @@ function ItemMeta(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('meta', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(ItemMeta, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(ItemMeta, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(ItemMeta, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(ItemMeta, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 ItemMeta.handledProps = ["as", "children", "className", "content"];
-ItemMeta.propTypes =  false ? {
+ItemMeta.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 ItemMeta.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(ItemMeta, function (content) {
   return {
@@ -71340,6 +71981,7 @@ ItemMeta.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShortha
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (ItemMeta);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -71358,7 +72000,7 @@ ItemMeta.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShortha
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -71397,9 +72039,9 @@ function Statistic(props) {
       size = props.size,
       text = props.text,
       value = props.value;
-  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["C" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(horizontal, 'horizontal'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), 'statistic', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getUnhandledProps */])(Statistic, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["p" /* getElementType */])(Statistic, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_2_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_5__lib__["E" /* useValueAndKey */])(floated, 'floated'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(horizontal, 'horizontal'), Object(__WEBPACK_IMPORTED_MODULE_5__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), 'statistic', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["r" /* getUnhandledProps */])(Statistic, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["q" /* getElementType */])(Statistic, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_5__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_4_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -71426,42 +72068,42 @@ function Statistic(props) {
 }
 
 Statistic.handledProps = ["as", "children", "className", "color", "content", "floated", "horizontal", "inverted", "label", "size", "text", "value"];
-Statistic.propTypes =  false ? {
+Statistic.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.string,
 
   /** A statistic can be formatted to be different colors. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].COLORS),
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A statistic can sit to the left or right of other content. */
-  floated: PropTypes.oneOf(SUI.FLOATS),
+  floated: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].FLOATS),
 
   /** A statistic can present its measurement horizontally. */
-  horizontal: PropTypes.bool,
+  horizontal: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** A statistic can be formatted to fit on a dark background. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Label content of the Statistic. */
-  label: customPropTypes.contentShorthand,
+  label: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A statistic can vary in size. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'big', 'massive', 'medium')),
+  size: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_5__lib__["b" /* SUI */].SIZES, 'big', 'massive', 'medium')),
 
   /** Format the StatisticValue with smaller font size to fit nicely beside number values. */
-  text: PropTypes.bool,
+  text: __WEBPACK_IMPORTED_MODULE_3_prop_types___default.a.bool,
 
   /** Value content of the Statistic. */
-  value: customPropTypes.contentShorthand
+  value: __WEBPACK_IMPORTED_MODULE_5__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 Statistic.Group = __WEBPACK_IMPORTED_MODULE_6__StatisticGroup__["a" /* default */];
 Statistic.Label = __WEBPACK_IMPORTED_MODULE_7__StatisticLabel__["a" /* default */];
@@ -71472,6 +72114,7 @@ Statistic.create = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["l" /* createShorth
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (Statistic);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -71479,7 +72122,7 @@ Statistic.create = Object(__WEBPACK_IMPORTED_MODULE_5__lib__["l" /* createShorth
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without__ = __webpack_require__("./node_modules/lodash/without.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_without___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_without__);
@@ -71515,9 +72158,9 @@ function StatisticGroup(props) {
       items = props.items,
       size = props.size,
       widths = props.widths;
-  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(horizontal, 'horizontal'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["y" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["E" /* useWidthProp */])(widths), 'statistics', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getUnhandledProps */])(StatisticGroup, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["p" /* getElementType */])(StatisticGroup, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_3_classnames___default()('ui', color, size, Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(horizontal, 'horizontal'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["A" /* useKeyOnly */])(inverted, 'inverted'), Object(__WEBPACK_IMPORTED_MODULE_6__lib__["G" /* useWidthProp */])(widths), 'statistics', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["r" /* getUnhandledProps */])(StatisticGroup, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_6__lib__["q" /* getElementType */])(StatisticGroup, props);
 
   if (!__WEBPACK_IMPORTED_MODULE_6__lib__["c" /* childrenUtils */].isNil(children)) {
     return __WEBPACK_IMPORTED_MODULE_5_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
@@ -71539,38 +72182,39 @@ function StatisticGroup(props) {
 }
 
 StatisticGroup.handledProps = ["as", "children", "className", "color", "content", "horizontal", "inverted", "items", "size", "widths"];
-StatisticGroup.propTypes =  false ? {
+StatisticGroup.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.string,
 
   /** A statistic group can be formatted to be different colors. */
-  color: PropTypes.oneOf(SUI.COLORS),
+  color: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].COLORS),
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** A statistic group can present its measurement horizontally. */
-  horizontal: PropTypes.bool,
+  horizontal: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** A statistic group can be formatted to fit on a dark background. */
-  inverted: PropTypes.bool,
+  inverted: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.bool,
 
   /** Array of props for Statistic. */
-  items: customPropTypes.collectionShorthand,
+  items: __WEBPACK_IMPORTED_MODULE_6__lib__["m" /* customPropTypes */].collectionShorthand,
 
   /** A statistic group can vary in size. */
-  size: PropTypes.oneOf(_without(SUI.SIZES, 'big', 'massive', 'medium')),
+  size: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_1_lodash_without___default()(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].SIZES, 'big', 'massive', 'medium')),
 
   /** A statistic group can have its items divided evenly. */
-  widths: PropTypes.oneOf(SUI.WIDTHS)
+  widths: __WEBPACK_IMPORTED_MODULE_4_prop_types___default.a.oneOf(__WEBPACK_IMPORTED_MODULE_6__lib__["b" /* SUI */].WIDTHS)
 } : {};
 /* harmony default export */ __webpack_exports__["a"] = (StatisticGroup);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -71578,7 +72222,7 @@ StatisticGroup.propTypes =  false ? {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -71601,26 +72245,26 @@ function StatisticLabel(props) {
       className = props.className,
       content = props.content;
   var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()('label', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(StatisticLabel, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(StatisticLabel, props);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(StatisticLabel, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(StatisticLabel, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 StatisticLabel.handledProps = ["as", "children", "className", "content"];
-StatisticLabel.propTypes =  false ? {
+StatisticLabel.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand
 } : {};
 StatisticLabel.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(StatisticLabel, function (content) {
   return {
@@ -71628,6 +72272,7 @@ StatisticLabel.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createS
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (StatisticLabel);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -71635,7 +72280,7 @@ StatisticLabel.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createS
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__ = __webpack_require__("./node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames__ = __webpack_require__("./node_modules/classnames/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_classnames___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_classnames__);
@@ -71658,30 +72303,30 @@ function StatisticValue(props) {
       className = props.className,
       content = props.content,
       text = props.text;
-  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["y" /* useKeyOnly */])(text, 'text'), 'value', className);
-  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getUnhandledProps */])(StatisticValue, props);
-  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["p" /* getElementType */])(StatisticValue, props);
+  var classes = __WEBPACK_IMPORTED_MODULE_1_classnames___default()(Object(__WEBPACK_IMPORTED_MODULE_4__lib__["A" /* useKeyOnly */])(text, 'text'), 'value', className);
+  var rest = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["r" /* getUnhandledProps */])(StatisticValue, props);
+  var ElementType = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["q" /* getElementType */])(StatisticValue, props);
   return __WEBPACK_IMPORTED_MODULE_3_react___default.a.createElement(ElementType, __WEBPACK_IMPORTED_MODULE_0__babel_runtime_helpers_extends___default()({}, rest, {
     className: classes
   }), __WEBPACK_IMPORTED_MODULE_4__lib__["c" /* childrenUtils */].isNil(children) ? content : children);
 }
 
 StatisticValue.handledProps = ["as", "children", "className", "content", "text"];
-StatisticValue.propTypes =  false ? {
+StatisticValue.propTypes = process.env.NODE_ENV !== "production" ? {
   /** An element type to render as (string or function). */
-  as: customPropTypes.as,
+  as: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].as,
 
   /** Primary content. */
-  children: PropTypes.node,
+  children: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.node,
 
   /** Additional classes. */
-  className: PropTypes.string,
+  className: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.string,
 
   /** Shorthand for primary content. */
-  content: customPropTypes.contentShorthand,
+  content: __WEBPACK_IMPORTED_MODULE_4__lib__["m" /* customPropTypes */].contentShorthand,
 
   /** Format the value with smaller font size to fit nicely beside number values. */
-  text: PropTypes.bool
+  text: __WEBPACK_IMPORTED_MODULE_2_prop_types___default.a.bool
 } : {};
 StatisticValue.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createShorthandFactory */])(StatisticValue, function (content) {
   return {
@@ -71689,6 +72334,7 @@ StatisticValue.create = Object(__WEBPACK_IMPORTED_MODULE_4__lib__["l" /* createS
   };
 });
 /* harmony default export */ __webpack_exports__["a"] = (StatisticValue);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -82374,7 +83020,7 @@ __WEBPACK_IMPORTED_MODULE_0_hellojs___default.a.init({
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppState; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppState; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_mobx__ = __webpack_require__("./node_modules/mobx/lib/mobx.module.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_axios__ = __webpack_require__("./node_modules/axios/index.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_axios__);
@@ -83153,7 +83799,7 @@ var AppState = (_class = function () {
           while (1) {
             switch (_context7.prev = _context7.next) {
               case 0:
-                console.log("backend: ", Object({"NODE_ENV":"production"}).BACKEND_API);
+                console.log("backend: ", process.env.BACKEND_API);
 
                 if (!__WEBPACK_IMPORTED_MODULE_2_validator___default.a.isLength(this.userInfo.displayname, {
                   min: 4,
@@ -84370,6 +85016,7 @@ var AppState = (_class = function () {
   initializer: null
 }), _applyDecoratedDescriptor(_class.prototype, "setImgUrl", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "setImgUrl"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "setModal", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "setModal"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "setProfileEmail", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "setProfileEmail"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "setProfileDisplayname", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "setProfileDisplayname"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "setProfileProvider", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "setProfileProvider"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "setLoading", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "setLoading"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "setError", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "setError"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "setInitUserInfo", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "setInitUserInfo"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "setAuthenticated", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "setAuthenticated"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "setInitLoggedInUserInfo", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "setInitLoggedInUserInfo"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "setClearMessage", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "setClearMessage"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "setSuccessFlashMessage", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "setSuccessFlashMessage"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "setErrorFlashMessage", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "setErrorFlashMessage"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "clearResourceInfo", [__WEBPACK_IMPORTED_MODULE_0_mobx__["action"]], Object.getOwnPropertyDescriptor(_class.prototype, "clearResourceInfo"), _class.prototype)), _class);
 
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -84396,12 +85043,13 @@ var AppState = (_class = function () {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return isProduction; });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return isProduction; });
 /* unused harmony export BACKEND_API */
-var isProduction = "production" === "production";
+var isProduction = process.env.NODE_ENV === "production";
 var BACKEND_API = "http://localhost:8080";
 
 
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("./node_modules/node-libs-browser/node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -84415,4 +85063,4 @@ module.exports = __webpack_require__("./src/index.js");
 /***/ })
 
 },[1]);
-//# sourceMappingURL=app.fa835d4f34566906808d.js.map
+//# sourceMappingURL=app.916013acec0bec76ea3b.js.map

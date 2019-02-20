@@ -124,6 +124,8 @@ export default class AppState {
       wolfgang: '',
       soma: '',
       luna: '',
+      maleA: '',
+      femaleA: ''
     }
 
     this.resourcesId = null;
@@ -172,6 +174,12 @@ export default class AppState {
         break;
       case 'Luna':
         this.resources.luna = value;
+        break;
+      case 'MaleA':
+        this.resources.maleA = value;
+        break;
+      case 'FemaleA':
+        this.resources.femaleA = value;
         break;
     }
   }

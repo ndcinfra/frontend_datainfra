@@ -126,6 +126,16 @@ class Register extends Component {
         this.store.GetImgUrl("Luna", acceptedFiles);
     }
 
+    MaleADrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("MaleA", acceptedFiles);
+    }
+
+    FemaleADrop = (acceptedFiles, rejectedFiles) => {
+        // Do something with files
+        this.store.GetImgUrl("FemaleA", acceptedFiles);
+    }
+
     handelRegister(e){
 		e.preventDefault();
         this.store.setLoading('on');
@@ -314,6 +324,26 @@ class Register extends Component {
                 <div style={thumb}>
                 <div style={thumbInner}>
                     <img src={resources.luna} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
+
+        const Malethumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={resources.maleA} style={img} />
+                </div>
+                </div>
+            </aside>
+        );
+
+        const Femalethumbs = (
+            <aside style={thumbsContainer}>
+                <div style={thumb}>
+                <div style={thumbInner}>
+                    <img src={resources.femaleA} style={img} />
                 </div>
                 </div>
             </aside>
@@ -556,6 +586,36 @@ class Register extends Component {
                                             )}
                                         </Dropzone>
                                         { resources.luna !== '' ? Lunathumbs : null }
+                                    </Form.Field>
+
+                                    <Form.Field>
+                                        <label>Male Accessory</label>
+                                        <Dropzone
+                                            onDrop={this.MaleADrop}
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                        { resources.maleA !== '' ? Malethumbs : null }
+                                    </Form.Field>
+
+                                    <Form.Field>
+                                        <label>Female Accessory</label>
+                                        <Dropzone
+                                            onDrop={this.FemalADrop}
+                                            >
+                                            {({getRootProps, getInputProps}) => (
+                                                <div {...getRootProps()}>
+                                                    <input {...getInputProps()} />
+                                                    <p>Drop files here or click to select file</p>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                        { resources.femaleA !== '' ? Femalethumbs : null }
                                     </Form.Field>
                                 </Form.Group>
 

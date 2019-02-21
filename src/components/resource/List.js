@@ -72,6 +72,11 @@ class List extends Component {
                     <button id="download-pdf">Download PDF</button>
                 </div>
                 */}
+
+                <div className="table-controls">
+                    <button id="download-csv">Download CSV</button>
+                </div>
+                
                 <div id="tabulator-1"></div>
 
             </Container>

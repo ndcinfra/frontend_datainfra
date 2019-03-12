@@ -63,6 +63,8 @@ export default class TopBar extends Component {
 
 		if (name === 'home') {
 			this.props.history.push('/');
+		}else if (name === 'KPI') {
+			this.props.history.push('/kpi/listKpi');
 		}else{
 			this.props.history.push('/'+name);
 		}
@@ -80,9 +82,10 @@ export default class TopBar extends Component {
 
 		var Viewpane = null;
 		var Resourcepane = null;
+		var kpiPane = null;
+
 		const { activeItem } = this.state;
 
-		
 		if(authenticated) {
 			Viewpane = (
 				<Menu.Menu position='right'>
@@ -113,6 +116,12 @@ export default class TopBar extends Component {
 				</Menu.Menu>
 			)
 
+			kpiPane = (
+				<Menu.Menu>
+					{ loggedInUserInfo.permission !== 'publisher' && loggedInUserInfo.permission !== 'user' ? <Menu.Item name='KPI' active={activeItem === 'KPI'} onClick={this.handleItemClick}></Menu.Item>:null}
+				</Menu.Menu>
+			)
+
 		}else{
 			Viewpane = (
 				<Menu.Menu position='right'>
@@ -128,6 +137,7 @@ export default class TopBar extends Component {
 				<Menu size='tiny' pointing borderless={true} fixed='top'>
 					<Menu.Item name='home' active={activeItem === 'home'} onClick={this.handleItemClick} />
 					{Resourcepane}
+					{kpiPane}
 					{Viewpane}
 				</Menu>
 			</div>

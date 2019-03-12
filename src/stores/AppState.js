@@ -9,14 +9,14 @@ import * as AuthAPI from '../lib/api/auth';
 import * as UserAPI from '../lib/api/user';
 import * as S3API from '../lib/api/s3';
 import * as ResourceAPI from '../lib/api/resource';
+import * as KpiAPI from '../lib/api/kpi';
 
 import storage from '../lib/storage';
 import redirect from '../lib/redirect';
 import social from '../lib/social';
 import hello from 'hellojs';
-// import request from 'superagent';
-import {BACKEND_API} from '../utils/constants';
 
+import {BACKEND_API} from '../utils/constants';
 
 export default class AppState {
   @observable authenticated;
@@ -64,6 +64,8 @@ export default class AppState {
   */
 
   @observable modalOpened;
+
+  @observable searchKPI;
 
   constructor() {
     this.authenticated = false;
@@ -131,6 +133,14 @@ export default class AppState {
     this.resourcesId = null;
 
     this.modalOpened = false;
+
+    this.searchKPI = {
+      from: '',
+      to: '',
+      country: '',
+      legend: ['KOREA', 'CHINA', 'JAPAN', 'TAIWAN', 'NA'],
+      result: []
+    }
 
   }
 
@@ -330,16 +340,7 @@ export default class AppState {
         history.push('/resource/list');
 
       } catch (err) {
-        //console.log(err);
         this.setError(err);
-        /*
-        if (err.response.data) {
-          this.setError(err.response.data.message);
-        } else {
-          this.setError(err);
-        }
-        */
-
       }
     }
 
@@ -359,16 +360,7 @@ export default class AppState {
       }
 
     } catch (err) {
-      //console.log(err);
       this.setError(err);
-      /*
-      if (err.response.data) {
-        this.setError(err.response.data.message);
-      } else {
-        this.setError(err);
-      }
-      */
-
     }
   }
 
@@ -393,16 +385,7 @@ export default class AppState {
         history.push('/resource/list');
 
       } catch (err) {
-        //console.log(err);
         this.setError(err);
-        /*
-        if (err.response.data) {
-          this.setError(err.response.data.message);
-        } else {
-          this.setError(err);
-        }
-        */
-
       }
     }
   }
@@ -419,17 +402,34 @@ export default class AppState {
       history.push('/resource/list');
 
     } catch (err) {
-      //console.log(err);
       this.setError(err);
-      /*
-      if (err.response.data) {
-        this.setError(err.response.data.message);
-      } else {
+    }
+  }
+
+  // GetKPI
+  async GetKPI() {
+
+    //validate date
+
+    if (!this.error) {
+      //let data = null;
+      let respData = null;
+      try {
+        // call backend
+        respData = await KpiAPI.getKPI(this.searchKPI);
+
+        //console.log(respData.data.data);
+
+        this.searchKPI.result.push(...respData.data.data);
+        //console.log(this.searchKPI.result[0]);
+
+        this.setLoading('off');
+
+      } catch (err) {
         this.setError(err);
       }
-      */
-
     }
+
   }
 
   // Signup

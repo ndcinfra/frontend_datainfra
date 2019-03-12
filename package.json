@@ -50,6 +50,8 @@
     "css-declaration-sorter": "^2.0.0",
     "css-mqpacker": "^6.0.1",
     "dotenv": "^6.2.0",
+    "echarts": "^4.1.0",
+    "echarts-for-react": "^2.0.15-beta.0",
     "faker": "^4.1.0",
     "form-data": "^2.3.3",
     "hellojs": "^1.17.1",

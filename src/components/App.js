@@ -14,6 +14,8 @@ import { Login, Logout, Signup } from './auth/index';
 import {ConfirmEmail, InvalidConfirmEmail, ForgotPassword, ResetPassword, Profile } from './user/index';
 import {Register, List, Detail} from './resource/index';
 
+import {Kpi} from './kpi/index';
+
 @withRouter
 @inject("store")
 @observer
@@ -65,6 +67,8 @@ export default class App extends Component {
 						<Route path="/resource/register" {...this.store.appState.authenticated} component={Register} /> 
 						<Route path="/resource/list" {...this.store.appState.authenticated}  component={List} />
 						<Route path="/resource/detail" {...this.store.appState.authenticated} component={Detail} />
+
+						<Route path="/kpi/listKpi" {...this.store.appState.authenticated} component={Kpi} />
 
 						<Route component={NotFound}/> 
 					</Switch>

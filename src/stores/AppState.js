@@ -139,7 +139,7 @@ export default class AppState {
       to: '',
       country: '',
       legend: ['KOREA', 'CHINA', 'JAPAN', 'TAIWAN', 'NA'],
-      result: []
+      kind: ''
     }
 
   }

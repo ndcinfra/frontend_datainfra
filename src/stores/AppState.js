@@ -16,7 +16,9 @@ import redirect from '../lib/redirect';
 import social from '../lib/social';
 import hello from 'hellojs';
 
+import ApexCharts from 'apexcharts';
 import {BACKEND_API} from '../utils/constants';
+var numeral = require('numeral');
 
 export default class AppState {
   @observable authenticated;
@@ -66,7 +68,7 @@ export default class AppState {
   @observable modalOpened;
   @observable searchKPI;
 
-  @observable option;
+  //@observable option;
 
   constructor() {
     this.authenticated = false;
@@ -143,6 +145,7 @@ export default class AppState {
       kind: ''
     }
 
+    /*
     this.option = {
       title: {
         text: 'REVENUE'
@@ -182,8 +185,16 @@ export default class AppState {
           //max: 'dataMax',
         }
       ],
-      series : []
+      series : [
+        {
+          name: 'dummy',
+    			type: 'line',
+    			data: [5, 20, 36, 10, 10, 20]
+        },
+      ]
+      
     }
+    */
 
   }
 
@@ -340,13 +351,210 @@ export default class AppState {
     
   }
 
-
   async fetchNewDate() { 
-    this.searchKPI.from = '2019-03-07' // for test
+    var myChart = echarts.init(document.getElementById('chart'));
+
+        // specify chart configuration item and data
+        var option = {
+          title: {
+              left: 'left',
+              text: 'Revenue - ₩'
+          },
+          tooltip : {
+              trigger: 'axis',
+              /*
+              axisPointer: {
+                  type: 'cross',
+                  label: {
+                      backgroundColor: '#6a7985'
+                  }
+              }
+              */
+          },
+          legend: {
+              data:['china', 'japan', 'korea', 'namerica', 'taiwan', 'total']
+          },
+          toolbox: {
+              feature: {
+                  saveAsImage: {}
+              }
+          },
+          grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '3%',
+              containLabel: true
+          },
+          xAxis : [
+              {
+                  type : 'category',
+                  boundaryGap : true,
+                  data : []
+              }
+          ],
+          yAxis : [
+              {
+                  type : 'value'
+              }
+          ],
+          series : []
+        };
+
+        this.searchKPI.from = '2018-04-01' // for test
+        this.searchKPI.to = '2018-06-30' // for test
+        this.searchKPI.country = 'all' // for test
+        this.searchKPI.kind = 'graph' // for test
+        
+        //this.option.series = [];
+
+        var color = ['#2f4554', '#5af70c', '#f7270c', '#0ef9e2', '#ca8622', '#108ce5', '#6e7074']
+
+       // series
+        var seiresArray = new Array();
+        seiresArray = [];
+
+        var lseries = new Object();
+        lseries = {};
+
+        var ldata = new Array();
+
+        try {
+          const response = await axios.post(BACKEND_API+'/v1/kpi/list', {...this.searchKPI});
+          //console.log(response.data.data, response.data.data.length);
+
+          //set series
+          // i = column, j = row
+          for (var i=0; i<Object.keys(response.data.data[0]).length; i++) {
+            for (var j=0; j<response.data.data.length; j++) {
+              // legend
+              if (i == 0) {
+                option.xAxis[0].data.push(moment(response.data.data[j].cdate).format('ll'));
+                //options.xaxis.categories.push(response.data.data[j].cdate);
+              }else{
+                //series
+                // i==1 china
+                // i==2 japan
+                // i==3 korea
+                // i==4 namerica
+                // i==5 taiwan
+                // i==6 total
+                lseries.name = Object.keys(response.data.data[j])[i];
+                lseries.type = 'line';
+                lseries.label = {normal: {show: false,}};
+                lseries.color = color[i];
+                //lseries.stack = '总量',
+                //lseries.areaStyle= {normal: {}}
+
+                switch (i) {
+                  case 1: // china
+                    ldata.push(response.data.data[j].china);
+                    break;
+                  case 2: // japan
+                    ldata.push(response.data.data[j].japan);
+                    break;
+                  case 3: // korea
+                    ldata.push(response.data.data[j].korea);
+                    break;
+                  case 4: // namerica
+                    ldata.push(response.data.data[j].namerica);
+                    break;
+                  case 5: // taiwan
+                    ldata.push(response.data.data[j].taiwan);
+                    break;
+                  case 6: // total
+                    ldata.push(response.data.data[j].total);
+                    break;
+                }
+
+              }
+              
+            }
+
+            //console.log("ldata: ", ldata);
+
+            // save ldata to series.data
+            lseries.data = ldata;
+            console.log("series.name: ",lseries.name,"series.data: ", lseries.data);
+
+            //console.log("lseries: ",lseries);
+
+            //seiresArray.push(lseries);
+            if (i > 0) {
+              option.series.push(lseries);
+            }
+            
+            //option.series.push(series)
+            //console.log("series: ",seiresArray);
+
+            lseries = {};
+            ldata = [];
+          }
+
+          //console.log("series: ",seiresArray);
+          console.log("legend: ", option.xAxis[0].data)
+          console.log("option.series: ", option.series);
+          console.log("option: ", option);
+
+          myChart.setOption(option);
+
+        } catch (error) {
+          console.error(error);
+        }
+
+        // use configuration item and data specified to show chart
+        
+  }
+
+  // for apexchart
+  /*
+  async fetchNewDate() { 
+    var options = {
+      chart: {
+        width: "100%",
+        height: 380,
+        type: 'line'
+      },
+      legend: {
+        position: 'top'
+      },
+      dataLabels: {
+        enabled: false,
+        formatter: function (val, opts) {
+          return '₩ '+numeral(val).format('0,0');
+        },
+        style: {
+          fontSize: '10px',
+        }
+      },
+      grid: {
+        position: 'front'
+      },
+      series: [],
+      xaxis: {
+        //type: "datetime",
+        categories: [],
+        labels: {
+          formatter: function (value) {
+            return moment(value).format('ll');
+          }
+        }
+      },
+      yaxis: {
+        labels: {
+          formatter: function (value) {
+            return '₩ '+numeral(value).format('0,0');
+          }
+        },
+      },
+    }
+
+
+    this.searchKPI.from = '2019-01-01' // for test
     this.searchKPI.to = '2019-03-13' // for test
     this.searchKPI.country = 'all' // for test
     this.searchKPI.kind = 'graph' // for test
     
+    //this.option.series = [];
 
     // series
     var seiresArray = new Array();
@@ -358,7 +566,7 @@ export default class AppState {
     var ldata = new Array();
 
     try {
-      const response = await axios.post(BACKEND_API+'/v1/kpi/list', {...this.store.searchKPI});
+      const response = await axios.post(BACKEND_API+'/v1/kpi/list', {...this.searchKPI});
       console.log(response.data.data, response.data.data.length);
 
       //set series
@@ -368,6 +576,7 @@ export default class AppState {
           // legend
           if (i == 0) {
             //option.xAxis[0].data.push(response.data.data[j].cdate);
+            options.xaxis.categories.push(response.data.data[j].cdate);
           }else{
             //series
             // i==1 china
@@ -377,35 +586,29 @@ export default class AppState {
             // i==5 taiwan
             // i==6 total
             lseries.name = Object.keys(response.data.data[j])[i];
-            lseries.type = 'line';
+            //lseries.type = 'line';
             //lseries.label = {normal: {show: true,}};
             //lseries.stack = '总量',
             //lseries.areaStyle= {normal: {}}
 
             switch (i) {
               case 1: // china
-                //ldata.push(Number(response.data.data[j].china));
-                ldata.push(j*100+10);
+                ldata.push(Number(response.data.data[j].china));
                 break;
               case 2: // japan
-                //ldata.push(Number(response.data.data[j].japan));
-                ldata.push(j*50+10);
+                ldata.push(Number(response.data.data[j].japan));
                 break;
               case 3: // korea
-                //ldata.push(Number(response.data.data[j].korea));
-                ldata.push(j*30+10);
+                ldata.push(Number(response.data.data[j].korea));
                 break;
               case 4: // na
-                //ldata.push(Number(response.data.data[j].na));
-                ldata.push(j*120+10);
+                ldata.push(Number(response.data.data[j].na));
                 break;
               case 5: // taiwan
-                //ldata.push(Number(response.data.data[j].taiwan));
-                ldata.push(j*150+10);
+                ldata.push(Number(response.data.data[j].taiwan));
                 break;
               case 6: // total
-                //ldata.push(Number(response.data.data[j].total));
-                ldata.push(j*170+10);
+                ldata.push(Number(response.data.data[j].total));
                 break;
             }
 
@@ -425,7 +628,7 @@ export default class AppState {
 
         //seiresArray.push(lseries);
         if (i > 0) {
-          option.series.push(lseries);
+          options.series.push(lseries);
         }
         
         //option.series.push(series)
@@ -436,17 +639,21 @@ export default class AppState {
       }
 
       console.log("series: ",seiresArray);
-      console.log("legend: ", option.xAxis[0].data)
-      console.log("option.series: ",option.series);
-      console.log("option: ", option);
+      console.log("legend: ", options.xaxis.categories)
+      console.log("option.series: ", options.series);
+      console.log("option: ", options);
 
-      //this.setState({option,});
+      //this.setState({this.option,});
+
+      var chart = new ApexCharts(document.querySelector("#chart"), options);
+      chart.render();
 
     } catch (error) {
       console.error(error);
     }
     
   };
+  */
 
   // setImgUrl
   async GetImgUrl(character, acceptedFiles) {

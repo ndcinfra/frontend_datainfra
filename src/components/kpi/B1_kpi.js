@@ -3,10 +3,9 @@ import { inject, observer } from "mobx-react";
 import { Link, withRouter } from "react-router-dom";
 
 import { Dimmer, Checkbox, Dropdown, Container,Select, Input, Form,Grid, Image, Label } from 'semantic-ui-react'
-//import ApexCharts from 'apexcharts';
-//import axios from "axios";
-//import {BACKEND_API} from '../../utils/constants';
-var echarts = require('echarts');
+import ApexCharts from 'apexcharts';
+import axios from "axios";
+import {BACKEND_API} from '../../utils/constants';
 
 @withRouter
 @inject("store")
@@ -48,7 +47,7 @@ class Kpi extends Component {
                             </Form>
                         </Grid.Column>
                         <Grid.Column width={13}>
-                            <div id="chart" style={{width:'100%', height:'400px'}} ></div>
+                            <div id="chart"></div>
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>

@@ -64,8 +64,9 @@ export default class AppState {
   */
 
   @observable modalOpened;
-
   @observable searchKPI;
+
+  @observable option;
 
   constructor() {
     this.authenticated = false;
@@ -140,6 +141,48 @@ export default class AppState {
       country: '',
       legend: ['KOREA', 'CHINA', 'JAPAN', 'TAIWAN', 'NA'],
       kind: ''
+    }
+
+    this.option = {
+      title: {
+        text: 'REVENUE'
+      },
+      tooltip : {
+        trigger: 'axis'
+      },
+      
+      legend: {
+        data: ['china', 'japan', 'korea',  'na', 'taiwan','total']
+      },
+      
+      toolbox: {
+        feature: {
+          saveAsImage: {}
+        }
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      xAxis : [
+        {
+          type : 'category',
+          boundaryGap : false,
+          data : ['3/7', '3/8', '3/11','3/12']
+        }
+      ],
+      yAxis : [
+        {
+          type : 'value'
+          //scale: true
+          //boundaryGap: ['20%', '20%'],
+          //min: 'dataMin',
+          //max: 'dataMax',
+        }
+      ],
+      series : []
     }
 
   }
@@ -296,6 +339,114 @@ export default class AppState {
     this.resourcesId = null;
     
   }
+
+
+  async fetchNewDate() { 
+    this.searchKPI.from = '2019-03-07' // for test
+    this.searchKPI.to = '2019-03-13' // for test
+    this.searchKPI.country = 'all' // for test
+    this.searchKPI.kind = 'graph' // for test
+    
+
+    // series
+    var seiresArray = new Array();
+    seiresArray = [];
+
+    var lseries = new Object();
+    lseries = {};
+
+    var ldata = new Array();
+
+    try {
+      const response = await axios.post(BACKEND_API+'/v1/kpi/list', {...this.store.searchKPI});
+      console.log(response.data.data, response.data.data.length);
+
+      //set series
+      // i = column, j = row
+      for (var i=0; i<Object.keys(response.data.data[0]).length; i++) {
+        for (var j=0; j<response.data.data.length; j++) {
+          // legend
+          if (i == 0) {
+            //option.xAxis[0].data.push(response.data.data[j].cdate);
+          }else{
+            //series
+            // i==1 china
+            // i==2 japan
+            // i==3 korea
+            // i==4 na
+            // i==5 taiwan
+            // i==6 total
+            lseries.name = Object.keys(response.data.data[j])[i];
+            lseries.type = 'line';
+            //lseries.label = {normal: {show: true,}};
+            //lseries.stack = '总量',
+            //lseries.areaStyle= {normal: {}}
+
+            switch (i) {
+              case 1: // china
+                //ldata.push(Number(response.data.data[j].china));
+                ldata.push(j*100+10);
+                break;
+              case 2: // japan
+                //ldata.push(Number(response.data.data[j].japan));
+                ldata.push(j*50+10);
+                break;
+              case 3: // korea
+                //ldata.push(Number(response.data.data[j].korea));
+                ldata.push(j*30+10);
+                break;
+              case 4: // na
+                //ldata.push(Number(response.data.data[j].na));
+                ldata.push(j*120+10);
+                break;
+              case 5: // taiwan
+                //ldata.push(Number(response.data.data[j].taiwan));
+                ldata.push(j*150+10);
+                break;
+              case 6: // total
+                //ldata.push(Number(response.data.data[j].total));
+                ldata.push(j*170+10);
+                break;
+            }
+
+            //console.log(j,i,keys,response.data.data[j].keys);
+            //ldata.push((response.data.data[j])[i]);
+          }
+          
+        }
+
+        //console.log("ldata: ", ldata);
+
+        // save ldata to series.data
+        lseries.data = ldata;
+        console.log("series.name: ",lseries.name,"series.data: ", lseries.data);
+
+        //console.log("lseries: ",lseries);
+
+        //seiresArray.push(lseries);
+        if (i > 0) {
+          option.series.push(lseries);
+        }
+        
+        //option.series.push(series)
+        //console.log("series: ",seiresArray);
+
+        lseries = {};
+        ldata = [];
+      }
+
+      console.log("series: ",seiresArray);
+      console.log("legend: ", option.xAxis[0].data)
+      console.log("option.series: ",option.series);
+      console.log("option: ", option);
+
+      //this.setState({option,});
+
+    } catch (error) {
+      console.error(error);
+    }
+    
+  };
 
   // setImgUrl
   async GetImgUrl(character, acceptedFiles) {

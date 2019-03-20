@@ -66,7 +66,8 @@ export default class AppState {
   */
 
   @observable modalOpened;
-  @observable searchKPI;
+  @observable clientIP;
+  @observable registerIndiSuccess;
 
   //@observable option;
 
@@ -134,68 +135,9 @@ export default class AppState {
     }
 
     this.resourcesId = null;
-
     this.modalOpened = false;
-
-    this.searchKPI = {
-      from: '',
-      to: '',
-      country: '',
-      legend: ['KOREA', 'CHINA', 'JAPAN', 'TAIWAN', 'NA'],
-      kind: ''
-    }
-
-    /*
-    this.option = {
-      title: {
-        text: 'REVENUE'
-      },
-      tooltip : {
-        trigger: 'axis'
-      },
-      
-      legend: {
-        data: ['china', 'japan', 'korea',  'na', 'taiwan','total']
-      },
-      
-      toolbox: {
-        feature: {
-          saveAsImage: {}
-        }
-      },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis : [
-        {
-          type : 'category',
-          boundaryGap : false,
-          data : ['3/7', '3/8', '3/11','3/12']
-        }
-      ],
-      yAxis : [
-        {
-          type : 'value'
-          //scale: true
-          //boundaryGap: ['20%', '20%'],
-          //min: 'dataMin',
-          //max: 'dataMax',
-        }
-      ],
-      series : [
-        {
-          name: 'dummy',
-    			type: 'line',
-    			data: [5, 20, 36, 10, 10, 20]
-        },
-      ]
-      
-    }
-    */
-
+    this.clientIP = "";
+    this.registerIndiSuccess = false;
   }
 
   @action setImgUrl(chracter, value) {
@@ -350,310 +292,6 @@ export default class AppState {
     this.resourcesId = null;
     
   }
-
-  async fetchNewDate() { 
-    var myChart = echarts.init(document.getElementById('chart'));
-
-        // specify chart configuration item and data
-        var option = {
-          title: {
-              left: 'left',
-              text: 'Revenue - ₩'
-          },
-          tooltip : {
-              trigger: 'axis',
-              /*
-              axisPointer: {
-                  type: 'cross',
-                  label: {
-                      backgroundColor: '#6a7985'
-                  }
-              }
-              */
-          },
-          legend: {
-              data:['china', 'japan', 'korea', 'namerica', 'taiwan', 'total']
-          },
-          toolbox: {
-              feature: {
-                  saveAsImage: {}
-              }
-          },
-          grid: {
-              left: '3%',
-              right: '4%',
-              bottom: '3%',
-              containLabel: true
-          },
-          xAxis : [
-              {
-                  type : 'category',
-                  boundaryGap : true,
-                  data : []
-              }
-          ],
-          yAxis : [
-              {
-                  type : 'value'
-              }
-          ],
-          series : []
-        };
-
-        this.searchKPI.from = '2018-04-01' // for test
-        this.searchKPI.to = '2018-06-30' // for test
-        this.searchKPI.country = 'all' // for test
-        this.searchKPI.kind = 'graph' // for test
-        
-        //this.option.series = [];
-
-        var color = ['#2f4554', '#5af70c', '#f7270c', '#0ef9e2', '#ca8622', '#108ce5', '#6e7074']
-
-       // series
-        var seiresArray = new Array();
-        seiresArray = [];
-
-        var lseries = new Object();
-        lseries = {};
-
-        var ldata = new Array();
-
-        try {
-          const response = await axios.post(BACKEND_API+'/v1/kpi/list', {...this.searchKPI});
-          //console.log(response.data.data, response.data.data.length);
-
-          //set series
-          // i = column, j = row
-          for (var i=0; i<Object.keys(response.data.data[0]).length; i++) {
-            for (var j=0; j<response.data.data.length; j++) {
-              // legend
-              if (i == 0) {
-                option.xAxis[0].data.push(moment(response.data.data[j].cdate).format('ll'));
-                //options.xaxis.categories.push(response.data.data[j].cdate);
-              }else{
-                //series
-                // i==1 china
-                // i==2 japan
-                // i==3 korea
-                // i==4 namerica
-                // i==5 taiwan
-                // i==6 total
-                lseries.name = Object.keys(response.data.data[j])[i];
-                lseries.type = 'line';
-                lseries.label = {normal: {show: false,}};
-                lseries.color = color[i];
-                //lseries.stack = '总量',
-                //lseries.areaStyle= {normal: {}}
-
-                switch (i) {
-                  case 1: // china
-                    ldata.push(response.data.data[j].china);
-                    break;
-                  case 2: // japan
-                    ldata.push(response.data.data[j].japan);
-                    break;
-                  case 3: // korea
-                    ldata.push(response.data.data[j].korea);
-                    break;
-                  case 4: // namerica
-                    ldata.push(response.data.data[j].namerica);
-                    break;
-                  case 5: // taiwan
-                    ldata.push(response.data.data[j].taiwan);
-                    break;
-                  case 6: // total
-                    ldata.push(response.data.data[j].total);
-                    break;
-                }
-
-              }
-              
-            }
-
-            //console.log("ldata: ", ldata);
-
-            // save ldata to series.data
-            lseries.data = ldata;
-            console.log("series.name: ",lseries.name,"series.data: ", lseries.data);
-
-            //console.log("lseries: ",lseries);
-
-            //seiresArray.push(lseries);
-            if (i > 0) {
-              option.series.push(lseries);
-            }
-            
-            //option.series.push(series)
-            //console.log("series: ",seiresArray);
-
-            lseries = {};
-            ldata = [];
-          }
-
-          //console.log("series: ",seiresArray);
-          console.log("legend: ", option.xAxis[0].data)
-          console.log("option.series: ", option.series);
-          console.log("option: ", option);
-
-          myChart.setOption(option);
-
-        } catch (error) {
-          console.error(error);
-        }
-
-        // use configuration item and data specified to show chart
-        
-  }
-
-  // for apexchart
-  /*
-  async fetchNewDate() { 
-    var options = {
-      chart: {
-        width: "100%",
-        height: 380,
-        type: 'line'
-      },
-      legend: {
-        position: 'top'
-      },
-      dataLabels: {
-        enabled: false,
-        formatter: function (val, opts) {
-          return '₩ '+numeral(val).format('0,0');
-        },
-        style: {
-          fontSize: '10px',
-        }
-      },
-      grid: {
-        position: 'front'
-      },
-      series: [],
-      xaxis: {
-        //type: "datetime",
-        categories: [],
-        labels: {
-          formatter: function (value) {
-            return moment(value).format('ll');
-          }
-        }
-      },
-      yaxis: {
-        labels: {
-          formatter: function (value) {
-            return '₩ '+numeral(value).format('0,0');
-          }
-        },
-      },
-    }
-
-
-    this.searchKPI.from = '2019-01-01' // for test
-    this.searchKPI.to = '2019-03-13' // for test
-    this.searchKPI.country = 'all' // for test
-    this.searchKPI.kind = 'graph' // for test
-    
-    //this.option.series = [];
-
-    // series
-    var seiresArray = new Array();
-    seiresArray = [];
-
-    var lseries = new Object();
-    lseries = {};
-
-    var ldata = new Array();
-
-    try {
-      const response = await axios.post(BACKEND_API+'/v1/kpi/list', {...this.searchKPI});
-      console.log(response.data.data, response.data.data.length);
-
-      //set series
-      // i = column, j = row
-      for (var i=0; i<Object.keys(response.data.data[0]).length; i++) {
-        for (var j=0; j<response.data.data.length; j++) {
-          // legend
-          if (i == 0) {
-            //option.xAxis[0].data.push(response.data.data[j].cdate);
-            options.xaxis.categories.push(response.data.data[j].cdate);
-          }else{
-            //series
-            // i==1 china
-            // i==2 japan
-            // i==3 korea
-            // i==4 na
-            // i==5 taiwan
-            // i==6 total
-            lseries.name = Object.keys(response.data.data[j])[i];
-            //lseries.type = 'line';
-            //lseries.label = {normal: {show: true,}};
-            //lseries.stack = '总量',
-            //lseries.areaStyle= {normal: {}}
-
-            switch (i) {
-              case 1: // china
-                ldata.push(Number(response.data.data[j].china));
-                break;
-              case 2: // japan
-                ldata.push(Number(response.data.data[j].japan));
-                break;
-              case 3: // korea
-                ldata.push(Number(response.data.data[j].korea));
-                break;
-              case 4: // na
-                ldata.push(Number(response.data.data[j].na));
-                break;
-              case 5: // taiwan
-                ldata.push(Number(response.data.data[j].taiwan));
-                break;
-              case 6: // total
-                ldata.push(Number(response.data.data[j].total));
-                break;
-            }
-
-            //console.log(j,i,keys,response.data.data[j].keys);
-            //ldata.push((response.data.data[j])[i]);
-          }
-          
-        }
-
-        //console.log("ldata: ", ldata);
-
-        // save ldata to series.data
-        lseries.data = ldata;
-        console.log("series.name: ",lseries.name,"series.data: ", lseries.data);
-
-        //console.log("lseries: ",lseries);
-
-        //seiresArray.push(lseries);
-        if (i > 0) {
-          options.series.push(lseries);
-        }
-        
-        //option.series.push(series)
-        //console.log("series: ",seiresArray);
-
-        lseries = {};
-        ldata = [];
-      }
-
-      console.log("series: ",seiresArray);
-      console.log("legend: ", options.xaxis.categories)
-      console.log("option.series: ", options.series);
-      console.log("option: ", options);
-
-      //this.setState({this.option,});
-
-      var chart = new ApexCharts(document.querySelector("#chart"), options);
-      chart.render();
-
-    } catch (error) {
-      console.error(error);
-    }
-    
-  };
-  */
 
   // setImgUrl
   async GetImgUrl(character, acceptedFiles) {
@@ -1043,11 +681,41 @@ export default class AppState {
     }
   }
 
+  // register emai for closing indonesia
+  async registerEmailIndonesia() {
+
+    if (!validator.isEmail(this.userInfo.email)) {
+      //this.setError('Please input a valid email address.');
+      this.setErrorFlashMessage('Please input a valid email address.');
+    } else {
+      this.setErrorFlashMessage(null);
+    }
+
+    if (!this.errorFlash) {
+      let data = null;
+      try {
+        data = await UserAPI.registerEmailIndonesia(this.userInfo.email, this.clientIP);
+      } catch (err) {
+        //console.log(err);
+        this.setErrorFlashMessage(err.response.data.message);
+      }
+
+      if (data) {
+        await this.setInitUserInfo();
+        this.setSuccessFlashMessage('Register succeed.');
+
+        // redirect
+        // registration successful.
+        // history.push('/registerSuccess');
+        this.registerIndiSuccess = true;
+      }
+    }
+  }
+
   // logout
   async logout(history, goto) {
 
     await this.setInitUserInfo();
-
     await this.setInitLoggedInUserInfo();
 
     //this.setSuccessFlashMessage("Bye~~~, Hopely see you soon.");

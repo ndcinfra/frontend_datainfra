@@ -1,9 +1,9 @@
 import { store } from "rfx-core";
 
 import AppState from "./AppState";
-//import BillingState from "./BillingState";
+import KpiState from "./KpiState";
 
 export default store.setup({
 	appState: AppState,
-	//billingState: BillingState,
+	kpiState: KpiState,
 });

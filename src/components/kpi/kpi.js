@@ -27,7 +27,9 @@ class Kpi extends Component {
 
 
     handleChange = (e, { value }) => {
-        this.store.searchKPI.radio = value
+        this.store.searchKPI.radio = value;
+        this.store.setLoading('on');
+        this.store.fetchNewDate();
     }
 
 
@@ -50,7 +52,7 @@ class Kpi extends Component {
 
         const loaderView = (
             <Dimmer active inverted>
-                <Loader size='medium'></Loader>
+                <Loader size='huge'></Loader>
             </Dimmer>
         )
 
@@ -69,11 +71,14 @@ class Kpi extends Component {
                                     <Form.Field size='mini' control={Input} label='End Date' placeholder='End Date' value={searchKPI.to} onChange={this.handleInputTo} />
                                 </Form.Group>
                                 <Form.Field>
+                                    <Button color='violet' onClick={this.handleSearch.bind(this)}>Search</Button>
+                                </Form.Field>
+                                <Form.Field>
                                     <Radio
                                         label='revenue'
                                         name='radioGroup'
-                                        value='revenue'
-                                        checked={searchKPI.radio === 'revenue'}
+                                        value='rev'
+                                        checked={searchKPI.radio === 'rev'}
                                         onChange={this.handleChange}
                                     />
                                 </Form.Field>
@@ -104,9 +109,7 @@ class Kpi extends Component {
                                         onChange={this.handleChange}
                                     />
                                 </Form.Field>
-                                <Form.Field>
-                                    <Button color='violet' onClick={this.handleSearch.bind(this)}>Search</Button>
-                                </Form.Field>
+                                
                             </Form>
                         </Grid.Column>
                         <Grid.Column width={13}>

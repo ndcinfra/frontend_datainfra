@@ -12,15 +12,15 @@ export default class AppState {
     @observable loading;
 
     constructor() {
-        var from = moment(moment().subtract(10, 'days').calendar()).format('YYYY-MM-DD');  // d-10
-        var to = moment().subtract(1, 'days').format('YYYY-MM-DD');// d-1
+        var from = moment(moment().subtract(14, 'days').calendar()).format('YYYYMMDD');  // d-14
+        var to = moment().subtract(1, 'days').format('YYYYMMDD');// d-1
 
         this.searchKPI = {
             from: from,
             to: to,
             country: 'all',
             kind: 'graph',
-            radio: 'revenue',
+            radio: 'rev',
         }
 
         this.loading = 'off';
@@ -52,7 +52,7 @@ export default class AppState {
 
         var text = ''
         switch (this.searchKPI.radio) {
-            case 'revenue':
+            case 'rev':
                 text = 'Revenue - ₩';
                 break;
             case 'avg':
@@ -214,7 +214,8 @@ export default class AppState {
                         field: "korea",
                         align: "center",
                         formatter: function(cell, formatterParams) {
-                            return '₩ '+numeral(cell.getValue()).format('0,0');
+                            //return '₩ '+numeral(cell.getValue()).format('0,0');
+                            return numeral(cell.getValue()).format('0,0');
                         }
                         //width: 200,
                         //headerFilter:true,
@@ -225,7 +226,8 @@ export default class AppState {
                         field: "china",
                         align: "center",
                         formatter: function(cell, formatterParams) {
-                            return '₩ '+numeral(cell.getValue()).format('0,0');
+                            //return '₩ '+numeral(cell.getValue()).format('0,0');
+                            return numeral(cell.getValue()).format('0,0');
                         }
                         //width: 200,
                         //headerFilter:true,
@@ -236,7 +238,8 @@ export default class AppState {
                         field: "japan",
                         align: "center",
                         formatter: function(cell, formatterParams) {
-                            return '₩ '+numeral(cell.getValue()).format('0,0');
+                            //return '₩ '+numeral(cell.getValue()).format('0,0');
+                            return numeral(cell.getValue()).format('0,0');
                         }
                         //width: 200,
                         //headerFilter:true,
@@ -247,7 +250,8 @@ export default class AppState {
                         field: "taiwan",
                         align: "center",
                         formatter: function(cell, formatterParams) {
-                            return '₩ '+numeral(cell.getValue()).format('0,0');
+                            //return '₩ '+numeral(cell.getValue()).format('0,0');
+                            return numeral(cell.getValue()).format('0,0');
                         }
                         //width: 200,
                         //headerFilter:true,
@@ -259,7 +263,8 @@ export default class AppState {
                         field: "namerica",
                         align: "center",
                         formatter: function(cell, formatterParams) {
-                            return '₩ '+numeral(cell.getValue()).format('0,0');
+                            //return '₩ '+numeral(cell.getValue()).format('0,0');
+                            return numeral(cell.getValue()).format('0,0');
                         }
                         //width: 200,
                         //headerFilter:true,
@@ -271,7 +276,8 @@ export default class AppState {
                         field: "total",
                         align: "center",
                         formatter: function(cell, formatterParams) {
-                            return '₩ '+numeral(cell.getValue()).format('0,0');
+                            //return '₩ '+numeral(cell.getValue()).format('0,0');
+                            return numeral(cell.getValue()).format('0,0');
                         }
                         //width: 200,
                         //headerFilter:true,

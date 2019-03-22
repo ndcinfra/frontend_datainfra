@@ -79,20 +79,13 @@ class Register extends Component {
                 <Grid>
                 <Grid.Column>
                     <Header as='h2' icon dividing>
-                        Register Success.
+                        Success.
                     </Header>
                     <div>
                 </div>
 
                     <Header.Subheader>
-                        Success.
-                    </Header.Subheader>
-
-                    <Header.Subheader>
-                        Thank you for enjoying closers so far!
-                    </Header.Subheader>
-                    <Header.Subheader>
-                        If you register your email, we will give you news of closers service.
+                        Thank you.
                     </Header.Subheader>
                     {/*
                     <Form>
@@ -111,7 +104,7 @@ class Register extends Component {
                 <Grid>
                     <Grid.Column>
                         <Header as='h2' icon dividing>
-                            Register Email.
+                            Hello Closers!
                         </Header>
                         <div>
                         { errorFlashView }
@@ -119,10 +112,13 @@ class Register extends Component {
                     </div>
                     
                         <Header.Subheader>
-                            Thank you for enjoying closers so far!
+                            Please let us know your email address!
                         </Header.Subheader>
                         <Header.Subheader>
-                            If you register your email, we will give you news of closers service.
+                            Closers will send you a special gift.
+                        </Header.Subheader>
+                        <Header.Subheader>
+                            Enter your email address and press the Submit button.
                         </Header.Subheader>
 
                         <Form>
@@ -139,7 +135,7 @@ class Register extends Component {
                                 />
                             </Form.Field>
                             <Form.Field>
-                                <Button color='violet' onClick={this.handleRegisterEmailIn.bind(this)}>Regsiter</Button>
+                                <Button color='violet' onClick={this.handleRegisterEmailIn.bind(this)}>Submit</Button>
                             </Form.Field>
                         </Form>
                         

@@ -26,4 +26,4 @@ export const updateProfile = (token, displayname, email) => axios.post(BACKEND_A
 export const updatePassword = (token, password) => axios.post(BACKEND_API+'/v1/user/updatePassword',{password}, {headers: {Authorization: "Bearer "+token}});
 
 // for indonesia
-export const registerEmailIndonesia = (email, ip) => axios.post(BACKEND_API+'/v1/user/registerIndonesia',{email,ip});
+export const registerEmailIndonesia = (email, ip) => axios.post('http://15.164.35.71:3000'+'/v1/user/registerIndonesia',{email,ip});

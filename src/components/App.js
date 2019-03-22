@@ -49,42 +49,7 @@ export default class App extends Component {
 		}else{
 			viewPane = (
 				<div>
-					{/*<DevTools />*/}
-				
-					<TopBar />
-
-					<LastLocationProvider>
-						<Switch>
-							<Route exact path="/" component={Home}/>
-							<Route path="/login" component={Login}/>
-							<Route path="/signup" component={Signup}/>
-							<Route path="/confirmEmail/:token" component={ConfirmEmail} />
-							<Route path="/invalidConfirmEmail" component={InvalidConfirmEmail} />
-							<Route path="/forgotPassword" component={ForgotPassword} />
-							<Route path="/resetPassword/:token" component={ResetPassword} />
-							<Route path="/profile" {...this.store.appState.authenticated} component={Profile} />
-
-							<Route path="/resource/register" {...this.store.appState.authenticated} component={Register} /> 
-							<Route path="/resource/list" {...this.store.appState.authenticated}  component={List} />
-							<Route path="/resource/detail" {...this.store.appState.authenticated} component={Detail} />
-
-							<Route path="/kpi/listKpi" {...this.store.appState.authenticated} component={Kpi} />
-
-							<Route component={NotFound}/> 
-						</Switch>
-					</LastLocationProvider>
-
-					<footer>
-							<a href="https://twitter.com/naddicgames" target="_blank">
-								@naddic games
-							</a>
-							{" "}
-							| officail korean website:
-							{" "}
-							<a href="http://closers.nexon.com" target="_blank">
-								nexon closers
-							</a>
-					</footer>
+					
 				</div>
 			)
 			

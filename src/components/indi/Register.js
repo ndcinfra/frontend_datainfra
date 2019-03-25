@@ -68,6 +68,7 @@ class Register extends Component {
         }
         
         var registerView = null;
+
         if(registerIndiSuccess) {
             // success
             registerView = (
@@ -97,45 +98,7 @@ class Register extends Component {
         }else{
             registerView = (
                 <Grid>
-                    <Grid.Column>
-                        <Header as='h2' icon dividing>
-                            Hello Closers!
-                        </Header>
-                        <div>
-                        { errorFlashView }
-                        { successFlashView }
-                    </div>
-                    
-                        <Header.Subheader>
-                            Please let us know your email address!
-                        </Header.Subheader>
-                        <Header.Subheader>
-                            Closers will send you a special gift.
-                        </Header.Subheader>
-                        <Header.Subheader>
-                            Enter your email address and press the Submit button.
-                        </Header.Subheader>
-
-                        <Form>
-                            <Form.Field></Form.Field>
-                            <Form.Field>
-                                <Input style={{ maxWidth: 300 }}
-                                    icon='mail' 
-                                    iconPosition='left'
-                                    placeholder='E-mail address' 
-                                    name='email' 
-                                    size='small'
-                                    value={userInfo.email} 
-                                    onChange={this.handleInputEmail}
-                                />
-                            </Form.Field>
-                            <Form.Field>
-                                <Button color='violet' onClick={this.handleRegisterEmailIn.bind(this)}>Submit</Button>
-                            </Form.Field>
-                        </Form>
-                        
-
-                    </Grid.Column>
+                    Test
                 </Grid>
             )
 

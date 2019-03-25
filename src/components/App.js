@@ -86,7 +86,6 @@ export default class App extends Component {
 					</footer>
 				</div>
 			)
-			
 		}
 
 		return (

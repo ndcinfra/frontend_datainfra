@@ -46,6 +46,7 @@
     "webpack-dev-server": "^2.4.5"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.4.0",
     "apexcharts": "^3.6.2",
     "axios": "^0.16.2",
     "css-declaration-sorter": "^2.0.0",

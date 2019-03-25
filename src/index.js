@@ -1,6 +1,6 @@
 //import 'babel-polyfill';
 // This must be the first line in src/index.js
-import 'react-app-polyfill/ie11';
+import '@babel/polyfill'
 
 import("./styles/main.scss");
 import React from "react";

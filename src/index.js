@@ -2,7 +2,7 @@
 // This must be the first line in src/index.js
 //import 'babel-polyfill'
 
-import("./styles/main.scss");
+import "./styles/main.scss";
 import React from "react";
 import { render } from "react-dom";
 import { BrowserRouter as Router } from "react-router-dom";

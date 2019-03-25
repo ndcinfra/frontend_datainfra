@@ -102,6 +102,15 @@ class Kpi extends Component {
                                 </Form.Field>
                                 <Form.Field>
                                     <Radio
+                                        label='unique users'
+                                        name='radioGroup'
+                                        value='uu'
+                                        checked={searchKPI.radio === 'uu'}
+                                        onChange={this.handleChange}
+                                    />
+                                </Form.Field>
+                                <Form.Field>
+                                    <Radio
                                         label='new registered users'
                                         name='radioGroup'
                                         value='nru'
@@ -118,6 +127,9 @@ class Kpi extends Component {
                             <label>* 이 데이터는 추이 분석용으로만 사용 부탁 드립니다. 취소, 환불, 보상등 최종 금액이 반영 되지 않은 데이터 입니다. </label>
                             <br/>
                             <label>* 한국을 제외한 다른 국가의 Revenue 경우 해당 일자의 환율 혹은 그 당시 고정 환율을 적용해서 원화로 계산 된 데이터 입니다.</label>
+                            <br/>
+                            <label>* 매출을 제외한 일부 데이터(ex, 평균 동접)는 2019-03-22일 부터 자동으로 저장이 되고 있습니다. 그 이전 데이터는 취합이 불가합니다.</label>
+                            <br/>
                             <br/><br/><br/>
                             <div id="chart" style={{width:'100%', height:'400px'}} ></div>
 

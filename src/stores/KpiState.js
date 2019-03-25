@@ -12,7 +12,7 @@ export default class AppState {
     @observable loading;
 
     constructor() {
-        var from = moment(moment().subtract(14, 'days').calendar()).format('YYYYMMDD');  // d-14
+        var from = moment(moment().subtract(15, 'days').calendar()).format('YYYYMMDD');  // d-14
         var to = moment().subtract(1, 'days').format('YYYYMMDD');// d-1
 
         this.searchKPI = {
@@ -60,6 +60,9 @@ export default class AppState {
                 break;
             case 'mcu':
                 text = 'Max concurrent users (최대동접)';
+                break;
+            case 'uu':
+                text = 'Unique play users (유니크 유저)';
                 break;
             case 'nru':
                 text = 'New registered users (신규등록유저)';

@@ -49,7 +49,8 @@ export default class App extends Component {
 		}else{
 			viewPane = (
 				<div>
-					
+					{/*<DevTools />*/}
+				
 				</div>
 			)
 			

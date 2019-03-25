@@ -10,8 +10,6 @@ import { isProduction } from "./utils/constants";
 import App from "./components/App";
 import stores from "./stores/stores";
 
-//import "babel-polyfill";
-
 const store = rehydrate();
 
 const renderApp = Component => {

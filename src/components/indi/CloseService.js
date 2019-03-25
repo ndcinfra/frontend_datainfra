@@ -1,4 +1,4 @@
-import 'babel-polyfill'; 
+//import 'babel-polyfill'; 
 
 import React, { Component } from 'react';
 import { inject, observer } from "mobx-react";

@@ -14,7 +14,7 @@ import { Login, Logout, Signup } from './auth/index';
 import {ConfirmEmail, InvalidConfirmEmail, ForgotPassword, ResetPassword, Profile } from './user/index';
 import {Register, List, Detail} from './resource/index';
 
-import {RegisterIn} from './indi/index';
+import {CloseService} from './indi/index';
 import {Kpi} from './kpi/index';
 
 @withRouter
@@ -92,7 +92,7 @@ export default class App extends Component {
 		return (
 
 			<div>
-				<Route path="/registerIn" component={RegisterIn} />
+				<Route path="/closeservice" component={CloseService} />
 			</div>
 		);
 	}

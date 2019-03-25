@@ -48,9 +48,6 @@ class Register extends Component {
     
     handleClose(e) {
         e.preventDefault();
-        console.log("click close");
-        //var customWindow = window.open('', '_self', '');
-        //customWindow.close();
         window.close();
     }
 

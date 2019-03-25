@@ -15,7 +15,6 @@ import {ConfirmEmail, InvalidConfirmEmail, ForgotPassword, ResetPassword, Profil
 import {Register, List, Detail} from './resource/index';
 
 import {RegisterIn} from './indi/index';
-
 import {Kpi} from './kpi/index';
 
 @withRouter

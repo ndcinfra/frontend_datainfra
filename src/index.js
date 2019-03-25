@@ -10,7 +10,7 @@ import { isProduction } from "./utils/constants";
 import App from "./components/App";
 import stores from "./stores/stores";
 
-import "babel-polyfill";
+//import "babel-polyfill";
 
 const store = rehydrate();
 

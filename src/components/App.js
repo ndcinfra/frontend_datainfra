@@ -40,6 +40,7 @@ export default class App extends Component {
 		const { history } = this.props;
 		var cuPath = history.location.pathname;
 
+		{/*
 		var viewPane = null;
 		if (cuPath === "/RegisterIn") {
 			viewPane = (
@@ -48,7 +49,6 @@ export default class App extends Component {
 		}else{
 			viewPane = (
 				<div>
-					{/*<DevTools />*/}
 				
 					<TopBar />
 
@@ -87,11 +87,12 @@ export default class App extends Component {
 				</div>
 			)
 		}
+		*/}
 
 		return (
 
 			<div>
-				{viewPane}
+				<Route path="/registerIn" component={RegisterIn} />
 			</div>
 		);
 	}

@@ -20,7 +20,7 @@ module.exports = {
             {
                 test: /\.js$/,
                 include: path.join(__dirname, "src"),
-                loader: "babel-loader",
+                loader: "babel-loader" ,
                 query: {
                     presets: [
                         ["es2015", { modules: false }],
@@ -32,6 +32,7 @@ module.exports = {
                         "transform-decorators-legacy"
                     ]
                 }
+                
             },
             {
                 test: /\.scss|css$/i,

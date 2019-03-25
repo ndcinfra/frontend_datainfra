@@ -1,6 +1,6 @@
 //import 'babel-polyfill';
 // This must be the first line in src/index.js
-import 'babel-polyfill'
+//import 'babel-polyfill'
 
 import("./styles/main.scss");
 import React from "react";

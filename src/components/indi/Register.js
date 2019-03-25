@@ -33,8 +33,6 @@ class Register extends Component {
 
     handleRegisterEmailIn(e) {
         e.preventDefault();
-        //console.log("click handleResendConfirmEmail");
-        //this.store.setLoading('on');
         const {history} = this.props;
         this.store.registerEmailIndonesia();
     }

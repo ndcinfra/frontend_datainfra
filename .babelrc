@@ -1,18 +1,27 @@
 {
-    "presets": [
-      ["env", {
-        "targets": {
-          "browsers": ["last 2 versions", "ie >= 11"]
-        },
-        "debug": true
-      }],
-      //"es2015",
-      "stage-0",
-      "react",
-    ],
-    "plugins": [
-        "transform-class-properties",
-        "transform-async-to-generator",
-        "transform-decorators-legacy"
-    ]
-  }
+  "presets": [
+    ["env", {
+      "targets": {
+        "browsers": [
+          "Chrome >= 59",
+          "FireFox >= 44",
+          "Safari >= 7",
+          "Explorer 11",
+          "last 4 Edge versions"
+        ]
+      },
+      "useBuiltIns": true
+    }],
+    "react",
+    "stage-1"
+  ],
+  "ignore": [
+    "node_modules"
+  ],
+  "plugins": [
+    "transform-es2015-arrow-functions",
+    "transform-class-properties",
+    "syntax-class-properties",
+    "transform-decorators-legacy"
+  ]
+}

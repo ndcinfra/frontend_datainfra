@@ -1,30 +1,48 @@
 {
   "presets": [
-    ["env", {
-      "es2015": {
-        "modules": false
-      },
-      "targets": {
-        "browsers": [
-          "Chrome >= 59",
-          "FireFox >= 44",
-          "Safari >= 7",
-          "Explorer 11",
-          "last 4 Edge versions"
-        ]
-      },
-      "useBuiltIns": true
-    }],
-    "react",
-    "stage-1"
+      "react",
+      [
+          "env",
+          {
+              "targets": {
+                  "browsers": [
+                      "last 1 versions",
+                      "ie >= 11"
+                  ]
+              },
+              "debug": true,
+              "modules": "commonjs"
+          }
+      ]
   ],
-  "ignore": [
-    "node_modules"
-  ],
+  "env": {
+      "test": {
+          "presets": [
+              [
+                  "babel-preset-env",
+                  "react"
+              ]
+          ],
+          "plugins": [
+              "transform-object-rest-spread",
+              "transform-class-properties",
+              "transform-runtime",
+              "babel-plugin-dynamic-import-node",
+              "array-includes",
+              "url-search-params-polyfill",
+              "transform-object-assign",
+              "transform-decorators-legacy"
+          ]
+      }
+  },
   "plugins": [
-    "transform-es2015-arrow-functions",
-    "transform-class-properties",
-    "syntax-class-properties",
-    "transform-decorators-legacy"
+      "transform-object-rest-spread",
+      "transform-class-properties",
+      "syntax-dynamic-import",
+      "transform-runtime",
+      "array-includes",
+      "url-search-params-polyfill",
+      "transform-object-assign",
+      "transform-decorators-legacy"
   ]
 }

@@ -38,8 +38,8 @@ export default class App extends Component {
 		await this.store.appState.checkAuth();
 	}
 	render() {
-		const { history } = this.props;
-		var cuPath = history.location.pathname;
+		//const { history } = this.props;
+		//var cuPath = history.location.pathname;
 
 		{/*
 		var viewPane = null;

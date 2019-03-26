@@ -13,9 +13,6 @@ import Home from "./Home";
 import { Login, Logout, Signup } from './auth/index';
 import {ConfirmEmail, InvalidConfirmEmail, ForgotPassword, ResetPassword, Profile } from './user/index';
 import {Register, List, Detail} from './resource/index';
-
-import {RegisterIn} from './indi/index';
-import {CloseService} from './indi/index';
 import {Kpi} from './kpi/index';
 
 @withRouter
@@ -38,63 +35,46 @@ export default class App extends Component {
 		await this.store.appState.checkAuth();
 	}
 	render() {
-		//const { history } = this.props;
-		//var cuPath = history.location.pathname;
-
-		{/*
-		var viewPane = null;
-		if (cuPath === "/RegisterIn") {
-			viewPane = (
-				<Route path="/registerIn" component={RegisterIn} />
-			);
-		}else{
-			viewPane = (
-				<div>
-				
-					<TopBar />
-
-					<LastLocationProvider>
-						<Switch>
-							<Route exact path="/" component={Home}/>
-							<Route path="/login" component={Login}/>
-							<Route path="/signup" component={Signup}/>
-							<Route path="/confirmEmail/:token" component={ConfirmEmail} />
-							<Route path="/invalidConfirmEmail" component={InvalidConfirmEmail} />
-							<Route path="/forgotPassword" component={ForgotPassword} />
-							<Route path="/resetPassword/:token" component={ResetPassword} />
-							<Route path="/profile" {...this.store.appState.authenticated} component={Profile} />
-
-							<Route path="/resource/register" {...this.store.appState.authenticated} component={Register} /> 
-							<Route path="/resource/list" {...this.store.appState.authenticated}  component={List} />
-							<Route path="/resource/detail" {...this.store.appState.authenticated} component={Detail} />
-
-							<Route path="/kpi/listKpi" {...this.store.appState.authenticated} component={Kpi} />
-
-							<Route component={NotFound}/> 
-						</Switch>
-					</LastLocationProvider>
-
-					<footer>
-							<a href="https://twitter.com/naddicgames" target="_blank">
-								@naddic games
-							</a>
-							{" "}
-							| officail korean website:
-							{" "}
-							<a href="http://closers.nexon.com" target="_blank">
-								nexon closers
-							</a>
-					</footer>
-				</div>
-			)
-		}
-		*/}
+		const { history } = this.props;
+		var cuPath = history.location.pathname;
 
 		return (
 
 			<div>
-				<Route path="/closeservice" component={CloseService} />
-				<Route path="/RegisterIn" component={RegisterIn} />
+				<TopBar />
+
+				<LastLocationProvider>
+					<Switch>
+						<Route exact path="/" component={Home}/>
+						<Route path="/login" component={Login}/>
+						<Route path="/signup" component={Signup}/>
+						<Route path="/confirmEmail/:token" component={ConfirmEmail} />
+						<Route path="/invalidConfirmEmail" component={InvalidConfirmEmail} />
+						<Route path="/forgotPassword" component={ForgotPassword} />
+						<Route path="/resetPassword/:token" component={ResetPassword} />
+						<Route path="/profile" {...this.store.appState.authenticated} component={Profile} />
+
+						<Route path="/resource/register" {...this.store.appState.authenticated} component={Register} /> 
+						<Route path="/resource/list" {...this.store.appState.authenticated}  component={List} />
+						<Route path="/resource/detail" {...this.store.appState.authenticated} component={Detail} />
+
+						<Route path="/kpi/listKpi" {...this.store.appState.authenticated} component={Kpi} />
+
+						<Route component={NotFound}/> 
+					</Switch>
+				</LastLocationProvider>
+
+				<footer>
+						<a href="https://twitter.com/naddicgames" target="_blank">
+							@naddic games
+						</a>
+						{" "}
+						| officail korean website:
+						{" "}
+						<a href="http://closers.nexon.com" target="_blank">
+							nexon closers
+						</a>
+				</footer>
 			</div>
 		);
 	}

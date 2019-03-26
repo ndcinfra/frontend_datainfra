@@ -18,18 +18,21 @@ class Kpi extends Component {
         super(props);
 
         this.store = this.props.store.kpiState;
+        
     }
 
     componentDidMount() {
         this.store.setLoading('on');
-        this.store.fetchNewDate();
+        const {history} = this.props;
+        this.store.fetchNewDate(this.props.store.appState,history);
     }
 
 
     handleChange = (e, { value }) => {
         this.store.searchKPI.radio = value;
         this.store.setLoading('on');
-        this.store.fetchNewDate();
+        const {history} = this.props;
+        this.store.fetchNewDate(this.props.store.appState,history);
     }
 
 
@@ -44,7 +47,8 @@ class Kpi extends Component {
     handleSearch = (e) => {
         e.preventDefault();
         this.store.setLoading('on');
-        this.store.fetchNewDate();
+        const {history} = this.props;
+        this.store.fetchNewDate(this.props.store.appState,history);
     }
 
     render() {
@@ -59,7 +63,6 @@ class Kpi extends Component {
         return (
             <Container style={{ marginTop: '5em', width: '95%' }}>
                 { loading === 'on' ? loaderView : null  }
-                KPI
                 <Grid celled>
                     <Grid.Row>
                         <Grid.Column width={3}>

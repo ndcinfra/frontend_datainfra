@@ -1,6 +1,9 @@
 {
   "presets": [
     ["env", {
+      "es2015": {
+        "modules": false
+      },
       "targets": {
         "browsers": [
           "Chrome >= 59",

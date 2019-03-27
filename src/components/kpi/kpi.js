@@ -18,15 +18,23 @@ class Kpi extends Component {
         super(props);
 
         this.store = this.props.store.kpiState;
+        const {history} = this.props;
+        if (this.props.store.appState.loggedInUserInfo.permission === "publisher") {
+            history.push("/");
+        }
         
     }
 
     componentDidMount() {
         this.store.setLoading('on');
         const {history} = this.props;
-        this.store.fetchNewDate(this.props.store.appState,history);
-    }
+        if (this.props.store.appState.loggedInUserInfo.permission === "publisher") {
+            history.push("/");
+        }
 
+        this.store.fetchNewDate(this.props.store.appState,history);
+
+    }
 
     handleChange = (e, { value }) => {
         this.store.searchKPI.radio = value;

@@ -118,7 +118,7 @@ export default class TopBar extends Component {
 
 			kpiPane = (
 				<Menu.Menu>
-					{ loggedInUserInfo.permission !== 'publisher' && loggedInUserInfo.permission !== 'user' ? <Menu.Item name='KPI' active={activeItem === 'KPI'} onClick={this.handleItemClick}></Menu.Item>:null}
+					{ loggedInUserInfo.permission !== 'publisher'  ? <Menu.Item name='KPI' active={activeItem === 'KPI'} onClick={this.handleItemClick}></Menu.Item>:null}
 				</Menu.Menu>
 			)
 

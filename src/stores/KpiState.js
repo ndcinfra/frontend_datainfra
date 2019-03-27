@@ -39,6 +39,8 @@ export default class AppState {
         if (!appState.authenticated) {
             history.push('/login');
 
+        } else if (appState.loggedInUserInfo.permission === "publisher") {
+            history.push('/');
         } else {
             var myChart = echarts.init(document.getElementById('chart'));
 

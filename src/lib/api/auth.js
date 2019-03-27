@@ -1,6 +1,8 @@
 import axios from 'axios';
 import {BACKEND_API} from '../../utils/constants';
 
+console.log(BACKEND_API);
+
 export const checkEmail = (email) => axios.get(BACKEND_API+'/api/v1.0/auth/exists/email/' + email);
 export const checkDisplayName = (displayname) => axios.get(BACKEND_API+'/v1/auth/checkDisplayName/' + displayname);
 export const localRegister = ({displayname,email,password}) => axios.post(BACKEND_API+'/v1/auth/register', {displayname,email,password});

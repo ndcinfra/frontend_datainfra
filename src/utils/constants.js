@@ -1,5 +1,5 @@
-const isProduction = process.env.NODE_ENV === "production";
 
+const isProduction = process.env.NODE_ENV === "production";
 // Live
 var BACKEND_API = ""; 
 
@@ -8,5 +8,10 @@ if (isProduction == true) {
 }else{
     BACKEND_API = "http://localhost:8080";
 }
+
+
+//require('dotenv').config();
+//const isProduction = process.env.isProduction;
+//const BACKEND_API = process.env.BACKEND_API;
 
 export { isProduction, BACKEND_API };

@@ -136,7 +136,7 @@ export default class TopBar extends Component {
 			<div>
 				<Menu size='tiny' pointing borderless={true} fixed='top'>
 					<Menu.Item name='home' active={activeItem === 'home'} onClick={this.handleItemClick} />
-					{loggedInUserInfo.displayname != 'theBoss' ? {Resourcepane} : null }
+					{loggedInUserInfo.displayname != 'theBoss' ? Resourcepane : null }
 					{kpiPane}
 					{Viewpane}
 				</Menu>

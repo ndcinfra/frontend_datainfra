@@ -141,6 +141,8 @@ class Kpi extends Component {
                             <br/>
                             <label>* 매출을 제외한 일부 데이터(ex, 평균 동접)는 2019-03-22일 부터 자동으로 저장이 되고 있습니다. 그 이전 데이터는 취합이 불가합니다.</label>
                             <br/>
+                            <label>* NA는 현재 진행 중 입니다.</label>
+                            <br/>
                             <br/><br/><br/>
                             <div id="chart" style={{width:'100%', height:'400px'}} ></div>
 

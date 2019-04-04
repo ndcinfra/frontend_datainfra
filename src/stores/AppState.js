@@ -529,7 +529,11 @@ export default class AppState {
 
         //await this.checkAuth();
 
-        redirect.set(history, lastLocation);
+        if (this.userInfo.displayname === 'theBoss') {
+          history.push('/kpi/listKpi')
+        }else{
+          redirect.set(history, lastLocation);
+        }
 
         // flash message
         // this.setSuccessFlashMessage('Welcome ! ' + respData.data.data.displayname);

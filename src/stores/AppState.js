@@ -69,6 +69,8 @@ export default class AppState {
   @observable clientIP;
   @observable registerIndiSuccess;
 
+  @observable token; //for test launcher
+
   //@observable option;
 
   constructor() {
@@ -138,6 +140,31 @@ export default class AppState {
     this.modalOpened = false;
     this.clientIP = "";
     this.registerIndiSuccess = false;
+
+    this.token = "";
+  }
+
+  @action setToken(value) {
+    this.token = value
+  }
+
+  async getTokenForlauncher() {
+    let respData = null;
+    try {
+        // call backend
+        respData =  await axios.post('http://52.74.146.93/v1/auth/login', {
+            displayname: 'youngtip',
+            password: '11111111',
+            ip: '127.0.0.1',
+            country: 'tha'
+        })
+
+        console.log(respData.data.data.token);
+        this.setToken(respData.data.data.token);
+
+    } catch (err) {
+        console.log(err)
+    }
   }
 
   @action setImgUrl(chracter, value) {
@@ -1255,5 +1282,10 @@ export default class AppState {
     }
   }
 
+
+  // for launcher test
+  async runLauncher() {
+    
+  }
 
 }

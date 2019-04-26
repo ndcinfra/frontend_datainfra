@@ -14,6 +14,7 @@ import { Login, Logout, Signup } from './auth/index';
 import {ConfirmEmail, InvalidConfirmEmail, ForgotPassword, ResetPassword, Profile } from './user/index';
 import {Register, List, Detail} from './resource/index';
 import {Kpi} from './kpi/index';
+import {Launcher} from './test/index';
 
 @withRouter
 @inject("store")
@@ -59,6 +60,8 @@ export default class App extends Component {
 						<Route path="/resource/detail" {...this.store.appState.authenticated} component={Detail} />
 
 						<Route path="/kpi/listKpi" {...this.store.appState.authenticated} component={Kpi} />
+
+						<Route path="/test/launcher" component={Launcher} />
 
 						<Route component={NotFound}/> 
 					</Switch>

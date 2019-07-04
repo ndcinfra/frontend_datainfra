@@ -13,7 +13,7 @@ import Home from "./Home";
 import { Login, Logout, Signup } from './auth/index';
 import {ConfirmEmail, InvalidConfirmEmail, ForgotPassword, ResetPassword, Profile } from './user/index';
 import {Register, List, Detail} from './resource/index';
-import {Kpi} from './kpi/index';
+import {Kpi, UserKpi} from './kpi/index';
 import {Launcher} from './test/index';
 
 @withRouter
@@ -60,6 +60,7 @@ export default class App extends Component {
 						<Route path="/resource/detail" {...this.store.appState.authenticated} component={Detail} />
 
 						<Route path="/kpi/listKpi" {...this.store.appState.authenticated} component={Kpi} />
+						<Route path="/kpi/userKpi" {...this.store.appState.authenticated} component={UserKpi} />
 
 						<Route path="/test/launcher" component={Launcher} />
 

@@ -118,7 +118,14 @@ export default class TopBar extends Component {
 
 			kpiPane = (
 				<Menu.Menu>
-					{ loggedInUserInfo.permission !== 'publisher'  ? <Menu.Item name='KPI' active={activeItem === 'KPI'} onClick={this.handleItemClick}></Menu.Item>:null}
+					{ loggedInUserInfo.permission !== 'publisher'  ? <Menu.Item name='KPI' active={activeItem === 'KPI'} onClick={this.handleItemClick}>
+						<Dropdown item text='KPI' size='mini' >
+							<Dropdown.Menu>
+								<Dropdown.Item name='kpi/listKpi' onClick={this.handleItemClick.bind(this)}>국가별요약</Dropdown.Item>
+								<Dropdown.Item name='kpi/userKpi' onClick={this.handleItemClick.bind(this)}>유저통계</Dropdown.Item>
+							</Dropdown.Menu>
+						</Dropdown>
+					</Menu.Item>:null}
 				</Menu.Menu>
 			)
 

@@ -9,7 +9,8 @@ import * as KpiAPI from '../lib/api/kpi';
 var echarts = require('echarts');
 var moment = require('moment');
 
-export default class AppState {
+
+export default class KpiState {
     @observable searchKPI;
     @observable loading;
 
@@ -23,11 +24,19 @@ export default class AppState {
             country: 'all',
             kind: 'graph',
             radio: 'rev',
+            kindCalendar: 'da',
         }
 
         this.loading = 'off';
+    }  
+
+    @action setKindCalendar(value) {
+        this.searchKPI.kindCalendar = value;
     }
 
+    @action setCountry(value) {
+        this.searchKPI.country = value;
+    }
 
     @action setLoading(value) {
         this.loading = value;
@@ -332,4 +341,57 @@ export default class AppState {
     }
 
 
+    async fetchUserStatis(appState, history) { 
+        await appState.checkAuth(); // TODO: ??
+
+        if (!appState.authenticated) {
+            history.push('/login');
+
+        } else if (appState.loggedInUserInfo.permission === "publisher") {
+            history.push('/');
+        } else {
+            var myChart = echarts.init(document.getElementById('chart_user'));
+
+            var legend = ['유니크유저', '신규유저', '최고동접', '평균동접']
+            var color = ['#2f4554', '#0ef9e2', '#5af70c', '#f7270c']
+
+            // specify chart configuration item and data
+            var option = {
+                title: {
+                    left: 'left',
+                    text: '유저통계'
+                },
+                tooltip : {
+                    trigger: 'axis',
+                },
+                legend: {
+                    data:legend
+                },
+                toolbox: {
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis : [
+                    {
+                        type : 'category',
+                        boundaryGap : true,
+                        data : []
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value'
+                    }
+                ],
+                series : []
+            };
+        }
+    }
 }

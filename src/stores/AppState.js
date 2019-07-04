@@ -148,6 +148,7 @@ export default class AppState {
     this.token = value
   }
 
+  /* for launcher test
   async getTokenForlauncher() {
     let respData = null;
     try {
@@ -166,6 +167,7 @@ export default class AppState {
         console.log(err)
     }
   }
+  */
 
   @action setImgUrl(chracter, value) {
     switch (chracter){

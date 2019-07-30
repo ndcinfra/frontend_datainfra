@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from "mobx-react";
 import { Link, withRouter } from "react-router-dom";
 
-import { Dimmer, Checkbox, Dropdown, Container,Button, Input, Form,Grid, Radio, Loader, Label } from 'semantic-ui-react'
+import { Dimmer, Checkbox, Dropdown, Container,Button, Input, Form,Grid, Radio, Loader, Label,Divider ,Header, Icon} from 'semantic-ui-react'
 
 var echarts = require('echarts');
 
@@ -20,6 +20,11 @@ class UserKpi extends Component {
         if (this.props.store.appState.loggedInUserInfo.permission === "publisher") {
             history.push("/");
         }
+
+        // TODO: props 초기화
+
+        this.store.searchKPI.country = "KOREA"
+
     }
 
     componentDidMount() {
@@ -29,7 +34,7 @@ class UserKpi extends Component {
             history.push("/");
         }
 
-        //this.store.fetchNewDate(this.props.store.appState,history);
+        this.store.fetchUserStatis(this.props.store.appState,history);
 
     }
     
@@ -38,17 +43,28 @@ class UserKpi extends Component {
         this.store.setLoading('on');
         const {history} = this.props;
 
-        //this.store.fetchNewDate(this.props.store.appState,history);
+        this.store.fetchUserStatis(this.props.store.appState,history);
     }
 
     handleCountry = (e, {value}) => {
         console.log("country: ", value);
         this.store.setCountry(value);
+        this.store.fetchUserStatis(this.props.store.appState,history);
     }
 
     handleChange = (e, {value}) => {
         console.log("kind of calendar: ", value);
         this.store.setKindCalendar(value);
+        this.store.fetchUserStatis(this.props.store.appState,history);
+    }
+
+
+    handleInputFrom = (e, { value }) => {
+        this.store.searchKPI.from = value;
+    }
+
+    handleInputTo = (e, { value }) => {
+        this.store.searchKPI.to = value;
     }
 
     render() {
@@ -57,53 +73,70 @@ class UserKpi extends Component {
         const countryOptions = [
             { key: 'th', value: 'THAILAND', flag: 'th', text: 'Thailand' },
             { key: 'vn', value: 'VIETNAM', flag: 'vn', text: 'Vietnam' },
+            { key: 'kr', value: 'KOREA', flag: 'kr', text: 'Korea' },
+            { key: 'jp', value: 'JAPAN', flag: 'jp', text: 'Japan' },
+            { key: 'tw', value: 'TAIWAN', flag: 'tw', text: 'Taiwan' },
         ]
 
         return(
             <Container style={{ marginTop: '5em', width: '95%' }}>
                 <Grid celled>
                     <Grid.Row>
-                        <Grid.Column width={2}>
-                            유저통계
-                        </Grid.Column>
-                        <Grid.Column width={13}>
+                        <Grid.Column width={3}>
+                           
+
                             <Form size='mini'>
                                 <Form.Group widths='equal'>
-                                    <Form.Select fluid label='Country' onChange={this.handleCountry} options={countryOptions} placeholder='Country' defaultValue={countryOptions[0].value}/>
+                                    <Form.Select fluid label='Country' onChange={this.handleCountry} options={countryOptions} placeholder='Country' defaultValue={searchKPI.country}/>
                                 </Form.Group>
-                                <Form.Group widths='inline'>
+                                <Divider></Divider>
+                                <Form.Field control={Input} placeholder='Start Date' value={searchKPI.from} onChange={this.handleInputFrom}/>
+                                <Form.Field control={Input} placeholder='End Date' value={searchKPI.to} onChange={this.handleInputTo} />
+
+                                <Form.Button color='violet' onClick={this.handleSearch.bind(this)}>Search</Form.Button>
+                            
+                                <Form.Field>
                                     <Form.Radio
                                         label='Daily'
                                         value='day'
                                         checked={searchKPI.kindCalendar === 'day'}
                                         onChange={this.handleChange}
                                     />
+                                </Form.Field>
+                                <Form.Field>
                                     <Form.Radio
                                         label='Weekly'
                                         value='week'
                                         checked={searchKPI.kindCalendar === 'week'}
                                         onChange={this.handleChange}
                                     />
+                                </Form.Field>
+                                <Form.Field>
                                     <Form.Radio
                                         label='Monthly'
                                         value='month'
                                         checked={searchKPI.kindCalendar === 'month'}
                                         onChange={this.handleChange}
                                     />
-
-                                    <Form.Field control={Input} placeholder='Start Date' value={searchKPI.from} onChange={this.handleInputFrom}/>
-                                    <Form.Field control={Input} placeholder='End Date' value={searchKPI.to} onChange={this.handleInputTo} />
-
-                                    <Form.Button color='violet' onClick={this.handleSearch.bind(this)}>Search</Form.Button>
-                                </Form.Group>
+                                </Form.Field>
+                                   
                                 
                             </Form>
                         </Grid.Column>
-                    </Grid.Row>
+                    
+                        <Grid.Column width={13}>
+                        <label>* 유저통계</label>
+                        <br/>
+                        <label>     uu: Unique User </label>
+                        <br/>
+                        <label>     nru: New Register User</label> 
+                        <br/>
+                        <label>     mcu: Max Current User </label>
+                        <br/>
+                        <label>     avg: Average Current User</label>
+                        <br/>
 
-                    <Grid.Row>
-                        <Grid.Column width={15}>
-                            <label></label>
+                        <Divider section />
                             <div id="chart_user" style={{width:'100%', height:'400px'}} ></div>
                             <div id="tabulator_user"></div>
                         </Grid.Column>

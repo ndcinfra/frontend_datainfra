@@ -763,7 +763,7 @@ export default class KpiState {
                             align: "center",
                             formatter: function(cell, formatterParams) {
                                 //return '₩ '+numeral(cell.getValue()).format('0,0');
-                                return numeral(cell.getValue()).format('0.00');
+                                return numeral(cell.getValue()).format('0000.00');
                             }
                             //width: 200,
                             //headerFilter:true,

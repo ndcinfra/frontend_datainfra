@@ -22,7 +22,9 @@ class SalesKpi extends Component {
         }
 
         // TODO: props 초기화
-
+        // TODO: 권한 설정.
+        // ARPU - Average Revenue Per User 유저 한명이 결제하는 평균 금액
+        // ARPPU - 결제 유저들이 결제하는 평균 금액
         this.store.searchKPI.country = "KOREA"
 
     }
@@ -34,7 +36,7 @@ class SalesKpi extends Component {
             history.push("/");
         }
 
-        this.store.fetchUserStatis(this.props.store.appState,history);
+        this.store.fetchSaleStatis(this.props.store.appState,history);
 
     }
     
@@ -43,19 +45,19 @@ class SalesKpi extends Component {
         this.store.setLoading('on');
         const {history} = this.props;
 
-        this.store.fetchUserStatis(this.props.store.appState,history);
+        this.store.fetchSaleStatis(this.props.store.appState,history);
     }
 
     handleCountry = (e, {value}) => {
         console.log("country: ", value);
         this.store.setCountry(value);
-        this.store.fetchUserStatis(this.props.store.appState,history);
+        this.store.fetchSaleStatis(this.props.store.appState,history);
     }
 
     handleChange = (e, {value}) => {
         console.log("kind of calendar: ", value);
         this.store.setKindCalendar(value);
-        this.store.fetchUserStatis(this.props.store.appState,history);
+        this.store.fetchSaleStatis(this.props.store.appState,history);
     }
 
 
@@ -125,20 +127,20 @@ class SalesKpi extends Component {
                         </Grid.Column>
                     
                         <Grid.Column width={13}>
-                        <label>* 매출통계</label>
+                        <label>* 매출통계 Sales KPI</label>
                         <br/>
-                        <label>     uu: Unique User </label>
+                        <label>     rev: Revenue </label>
                         <br/>
-                        <label>     nru: New Register User</label> 
+                        <label>     arppu: Average Revenue Per Paid User</label> 
                         <br/>
-                        <label>     mcu: Max Current User </label>
+                        <label>     bu: Buying User </label>
                         <br/>
-                        <label>     avg: Average Current User</label>
+                        <label>     P.rate: ???</label>
                         <br/>
 
                         <Divider section />
-                            <div id="chart_user" style={{width:'100%', height:'400px'}} ></div>
-                            <div id="tabulator_user"></div>
+                            <div id="chart_sale" style={{width:'100%', height:'400px'}} ></div>
+                            <div id="tabulator_sale"></div>
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>

@@ -22,7 +22,7 @@ class UserKpi extends Component {
         }
 
         // TODO: props 초기화
-
+        // TODO: 권한 체크, 나라
         this.store.searchKPI.country = "KOREA"
 
     }
@@ -125,7 +125,7 @@ class UserKpi extends Component {
                         </Grid.Column>
                     
                         <Grid.Column width={13}>
-                        <label>* 유저통계</label>
+                        <label>* 유저통계 User KPI</label>
                         <br/>
                         <label>     uu: Unique User </label>
                         <br/>

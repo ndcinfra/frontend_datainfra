@@ -562,4 +562,226 @@ export default class KpiState {
         }
     }
 
+    
+    async fetchSaleStatis(appState, history) { 
+        await appState.checkAuth(); // TODO: ??
+
+        if (!appState.authenticated) {
+            history.push('/login');
+
+        } else if (appState.loggedInUserInfo.permission === "publisher") {
+            history.push('/');
+        } else {
+            var myChart = echarts.init(document.getElementById('chart_sale'));
+
+            //var legend = ['유니크유저', '신규유저', '최고동접', '평균동접']
+            var legend = ['rev', 'arppu', 'bu', 'prate']
+            var color = ['#2f4554', '#0ef9e2', '#5af70c', '#f7270c']
+
+            // series
+            var lseries = new Object();
+            lseries = {};
+
+            var ldata = new Array();
+
+            // TODO: set default country
+            //this.searchKPI.country = 'KOREA';
+
+            // specify chart configuration item and data
+            var option = {
+                title: {
+                    left: 'left',
+                    text: 'Sale Statistics - ' + this.searchKPI.country
+                },
+                tooltip : {
+                    trigger: 'axis',
+                },
+                legend: {
+                    data:legend
+                },
+                toolbox: {
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis : [
+                    {
+                        type : 'category',
+                        boundaryGap : true,
+                        data : []
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value'
+                    }
+                ],
+                series : []
+            };
+
+            // make a chart
+            try {
+                
+                //this.searchKPI.from = '2019-07-01';
+                //this.searchKPI.to = '2019-07-04';
+
+                
+                
+                console.log("before call: ", this.searchKPI);
+
+                const response = await KpiAPI.getSaleKPI(this.searchKPI);
+
+                console.log("after call: ", response.data.data);
+
+                //set series
+                // i = column, j = row
+                for (var i=0; i<Object.keys(response.data.data[0]).length; i++) {
+                    for (var j=0; j<response.data.data.length; j++) {
+                        // legend
+                        if (i == 0) {
+                            option.xAxis[0].data.push(moment(response.data.data[j].cdate).format('ll'));
+                            //options.xaxis.categories.push(response.data.data[j].cdate);
+                        }else{
+                            //series
+                            // i==1 mcu
+                            // i==2 avg
+                            // i==3 uu
+                            // i==4 nru
+
+                            lseries.name = Object.keys(response.data.data[j])[i]; // !!!
+                            lseries.type = 'line';
+                            lseries.label = {normal: {show: false,}};
+                            lseries.color = color[i];
+
+                            switch (i) {
+                                case 1: // rev
+                                    ldata.push(response.data.data[j].rev);
+                                    break;
+                                case 2: // arppu
+                                    ldata.push(response.data.data[j].arppu);
+                                    break;
+                                case 3: // bu
+                                    ldata.push(response.data.data[j].bu);
+                                    break;
+                                case 4: // prate
+                                    ldata.push(response.data.data[j].prate);
+                                    break;
+                                // total??
+                            }
+
+                        }
+                    
+                    }
+
+                    //console.log("ldata: ", ldata);
+                    // save ldata to series.data
+                    lseries.data = ldata;
+                    //console.log("series.name: ",lseries.name,"series.data: ", lseries.data);
+                    //console.log("lseries: ",lseries);
+
+                    //seiresArray.push(lseries);
+                    if (i > 0) {
+                        option.series.push(lseries);
+                    }
+                    
+                    lseries = {};
+                    ldata = [];
+                }
+
+                //console.log("series: ",seiresArray);
+                //console.log("legend: ", option.xAxis[0].data)
+                //console.log("option.series: ", option.series);
+                //console.log("option: ", option);
+
+                myChart.setOption(option);
+
+                /* table */
+                var table = new Tabulator("#tabulator_sale", {
+                    //height: 511, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+                    autoResize:true, 
+                    resizableRows:true,
+                    layout: "fitColumns", //fit columns to width of table (optional, fitDataFill, fitColumns)
+                    //responsiveLayout: true,
+                    placeholder: "No Data Available", //display message to user on empty table
+                    columns: [ //Define Table Columns
+                        {
+                            title: "Date",
+                            //formatter: "rownum",
+                            field: "cdate",
+                            align: "center",
+                            //width: 70,
+                            formatter: function(cell, formatterParams) {
+                                return moment(cell.getValue()).format('ll')
+                            }
+                        },
+                        {
+                            title: "Revenue",
+                            //formatter: "rownum",
+                            field: "rev",
+                            align: "center",
+                            formatter: function(cell, formatterParams) {
+                                //return '₩ '+numeral(cell.getValue()).format('0,0');
+                                return numeral(cell.getValue()).format('0,0');
+                            }
+                            //width: 200,
+                            //headerFilter:true,
+                        },
+                        {
+                            title: "ARPPU",
+                            //formatter: "rownum",
+                            field: "arppu",
+                            align: "center",
+                            formatter: function(cell, formatterParams) {
+                                //return '₩ '+numeral(cell.getValue()).format('0,0');
+                                return numeral(cell.getValue()).format('0,0');
+                            }
+                            //width: 200,
+                            //headerFilter:true,
+                        },
+                        {
+                            title: "BU",
+                            //formatter: "rownum",
+                            field: "bu",
+                            align: "center",
+                            formatter: function(cell, formatterParams) {
+                                //return '₩ '+numeral(cell.getValue()).format('0,0');
+                                return numeral(cell.getValue()).format('0,0');
+                            }
+                            //width: 200,
+                            //headerFilter:true,
+                        },
+                        {
+                            title: "P.rate",
+                            //formatter: "rownum",
+                            field: "prate",
+                            align: "center",
+                            formatter: function(cell, formatterParams) {
+                                //return '₩ '+numeral(cell.getValue()).format('0,0');
+                                return numeral(cell.getValue()).format('0.00');
+                            }
+                            //width: 200,
+                            //headerFilter:true,
+                        },
+                    ],
+                
+                });
+        
+                //table.setData(BACKEND_API+'/v1/resource/list', {}, "GET");
+                table.setData(response.data.data);
+
+                this.setLoading('off');
+
+            } catch (error) {
+                this.setLoading('off');
+                console.error(error);
+            }
+        }
+    }
+
 }

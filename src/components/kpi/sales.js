@@ -130,13 +130,14 @@ class SalesKpi extends Component {
                         <Grid.Column width={13}>
                         <label>* 매출통계 Sales KPI</label>
                         <br/>
-                        <label>     rev: Revenue </label>
+                        <br/>
+                        <label>     rev: Revenue (그 날 환율로 적용 해서 원화로 변경 되어서 표시 됩니다. 태국: ₩37.70)</label>
                         <br/>
                         <label>     arppu: Average Revenue Per Paid User</label> 
                         <br/>
                         <label>     bu: Buying User </label>
                         <br/>
-                        <label>     P.rate: ???</label>
+                        <label>     P.rate: </label>
                         <br/>
 
                         <Divider section />

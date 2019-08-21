@@ -139,6 +139,11 @@ class UserKpi extends Component {
 
                         <Divider section />
                             <div id="chart_user" style={{width:'100%', height:'400px'}} ></div>
+
+                            <div className="table-controls">
+                                <button id="download-csv">Download CSV</button>
+                            </div>
+                            
                             <div id="tabulator_user"></div>
                         </Grid.Column>
                     </Grid.Row>

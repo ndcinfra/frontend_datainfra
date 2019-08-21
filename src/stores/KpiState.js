@@ -479,6 +479,11 @@ export default class KpiState {
 
                 myChart.setOption(option);
 
+                //trigger download of data.csv file
+                $("#download-csv").click(function(){
+                    table.download("csv", "data.csv");
+                });
+
                 /* table */
                 var table = new Tabulator("#tabulator_user", {
                     //height: 511, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
@@ -631,8 +636,6 @@ export default class KpiState {
                 //this.searchKPI.from = '2019-07-01';
                 //this.searchKPI.to = '2019-07-04';
 
-                
-                
                 console.log("before call: ", this.searchKPI);
 
                 const response = await KpiAPI.getSaleKPI(this.searchKPI);
@@ -700,6 +703,12 @@ export default class KpiState {
                 //console.log("option: ", option);
 
                 myChart.setOption(option);
+
+                //csv
+                //trigger download of data.csv file
+                $("#download-csv").click(function(){
+                    table.download("csv", "data.csv");
+                });
 
                 /* table */
                 var table = new Tabulator("#tabulator_sale", {

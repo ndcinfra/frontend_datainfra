@@ -60,8 +60,12 @@ export default class KpiState {
 
             //var legend = ['china', 'japan', 'korea', 'namerica', 'taiwan', 'total']
             //var color = ['#2f4554', '#5af70c', '#f7270c', '#0ef9e2', '#ca8622', '#108ce5', '#6e7074']
-            var legend = ['china', 'japan', 'korea', 'namerica', 'taiwan', 'total']
-            var color = ['#2f4554', '#0ef9e2', '#5af70c', '#f7270c', '#108ce5', '#ca8622', '#6e7074']
+            
+            //var legend = ['china', 'japan', 'korea', 'namerica', 'taiwan', 'total']
+            //var color = ['#2f4554', '#0ef9e2', '#5af70c', '#f7270c', '#108ce5', '#ca8622', '#6e7074']
+
+            var legend = ['china', 'japan', 'korea',  'taiwan', 'total', 'thailand']
+            var color = ['#2f4554', '#0ef9e2', '#5af70c', '#108ce5', '#ca8622', '#6e7074', '#f7270c']
 
              // series
             var lseries = new Object();
@@ -153,6 +157,8 @@ export default class KpiState {
                             // i==4 namerica
                             // i==5 taiwan
                             // i==6 total
+
+                            // i==7 thailand
                             lseries.name = Object.keys(response.data.data[j])[i];
                             lseries.type = 'line';
                             lseries.label = {normal: {show: false,}};
@@ -179,6 +185,9 @@ export default class KpiState {
                                     break;
                                 case 6: // total
                                     ldata.push(response.data.data[j].total);
+                                    break;
+                                case 7: // thailand
+                                    ldata.push(response.data.data[j].thailand);
                                     break;
                             }
 
@@ -279,10 +288,24 @@ export default class KpiState {
                             //headerFilter:true,
                         },
                         
+                        /*
                         {
                             title: "North America",
                             //formatter: "rownum",
                             field: "namerica",
+                            align: "center",
+                            formatter: function(cell, formatterParams) {
+                                //return '₩ '+numeral(cell.getValue()).format('0,0');
+                                return numeral(cell.getValue()).format('0,0');
+                            }
+                            //width: 200,
+                            //headerFilter:true,
+                        },
+                        */
+                        {
+                            title: "Thailand",
+                            //formatter: "rownum",
+                            field: "thailand",
                             align: "center",
                             formatter: function(cell, formatterParams) {
                                 //return '₩ '+numeral(cell.getValue()).format('0,0');
@@ -479,10 +502,7 @@ export default class KpiState {
 
                 myChart.setOption(option);
 
-                //trigger download of data.csv file
-                $("#download-csv").click(function(){
-                    table.download("csv", "data.csv");
-                });
+                
 
                 /* table */
                 var table = new Tabulator("#tabulator_user", {
@@ -557,6 +577,11 @@ export default class KpiState {
         
                 //table.setData(BACKEND_API+'/v1/resource/list', {}, "GET");
                 table.setData(response.data.data);
+
+                //trigger download of data.csv file
+                $("#download-csv").click(function(){
+                    table.download("csv", "data.csv");
+                });
 
                 this.setLoading('off');
 
@@ -704,11 +729,7 @@ export default class KpiState {
 
                 myChart.setOption(option);
 
-                //csv
-                //trigger download of data.csv file
-                $("#download-csv").click(function(){
-                    table.download("csv", "data.csv");
-                });
+                
 
                 /* table */
                 var table = new Tabulator("#tabulator_sale", {
@@ -733,6 +754,30 @@ export default class KpiState {
                             title: "Revenue",
                             //formatter: "rownum",
                             field: "rev",
+                            align: "center",
+                            formatter: function(cell, formatterParams) {
+                                //return '₩ '+numeral(cell.getValue()).format('0,0');
+                                return numeral(cell.getValue()).format('0,0');
+                            }
+                            //width: 200,
+                            //headerFilter:true,
+                        },
+                        {
+                            title: "Charge",
+                            //formatter: "rownum",
+                            field: "charge",
+                            align: "center",
+                            formatter: function(cell, formatterParams) {
+                                //return '₩ '+numeral(cell.getValue()).format('0,0');
+                                return numeral(cell.getValue()).format('0,0');
+                            }
+                            //width: 200,
+                            //headerFilter:true,
+                        },
+                        {
+                            title: "Charge Unique User",
+                            //formatter: "rownum",
+                            field: "chargeuu",
                             align: "center",
                             formatter: function(cell, formatterParams) {
                                 //return '₩ '+numeral(cell.getValue()).format('0,0');
@@ -784,6 +829,12 @@ export default class KpiState {
                 //table.setData(BACKEND_API+'/v1/resource/list', {}, "GET");
                 table.setData(response.data.data);
 
+                //csv
+                //trigger download of data.csv file
+                $("#download-csv").click(function(){
+                    table.download("csv", "data.csv");
+                });
+
                 this.setLoading('off');
 
             } catch (error) {
@@ -793,4 +844,88 @@ export default class KpiState {
         }
     }
 
+
+    async fetchItemSaleStatis(appState, history) {
+        await appState.checkAuth(); // TODO: ??
+
+        if (!appState.authenticated) {
+            history.push('/login');
+
+        } else if (appState.loggedInUserInfo.permission === "publisher") {
+            history.push('/');
+        } else {
+
+            try {
+
+                console.log("before call: ", this.searchKPI);
+
+                const response = await KpiAPI.getItemSaleKPI(this.searchKPI);
+
+                console.log("after call: ", response.data.data);
+
+                /* table */
+                var table = new Tabulator("#tabulator_saleItems", {
+                    //height: 511, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+                    autoResize:true, 
+                    resizableRows:true,
+                    layout: "fitColumns", //fit columns to width of table (optional, fitDataFill, fitColumns)
+                    //responsiveLayout: true,
+                    placeholder: "No Data Available", //display message to user on empty table
+                    columns: [ //Define Table Columns
+                        {
+                            title: "ID",
+                            formatter: "rownum",
+                            align: "center"
+                        },
+                        /*
+                        {
+                            title: "Date",
+                            //formatter: "rownum",
+                            field: "cdate",
+                            align: "center",
+                            //width: 70,
+                            formatter: function(cell, formatterParams) {
+                                return moment(cell.getValue()).format('ll')
+                            }
+                        },
+                        */
+                        {
+                            title: "ItemID",
+                            field: "itemid",
+                            align: "center"
+                        },
+                        {
+                            title: "Item Name",
+                            field: "itemname",
+                            align: "center"
+                        },
+                        {
+                            title: "Count",
+                            field: "count",
+                            align: "center",
+                            formatter: function(cell, formatterParams) {
+                                return numeral(cell.getValue()).format('0,0');
+                            }
+                        }
+                    ],
+                
+                });
+        
+                table.setData(response.data.data);
+
+                //csv
+                //trigger download of data.csv file
+                $("#download-csv").click(function(){
+                    table.download("csv", "data.csv");
+                });
+
+                this.setLoading('off');
+            
+            } catch (error) {
+                this.setLoading('off');
+                console.error(error);
+            }
+            
+        }
+    }
 }

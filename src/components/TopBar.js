@@ -122,8 +122,9 @@ export default class TopBar extends Component {
 						<Dropdown item text='KPI' size='mini' >
 							<Dropdown.Menu>
 								<Dropdown.Item name='kpi/listKpi' onClick={this.handleItemClick.bind(this)}>Dashboard</Dropdown.Item>
-								<Dropdown.Item name='kpi/userKpi' onClick={this.handleItemClick.bind(this)}>유저통계(User KPI)</Dropdown.Item>
-								<Dropdown.Item name='kpi/salesKpi' onClick={this.handleItemClick.bind(this)}>매출통계(Sales KPI)</Dropdown.Item>
+								<Dropdown.Item name='kpi/userKpi' onClick={this.handleItemClick.bind(this)}>유저통계 (User KPI)</Dropdown.Item>
+								<Dropdown.Item name='kpi/salesKpi' onClick={this.handleItemClick.bind(this)}>매출통계 (Sales KPI)</Dropdown.Item>
+								<Dropdown.Item name='kpi/salesDetail' onClick={this.handleItemClick.bind(this)}>기타 (Etc. for Thai and Viet)</Dropdown.Item>
 							</Dropdown.Menu>
 						</Dropdown>
 					</Menu.Item>:null}

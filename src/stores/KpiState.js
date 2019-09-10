@@ -502,7 +502,11 @@ export default class KpiState {
 
                 myChart.setOption(option);
 
-                
+                //csv
+                //trigger download of data.csv file
+                $("#download-csv").click(function(){
+                    table.download("csv", "data.csv");
+                });
 
                 /* table */
                 var table = new Tabulator("#tabulator_user", {
@@ -548,6 +552,18 @@ export default class KpiState {
                             //headerFilter:true,
                         },
                         {
+                            title: "Game New Access User",
+                            //formatter: "rownum",
+                            field: "gnru",
+                            align: "center",
+                            formatter: function(cell, formatterParams) {
+                                //return '₩ '+numeral(cell.getValue()).format('0,0');
+                                return numeral(cell.getValue()).format('0,0');
+                            }
+                            //width: 200,
+                            //headerFilter:true,
+                        },
+                        {
                             title: "Max Current User",
                             //formatter: "rownum",
                             field: "mcu",
@@ -578,10 +594,12 @@ export default class KpiState {
                 //table.setData(BACKEND_API+'/v1/resource/list', {}, "GET");
                 table.setData(response.data.data);
 
+                /*
                 //trigger download of data.csv file
                 $("#download-csv").click(function(){
                     table.download("csv", "data.csv");
                 });
+                */
 
                 this.setLoading('off');
 
@@ -729,7 +747,9 @@ export default class KpiState {
 
                 myChart.setOption(option);
 
-                
+                $("#download-csv").click(function(){
+                    table.download("csv", "data.csv");
+                });
 
                 /* table */
                 var table = new Tabulator("#tabulator_sale", {
@@ -831,10 +851,11 @@ export default class KpiState {
 
                 //csv
                 //trigger download of data.csv file
+                /*
                 $("#download-csv").click(function(){
                     table.download("csv", "data.csv");
                 });
-
+                */
                 this.setLoading('off');
 
             } catch (error) {
@@ -862,6 +883,12 @@ export default class KpiState {
                 const response = await KpiAPI.getItemSaleKPI(this.searchKPI);
 
                 console.log("after call: ", response.data.data);
+
+                //csv
+                //trigger download of data.csv file
+                $("#download-csv").click(function(){
+                    table.download("csv", "data.csv");
+                });
 
                 /* table */
                 var table = new Tabulator("#tabulator_saleItems", {
@@ -915,9 +942,11 @@ export default class KpiState {
 
                 //csv
                 //trigger download of data.csv file
+                /*
                 $("#download-csv").click(function(){
                     table.download("csv", "data.csv");
                 });
+                */
 
                 this.setLoading('off');
             

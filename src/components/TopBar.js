@@ -83,6 +83,7 @@ export default class TopBar extends Component {
 		var Viewpane = null;
 		var Resourcepane = null;
 		var kpiPane = null;
+		var OpPane = null;
 
 		const { activeItem } = this.state;
 
@@ -131,6 +132,18 @@ export default class TopBar extends Component {
 				</Menu.Menu>
 			)
 
+			OpPane = (
+				<Menu.Menu>
+					{ loggedInUserInfo.permission !== 'publisher'  ? <Menu.Item name='Operation' active={activeItem === 'Operation'} onClick={this.handleItemClick}>
+						<Dropdown item text='Operation' size='mini' >
+							<Dropdown.Menu>
+								<Dropdown.Item name='op/user' onClick={this.handleItemClick.bind(this)}>Operation User</Dropdown.Item>
+							</Dropdown.Menu>
+						</Dropdown>
+					</Menu.Item>:null}
+				</Menu.Menu>
+			)
+
 		}else{
 			Viewpane = (
 				<Menu.Menu position='right'>
@@ -147,6 +160,7 @@ export default class TopBar extends Component {
 					<Menu.Item name='home' active={activeItem === 'home'} onClick={this.handleItemClick} />
 					{loggedInUserInfo.displayname != 'theBoss' ? Resourcepane : null }
 					{kpiPane}
+					{OpPane}
 					{Viewpane}
 				</Menu>
 			</div>

@@ -139,7 +139,9 @@ export default class KpiState {
             };
 
             try {
-                const response = await KpiAPI.getKPI(this.searchKPI);
+                const response = await KpiAPI.getKPI(this.searchKPI); // call backend 
+
+                console.log("test: ", response.data.data);
 
                 //set series
                 // i = column, j = row
@@ -218,7 +220,7 @@ export default class KpiState {
                 //console.log("option.series: ", option.series);
                 //console.log("option: ", option);
 
-                myChart.setOption(option);
+                myChart.setOption(option); // end chart
 
                 /* table */
                 var table = new Tabulator("#tabulator-2", {

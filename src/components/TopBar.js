@@ -155,6 +155,19 @@ export default class TopBar extends Component {
 
 		}
 
+
+
+
+
+
+
+
+
+
+
+
+
+		
 		return (
 			<div>
 				<Menu size='tiny' pointing borderless={true} fixed='top'>

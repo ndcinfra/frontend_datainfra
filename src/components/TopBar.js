@@ -123,6 +123,7 @@ export default class TopBar extends Component {
 						<Dropdown item text='KPI' size='mini' >
 							<Dropdown.Menu>
 								<Dropdown.Item name='kpi/listKpi' onClick={this.handleItemClick.bind(this)}>Dashboard</Dropdown.Item>
+								<Dropdown.Item name='kpi/newkpi' onClick={this.handleItemClick.bind(this)}>Dashboard_new</Dropdown.Item>
 								<Dropdown.Item name='kpi/userKpi' onClick={this.handleItemClick.bind(this)}>유저통계 (User KPI)</Dropdown.Item>
 								<Dropdown.Item name='kpi/salesKpi' onClick={this.handleItemClick.bind(this)}>매출통계 (Sales KPI)</Dropdown.Item>
 								<Dropdown.Item name='kpi/salesDetail' onClick={this.handleItemClick.bind(this)}>기타 (Etc. for Thai and Viet)</Dropdown.Item>
@@ -135,7 +136,7 @@ export default class TopBar extends Component {
 			OpPane = (
 				<Menu.Menu>
 					{ loggedInUserInfo.permission !== 'publisher'  ? <Menu.Item name='Operation' active={activeItem === 'Operation'} onClick={this.handleItemClick}>
-						<Dropdown item text='Operation' size='mini' >
+						<Dropdown item text='Operation (개발중)' size='mini' >
 							<Dropdown.Menu>
 								<Dropdown.Item name='op/user' onClick={this.handleItemClick.bind(this)}>Operation User</Dropdown.Item>
 							</Dropdown.Menu>

@@ -10,6 +10,7 @@ import * as UserAPI from '../lib/api/user';
 import * as S3API from '../lib/api/s3';
 import * as ResourceAPI from '../lib/api/resource';
 import * as KpiAPI from '../lib/api/kpi';
+import * as NewKpiAPI from '../lib/api/newkpi';
 
 import storage from '../lib/storage';
 import redirect from '../lib/redirect';
@@ -455,6 +456,31 @@ export default class AppState {
       }
     }
 
+  }
+
+  // New GetKPI
+  async GetNewKPI() {
+
+    //validate date
+
+    if (!this.error) {
+      //let data = null;
+      let respData = null;
+      try {
+        // call backend
+        respData = await NewKpiAPI.getKPI(this.searchKPI);
+
+        //console.log(respData.data.data);
+
+        this.searchKPI.result.push(...respData.data.data);
+        //console.log(this.searchKPI.result[0]);
+
+        this.setLoading('off');
+
+      } catch (err) {
+        this.setError(err);
+      }
+    }
   }
 
   // Signup

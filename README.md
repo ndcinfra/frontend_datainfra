@@ -3,7 +3,8 @@
 
     서버 반영  
       npm run build  
-        
-    git pull  
-    //npm run build  
+      git commit -am "" 
+      git  push
+      
+      
     sudo systemctl reload nginx  

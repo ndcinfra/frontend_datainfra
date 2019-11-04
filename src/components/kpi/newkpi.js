@@ -172,8 +172,6 @@ class NewKpi extends Component {
                             <br/>
                             <label>* 중국 데이터는 한국시간으로 오후 1:30분에 취합됩니다.</label>
                             <br/>
-                            <label>* NA는 현재 진행 중 입니다.</label>
-                            <br/>
                             <label>* Invalid date는 세로 합계 금액입니다. 또한 새로 추가된 Daily, Weekly, Monthly 조회는 Revenue / New Users 등 3개 메뉴만 가능합니다.</label>
                             <br/>
                             <br/><br/><br/>

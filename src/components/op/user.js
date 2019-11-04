@@ -78,7 +78,7 @@ class UserOperation extends Component {
                 <Grid celled>
                     <Grid.Row>
                         <Grid.Column width={5}>
-                            <label> * 현재 개발중입니다.</label>
+                            <label> * 현재 개발중입니다...</label>
                                 <br/>
                             <label> * 유저 정보를 조회 합니다.</label>
                             <br/>

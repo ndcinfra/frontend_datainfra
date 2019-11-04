@@ -170,7 +170,7 @@ class NewKpi extends Component {
                             <br/>
                             <label>* 매출을 제외한 일부 데이터(ex, 평균 동접)는 2019-03-22일 부터 자동으로 저장이 되고 있습니다. 그 이전 데이터는 취합이 불가합니다.</label>
                             <br/>
-                            <label>* 중국 데이터는 한국시간으로 오후 1:30분에 취합됩니다...</label>
+                            <label>* 중국 데이터는 한국시간으로 오후 1:30분에 취합됩니다.</label>
                             <br/>
                             <label>* Invalid date는 세로 합계 금액입니다. 또한 새로 추가된 Daily, Weekly, Monthly 조회는 Revenue / New Users 등 3개 메뉴만 가능합니다.</label>
                             <br/>

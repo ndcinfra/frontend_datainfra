@@ -25,6 +25,7 @@ class NewKpi extends Component {
         super(props);
 
         this.store = this.props.store.newkpiState;
+        
         const {history} = this.props;
         if (this.props.store.appState.loggedInUserInfo.permission === "publisher") {
             history.push("/");
@@ -162,19 +163,18 @@ class NewKpi extends Component {
                             </Form>
                         </Grid.Column>
                         <Grid.Column width={13}>
-                            <label>* 각 퍼블리셔의 통계툴에서 크롤링 하고 있습니다.</label>
+                            <div class="ui message">
+                                <div class="header">Notice</div>
+                                <ul class="list">
+                                    <li class="content">각 퍼블리셔의 통계툴에서 크롤링 하고 있습니다.</li>
+                                    <li class="content">이 데이터는 추이 분석용으로만 사용 부탁 드립니다. 취소, 환불, 보상등 최종 금액이 반영 되지 않은 데이터 입니다.</li>
+                                    <li class="content">한국을 제외한 다른 국가의 Revenue 경우 해당 일자의 환율 혹은 그 당시 고정 환율을 적용해서 원화로 계산 된 데이터 입니다.</li>
+                                    <li class="content">매출을 제외한 일부 데이터(ex, 평균 동접)는 2019-03-22일 부터 자동으로 저장이 되고 있습니다. 그 이전 데이터는 취합이 불가합니다.</li>
+                                    <li class="content">중국 데이터는 한국시간으로 오후 1:30분에 취합됩니다.</li>
+                                    <li class="content">Invalid date는 세로 합계 금액입니다. 또한 새로 추가된 Daily, Weekly, Monthly 조회는 Revenue / New Users 등 3개 메뉴만 가능합니다.</li>
+                                </ul>
+                            </div>
                             <br/>
-                            <label>* 이 데이터는 추이 분석용으로만 사용 부탁 드립니다. 취소, 환불, 보상등 최종 금액이 반영 되지 않은 데이터 입니다. </label>
-                            <br/>
-                            <label>* 한국을 제외한 다른 국가의 Revenue 경우 해당 일자의 환율 혹은 그 당시 고정 환율을 적용해서 원화로 계산 된 데이터 입니다.</label>
-                            <br/>
-                            <label>* 매출을 제외한 일부 데이터(ex, 평균 동접)는 2019-03-22일 부터 자동으로 저장이 되고 있습니다. 그 이전 데이터는 취합이 불가합니다.</label>
-                            <br/>
-                            <label>* 중국 데이터는 한국시간으로 오후 1:30분에 취합됩니다.</label>
-                            <br/>
-                            <label>* Invalid date는 세로 합계 금액입니다. 또한 새로 추가된 Daily, Weekly, Monthly 조회는 Revenue / New Users 등 3개 메뉴만 가능합니다.</label>
-                            <br/>
-                            <br/><br/><br/>
                             <div id="chart" style={{width:'100%', height:'400px'}} ></div>
 
                             <div id="tabulator-2"></div>

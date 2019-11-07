@@ -11,6 +11,7 @@ if (isProduction == true) {
     BACKEND_API = "http://localhost:8080";
 }
 
-var TH_API = "http://3.1.144.241";
+var TH_API = "http://3.1.144.241";        //TH-LIVE
+//var TH_API = "http://52.74.146.93";         //TH-QA
 
 export { isProduction, BACKEND_API, TH_API};

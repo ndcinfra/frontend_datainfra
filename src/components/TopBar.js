@@ -65,6 +65,8 @@ export default class TopBar extends Component {
 			this.props.history.push('/');
 		}else if (name === 'KPI') {
 			this.props.history.push('/kpi/listKpi');
+		}else if (name === 'Operation') {
+			this.props.history.push('/op/user');
 		}else{
 			this.props.history.push('/'+name);
 		}
@@ -136,7 +138,7 @@ export default class TopBar extends Component {
 			OpPane = (
 				<Menu.Menu>
 					{ loggedInUserInfo.permission !== 'publisher'  ? <Menu.Item name='Operation' active={activeItem === 'Operation'} onClick={this.handleItemClick}>
-						<Dropdown item text='Operation (개발중)' size='mini' >
+						<Dropdown item text='Operation' size='mini' >
 							<Dropdown.Menu>
 								<Dropdown.Item name='op/user' onClick={this.handleItemClick.bind(this)}>Operation User</Dropdown.Item>
 							</Dropdown.Menu>

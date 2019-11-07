@@ -269,7 +269,7 @@ class UserOperation extends Component {
                                         <Table.Cell><Icon name='angle right' />Confirm Date</Table.Cell>
                                         <Table.Cell>{this.store.oprResponse.resp_confirm}</Table.Cell>
                                         <Table.Cell><Icon name='angle right' />IP</Table.Cell>
-                                        <Table.Cell>{this.store.oprResponse.ip}</Table.Cell>
+                                        <Table.Cell>{this.store.oprResponse.resp_ip}</Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
                                         <Table.Cell><Icon name='angle right' />Provider</Table.Cell>

@@ -141,9 +141,7 @@ class UserOperation extends Component {
                             <div class="description"><Icon name='angle right' />Balance : {this.store.oprResponse.resp_balance}</div>
                             <Divider></Divider>
                             <div class="description">
-                                <Form.Group widths='equal'>
-                                    <Form.Select fluid onChange={this.handleCountry} options={countryOptions} placeholder='Country' defaultValue={oprSearch.country}/>
-                                </Form.Group>
+                                현재 개발 진행 중입니다.
                             </div>
                         </form>
                     </Modal.Content>
@@ -236,7 +234,7 @@ class UserOperation extends Component {
 
                                     <Table.Body>
                                     <Table.Row>
-                                        <Table.Cell collapsing width={3}><Icon name='angle right' />User Name</Table.Cell>
+                                        <Table.Cell collapsing width={3}><Icon name='angle right' />Display Name</Table.Cell>
                                         <Table.Cell>{this.store.oprResponse.resp_username}</Table.Cell>
                                         <Table.Cell collapsing width={3}><Icon name='angle right' />Country</Table.Cell>
                                         <Table.Cell>{this.store.oprResponse.resp_country}</Table.Cell>
@@ -254,9 +252,9 @@ class UserOperation extends Component {
                                         <Table.Cell>{this.store.oprResponse.resp_permission}</Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
-                                        <Table.Cell><Icon name='angle right' />Paid Balance</Table.Cell>
+                                        <Table.Cell><Icon name='angle right' />Paid Coin Balance</Table.Cell>
                                         <Table.Cell>{this.store.oprResponse.resp_paid}</Table.Cell>
-                                        <Table.Cell><Icon name='angle right' />Free Balance</Table.Cell>
+                                        <Table.Cell><Icon name='angle right' />Free Coin Balance</Table.Cell>
                                         <Table.Cell>{this.store.oprResponse.resp_free}</Table.Cell>
                                     </Table.Row>
                                     <Table.Row>

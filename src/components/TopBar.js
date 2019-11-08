@@ -138,7 +138,7 @@ export default class TopBar extends Component {
 			OpPane = (
 				<Menu.Menu>
 					{ loggedInUserInfo.permission !== 'publisher'  ? <Menu.Item name='Operation' active={activeItem === 'Operation'} onClick={this.handleItemClick}>
-						<Dropdown item text='Operation' size='mini' >
+						<Dropdown item text='Operation(개발중)' size='mini' >
 							<Dropdown.Menu>
 								<Dropdown.Item name='op/user' onClick={this.handleItemClick.bind(this)}>Operation User</Dropdown.Item>
 							</Dropdown.Menu>

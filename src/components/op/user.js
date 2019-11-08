@@ -141,7 +141,7 @@ class UserOperation extends Component {
                             <div class="description"><Icon name='angle right' />Balance : {this.store.oprResponse.resp_balance}</div>
                             <Divider></Divider>
                             <div class="description">
-                                현재 개발 진행 중입니다.
+                                현재 개발 진행 중입니다..
                             </div>
                         </form>
                     </Modal.Content>

@@ -54,8 +54,8 @@ export default class NewKpiState {
         } else {
             var myChart = echarts.init(document.getElementById('chart'));
 
-            var legend = ['china', 'japan', 'korea',  'taiwan', 'total', 'thailand']
-            var color = ['#2f4554', '#0ef9e2', '#5af70c', '#108ce5', '#ca8622', '#6e7074', '#f7270c']
+            var legend = ['china', 'japan', 'korea',  'taiwan', 'total', 'thailand', 'vietnam']
+            var color = ['#2f4554', '#0ef9e2', '#5af70c', '#108ce5', '#ca8622', '#6e7074', '#848484', '#FFFF00']
 
              // series
             var lseries = new Object();
@@ -147,21 +147,22 @@ export default class NewKpiState {
                             // i==4 namerica
                             // i==5 taiwan
                             // i==6 total
-
                             // i==7 thailand
+                            // I==8 vietnam
+
                             lseries.name = Object.keys(response.data.data[j])[i];
                             lseries.type = 'line';
                             lseries.label = {normal: {show: false,}};
                             lseries.color = color[i];
 
                             switch (i) {
-                                case 1: // korea
+                                case 1: // china
                                     ldata.push(response.data.data[j].china);
                                     break;
-                                case 2: // china
+                                case 2: // japan
                                     ldata.push(response.data.data[j].japan);
                                     break;
-                                case 3: // japan
+                                case 3: // korea
                                     ldata.push(response.data.data[j].korea);
                                     break;
                                 case 4: // taiwan
@@ -170,11 +171,14 @@ export default class NewKpiState {
                                 case 5: // namerica
                                     ldata.push(response.data.data[j].taiwan);
                                     break;
-                                case 6: // total
-                                    ldata.push(response.data.data[j].total);
-                                    break;
                                 case 7: // thailand
                                     ldata.push(response.data.data[j].thailand);
+                                    break;
+                                case 8: // vietnam
+                                    ldata.push(response.data.data[j].thailand);
+                                    break;
+                                case 6: // total
+                                    ldata.push(response.data.data[j].total);
                                     break;
                             }
 
@@ -301,6 +305,19 @@ export default class NewKpiState {
                             //width: 200,
                             //headerFilter:true,
                         },
+
+                        {
+                            title: "Vietnam",
+                            //formatter: "rownum",
+                            field: "vietnam",
+                            align: "center",
+                            formatter: function(cell, formatterParams) {
+                                //return '₩ '+numeral(cell.getValue()).format('0,0');
+                                return numeral(cell.getValue()).format('0,0');
+                            }
+                            //width: 200,
+                            //headerFilter:true,
+                        },
                         
                         {
                             title: "Total",
@@ -372,17 +389,13 @@ export default class NewKpiState {
                 }
 
                 //table.setData(response.data.data);
-
                 this.setLoading('off');
 
             } catch (error) {
                 this.setLoading('off');
                 console.error(error);
             }
-
         }
-
-        
     }
 
 

@@ -61,7 +61,6 @@ export default class App extends Component {
 						<Route path="/resource/list" {...this.store.appState.authenticated}  component={List} />
 						<Route path="/resource/detail" {...this.store.appState.authenticated} component={Detail} />
 
-						<Route path="/kpi/listKpi" {...this.store.appState.authenticated} component={Kpi} />
 						<Route path="/kpi/newkpi" {...this.store.appState.authenticated} component={NewKpi} />
 						<Route path="/kpi/userKpi" {...this.store.appState.authenticated} component={UserKpi} />
 						<Route path="/kpi/salesKpi" {...this.store.appState.authenticated} component={SalesKpi} />

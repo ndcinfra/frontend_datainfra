@@ -54,8 +54,8 @@ export default class NewKpiState {
         } else {
             var myChart = echarts.init(document.getElementById('chart'));
 
-            var legend = ['china', 'japan', 'korea',  'taiwan', 'total', 'thailand', 'vietnam']
-            var color = ['#2f4554', '#0ef9e2', '#5af70c', '#108ce5', '#ca8622', '#6e7074', '#848484', '#FFFF00']
+            var legend = ['china', 'japan', 'korea',  'taiwan', 'thailand', 'vietnam', 'total']
+            var color = ['#2f4554', '#0ef9e2', '#5af70c', '#108ce5', '#ca8622', '#D1B2FF', '#CCA63D', '#6e7074']
 
              // series
             var lseries = new Object();
@@ -165,17 +165,17 @@ export default class NewKpiState {
                                 case 3: // korea
                                     ldata.push(response.data.data[j].korea);
                                     break;
-                                case 4: // taiwan
+                                case 4: // namerica
                                     ldata.push(response.data.data[j].namerica);
                                     break;
-                                case 5: // namerica
+                                case 5: // taiwan
                                     ldata.push(response.data.data[j].taiwan);
                                     break;
                                 case 7: // thailand
                                     ldata.push(response.data.data[j].thailand);
                                     break;
                                 case 8: // vietnam
-                                    ldata.push(response.data.data[j].thailand);
+                                    ldata.push(response.data.data[j].vietnam);
                                     break;
                                 case 6: // total
                                     ldata.push(response.data.data[j].total);

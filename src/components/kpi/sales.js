@@ -15,7 +15,7 @@ class SalesKpi extends Component {
     constructor(props) {
         super(props);
 
-        this.store = this.props.store.kpiState;
+        this.store = this.props.store.newkpiState;
         const {history} = this.props;
         if (this.props.store.appState.loggedInUserInfo.permission === "publisher") {
             history.push("/");
@@ -82,72 +82,43 @@ class SalesKpi extends Component {
         ]
 
         return(
-            <Container style={{ marginTop: '5em', width: '95%' }}>
+            <Container style={{ marginTop: '5em', width: '100%' }}>
                 <Grid celled>
                     <Grid.Row>
-                        <Grid.Column width={3}>
-                           
-
-                            <Form size='mini'>
+                        <Grid.Column width={16}>
+                            <div class="ui message">
+                                <div class="header">매출통계 Sales KPI</div>
+                                <ul class="list">
+                                    <li class="content">REV: Revenue / ARPPU: Average Revenue Per Paid User / Bu: Buying User / P.rate: Purchase rate</li>
+                                </ul>
+                            </div>
+                        </Grid.Column>
+                        <Grid.Column width={16}>
+                            <div class="ui ignored positive message">
+                            <Form>
                                 <Form.Group widths='equal'>
-                                    <Form.Select fluid label='Country' onChange={this.handleCountry} options={countryOptions} placeholder='Country' defaultValue={searchKPI.country}/>
+                                    <Form.Select fluid onChange={this.handleCountry} options={countryOptions} placeholder='Country' defaultValue={searchKPI.country}/>
+                                    <Form.Field control={Input} placeholder='Start Date' value={searchKPI.from} onChange={this.handleInputFrom}/> ~ 
+                                    <Form.Field control={Input} placeholder='End Date' value={searchKPI.to} onChange={this.handleInputTo} />
+                                    <Form.Button color='violet' onClick={this.handleSearch.bind(this)}>Search</Form.Button>
                                 </Form.Group>
-                                <Divider></Divider>
-                                <Form.Field control={Input} placeholder='Start Date' value={searchKPI.from} onChange={this.handleInputFrom}/>
-                                <Form.Field control={Input} placeholder='End Date' value={searchKPI.to} onChange={this.handleInputTo} />
-
-                                <Form.Button color='violet' onClick={this.handleSearch.bind(this)}>Search</Form.Button>
-                            
-                                <Form.Field>
-                                    <Form.Radio
-                                        label='Daily'
-                                        value='day'
-                                        checked={searchKPI.kindCalendar === 'day'}
-                                        onChange={this.handleChange}
-                                    />
-                                </Form.Field>
-                                <Form.Field>
-                                    <Form.Radio
-                                        label='Weekly'
-                                        value='week'
-                                        checked={searchKPI.kindCalendar === 'week'}
-                                        onChange={this.handleChange}
-                                    />
-                                </Form.Field>
-                                <Form.Field>
-                                    <Form.Radio
-                                        label='Monthly'
-                                        value='month'
-                                        checked={searchKPI.kindCalendar === 'month'}
-                                        onChange={this.handleChange}
-                                    />
-                                </Form.Field>
-                                   
-                                
+                                <Form.Group>
+                                    <Form.Field control={Radio} name='radioGroup' label='Daily' value='day' checked={searchKPI.kindCalendar === 'day'} onChange={this.handleChange}></Form.Field>
+                                    <Form.Field control={Radio} name='radioGroup' label='Weekly' value='week' checked={searchKPI.kindCalendar === 'week'} onChange={this.handleChange}></Form.Field>
+                                    <Form.Field control={Radio} name='radioGroup' label='Monthly' value='month' checked={searchKPI.kindCalendar === 'month'} onChange={this.handleChange}></Form.Field>
+                                </Form.Group>
                             </Form>
+                            </div>
                         </Grid.Column>
                     
-                        <Grid.Column width={13}>
-                        <label>* 매출통계 Sales KPI</label>
-                        <br/>
-                        <br/>
-                        <label>     REV: Revenue (각 나라의 금액입니다.)</label>
-                        <br/>
-                        <label>     ARPPU: Average Revenue Per Paid User</label> 
-                        <br/>
-                        <label>     Bu: Buying User </label>
-                        <br/>
-                        <label>     P.rate: Purchase rate</label>
-                        <br/>
-
-                        <Divider section />
+                        <Grid.Column width={16}>
                             <div id="chart_sale" style={{width:'100%', height:'400px'}} ></div>
-
-                            <div className="table-controls">
-                                <button id="download-csv">Download CSV</button>
-                            </div>
-                            
+                            <br />
                             <div id="tabulator_sale"></div>
+                            <br />
+                            <div className="table-controls">
+                                <button id="download-csv" class="ui yellow button">Download CSV</button>
+                            </div>
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>

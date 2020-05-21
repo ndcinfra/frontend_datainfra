@@ -65,9 +65,11 @@ export default class Home extends Component {
 				<main>
 					<div className="section-header">
 						<h3><font color="green">Naddic Games</font></h3>
-						<hr />
+						<br />
+						<img src='http://gwx.bizmeka.com/Upload_LoginImage/%7B78827A05-A152-4E84-94CA-96E3B88EDF7F%7D_293.jpg'></img>
+						<br /><br />
 						<h3>Infra</h3>
-						<hr />
+						<br />
 					</div>
 				</main>
 			</div>

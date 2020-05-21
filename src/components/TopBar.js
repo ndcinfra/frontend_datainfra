@@ -5,7 +5,7 @@ import { Link, withRouter } from "react-router-dom";
 import TopNav from "./TopNav";
 import Button from "./ui/Button";
 
-import { Menu, Container, Dropdown, Icon, Image,Header } from 'semantic-ui-react';
+import { Menu, Container, Dropdown, Icon, Image, Header, Segment, Divider } from 'semantic-ui-react';
 
 @withRouter
 @inject("store")
@@ -91,13 +91,13 @@ export default class TopBar extends Component {
 
 		if(authenticated) {
 			Viewpane = (
-				<Menu.Menu position='right'>
-					<Menu.Item >
+				<Menu.Menu position='right' size='mini'>
+					<Menu.Item>
 						<Image src={loggedInUserInfo.gravatar} size='mini' circular />
-						<Dropdown item text={loggedInUserInfo.displayname} size='mini' >
+						<Dropdown item text={loggedInUserInfo.displayname} size='mini' item simple>
 							<Dropdown.Menu>
 								<Dropdown.Item name='profile' onClick={this.handleItemClick.bind(this)}>My Profile</Dropdown.Item>
-								
+								<Dropdown.Divider />
 								<Dropdown.Item onClick={this.handleLogout.bind(this)}>Sign Out</Dropdown.Item>
 							</Dropdown.Menu>
 						</Dropdown>
@@ -106,12 +106,12 @@ export default class TopBar extends Component {
 			)
 
 			Resourcepane = (
-				<Menu.Menu>
+				<Menu.Menu size='mini'>
 					<Menu.Item name='resource' active={activeItem === 'resource'} onClick={this.handleItemClick}>
 						<Dropdown item text='Resource' size='mini' >
 							<Dropdown.Menu>
 								{ loggedInUserInfo.permission === 'radmin' ? <Dropdown.Item name='resource/register' onClick={this.handleItemClick.bind(this)}>Register</Dropdown.Item>:null}
-								
+								<Dropdown.Divider />
 								<Dropdown.Item name='resource/list' onClick={this.handleItemClick.bind(this)}>List</Dropdown.Item>
 							</Dropdown.Menu>
 						</Dropdown>
@@ -120,13 +120,16 @@ export default class TopBar extends Component {
 			)
 
 			kpiPane = (
-				<Menu.Menu>
+				<Menu.Menu size='mini'>
 					{ loggedInUserInfo.permission !== 'publisher'  ? <Menu.Item name='KPI' active={activeItem === 'KPI'} onClick={this.handleItemClick}>
 						<Dropdown item text='KPI' size='mini' >
 							<Dropdown.Menu>
 								<Dropdown.Item name='kpi/newkpi' onClick={this.handleItemClick.bind(this)}>Dashboard</Dropdown.Item>
+								<Dropdown.Divider />
 								<Dropdown.Item name='kpi/userKpi' onClick={this.handleItemClick.bind(this)}>유저통계 (User KPI)</Dropdown.Item>
+								<Dropdown.Divider />
 								<Dropdown.Item name='kpi/salesKpi' onClick={this.handleItemClick.bind(this)}>매출통계 (Sales KPI)</Dropdown.Item>
+								<Dropdown.Divider />
 								<Dropdown.Item name='kpi/salesDetail' onClick={this.handleItemClick.bind(this)}>기타 (Etc. for Thai and Viet)</Dropdown.Item>
 							</Dropdown.Menu>
 						</Dropdown>
@@ -135,7 +138,7 @@ export default class TopBar extends Component {
 			)
 
 			OpPane = (
-				<Menu.Menu>
+				<Menu.Menu size='mini'>
 					{ loggedInUserInfo.permission !== 'publisher'  ? <Menu.Item name='Operation' active={activeItem === 'Operation'} onClick={this.handleItemClick}>
 						<Dropdown item text='Operation(개발중)' size='mini' >
 							<Dropdown.Menu>
@@ -148,8 +151,9 @@ export default class TopBar extends Component {
 
 		}else{
 			Viewpane = (
-				<Menu.Menu position='right'>
+				<Menu.Menu position='right' size='mini'>
 					<Menu.Item name='login' active={activeItem === 'login'} onClick={this.handleItemClick} />
+					<Dropdown.Divider />
 					<Menu.Item name='signup' active={activeItem === 'signup'} onClick={this.handleItemClick} />
 				</Menu.Menu>
 			)
@@ -158,12 +162,14 @@ export default class TopBar extends Component {
 
 		return (
 			<div>
-				<Menu size='tiny' pointing borderless={true} fixed='top'>
-					<Menu.Item name='home' active={activeItem === 'home'} onClick={this.handleItemClick} />
-					{loggedInUserInfo.displayname != 'theBoss' ? Resourcepane : null }
-					{kpiPane}
-					{OpPane}
-					{Viewpane}
+				<Menu size='mini' borderless={true} fixed='top' inverted>
+					<Container style={{ marginTop: '0em' }}>
+						<Menu.Item as='a' header name='home' onClick={this.handleItemClick} />
+						{loggedInUserInfo.displayname != 'theBoss' ? Resourcepane : null }
+						{kpiPane}
+						{OpPane}
+						{Viewpane}
+					</Container>
 				</Menu>
 			</div>
 		);

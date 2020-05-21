@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { Redirect } from "react-router-dom";
 
-import { Container, Button, Dimmer, Loader, Header, Grid, Form, Segment, Input, Divider, Message, Icon } from 'semantic-ui-react'
+import { Container, Button, Dimmer, Loader, Header, Grid, Form, Segment, Input, Divider, Message, Icon, Image } from 'semantic-ui-react'
+
 
 import redirect from '../../lib/redirect';
 
@@ -100,20 +101,24 @@ export default class Login extends Component {
         )
 
 		return (
-			<Container text style={{ marginTop: '5em' }} >
-				{ loading === 'on' ? loaderView : null  }
+			<Container text style={{ marginTop: '0em' }}>
+				{ loading === 'on' ? loaderView : null }
 				<div>
 					{ errorFlashView }
 					{ successFlashView }
 				</div>
-				<Grid textAlign='center' style={{ height: '100%' }} verticalAlign='middle' >
+				<Grid textAlign='center' style={{ height: '100vh' }} verticalAlign='middle' >
 					
 					<Grid.Column style={{ maxWidth: 450 }}>
-					<Header as='h2' textAlign='center'>SIGN IN</Header>
+						<Header as='h4' color='teal' textAlign='center'>
+						Login to your account
+						</Header>
+
 						<Form size='large'>
-							<Segment>
+							<Segment stacked>
 								<Form.Field>
 									<Input 
+										fluid
 										icon='user' 
 										iconPosition='left' 
 										placeholder='Display name.(Nick name)' 
@@ -124,6 +129,7 @@ export default class Login extends Component {
 								</Form.Field>
 								<Form.Field>
 									<Input 
+										fluid
 										icon='lock' 
 										iconPosition='left' 
 										placeholder='Password' 
@@ -140,12 +146,14 @@ export default class Login extends Component {
 									<div></div>
                                 </Form.Field>
 								<div>
-									<Button color='violet' fluid size='small' onClick={this.handelLogin.bind(this)}>SIGN IN</Button>
+									<Button color='teal' fluid size='small' onClick={this.handelLogin.bind(this)}>LOGIN</Button>
 								</div>
 							</Segment>
 						</Form>
 						<Message>
-							<a style={{ cursor: 'pointer', color: 'blue' }} onClick={this.handleForgotPassword.bind(this)}>Forgot Password?</a> | New to us?  <a style={{ cursor: 'pointer', color: 'blue' }} onClick={this.handleGotoSignup.bind(this)}>Sign up</a>
+							<a style={{ cursor: 'pointer', color: 'teal' }} onClick={this.handleForgotPassword.bind(this)}>Forgot Password?</a>
+							<br />
+							New to us?  <a style={{ cursor: 'pointer', color: 'teal' }} onClick={this.handleGotoSignup.bind(this)}>Sign up</a>
                         </Message>
 					</Grid.Column>
 				</Grid>

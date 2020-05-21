@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from "mobx-react";
 import { Link, withRouter } from "react-router-dom";
 
-import { Dimmer, Checkbox, Dropdown, Container,Button, Input, Form,Grid, Radio, Loader, Label,Divider ,Header, Icon} from 'semantic-ui-react'
+import { Dimmer, Checkbox, Dropdown, Container, Button, Input, Form, Grid, Radio, Loader, Label, Divider, Header, Icon} from 'semantic-ui-react'
 
 var echarts = require('echarts');
 
@@ -15,7 +15,7 @@ class SalesDetail extends Component {
     constructor(props) {
         super(props);
 
-        this.store = this.props.store.kpiState;
+        this.store = this.props.store.newkpiState;
         const {history} = this.props;
         if (this.props.store.appState.loggedInUserInfo.permission === "publisher") {
             history.push("/");
@@ -76,67 +76,42 @@ class SalesDetail extends Component {
         ]
 
         return(
-            <Container style={{ marginTop: '5em', width: '95%' }}>
+            <Container style={{ marginTop: '5em', width: '100%' }}>
                 <Grid celled>
                     <Grid.Row>
-                        <Grid.Column width={3}>
-                           
-
-                            <Form size='mini'>
+                        <Grid.Column width={16}>
+                            <div class="ui message">
+                                <div class="header">TOP 50 Sales Items</div>
+                                <ul class="list">
+                                    <li class="content">태국과 베트남만 지원 합니다. (타 국가는 자체 서비스 개시 후, 취합됩니다.)</li>
+                                    <li class="content">판매 금액은 5월21일부터 집계됩니다.</li>
+                                </ul>
+                            </div>
+                        </Grid.Column>
+                        <Grid.Column width={16}>
+                            <div class="ui ignored positive message">
+                            <Form>
                                 <Form.Group widths='equal'>
-                                    <Form.Select fluid label='Country' onChange={this.handleCountry} options={countryOptions} placeholder='Country' defaultValue={searchKPI.country}/>
+                                    <Form.Select fluid onChange={this.handleCountry} options={countryOptions} placeholder='Country' defaultValue={searchKPI.country}/>
+                                    <Form.Field control={Input} placeholder='Start Date' value={searchKPI.from} onChange={this.handleInputFrom}/> ~ 
+                                    <Form.Field control={Input} placeholder='End Date' value={searchKPI.to} onChange={this.handleInputTo} />
+                                    <Form.Button color='violet' onClick={this.handleSearch.bind(this)}>Search</Form.Button>
                                 </Form.Group>
-                                <Divider></Divider>
-                                <Form.Field control={Input} placeholder='Start Date' value={searchKPI.from} onChange={this.handleInputFrom}/>
-                                <Form.Field control={Input} placeholder='End Date' value={searchKPI.to} onChange={this.handleInputTo} />
-
-                                <Form.Button color='violet' onClick={this.handleSearch.bind(this)}>Search</Form.Button>
-                            
-                                <Form.Field>
-                                    <Form.Radio
-                                        label='Daily'
-                                        value='day'
-                                        checked={searchKPI.kindCalendar === 'day'}
-                                        onChange={this.handleChange}
-                                    />
-                                </Form.Field>
-                                <Form.Field>
-                                    <Form.Radio
-                                        label='Weekly'
-                                        value='week'
-                                        checked={searchKPI.kindCalendar === 'week'}
-                                        onChange={this.handleChange}
-                                    />
-                                </Form.Field>
-                                <Form.Field>
-                                    <Form.Radio
-                                        label='Monthly'
-                                        value='month'
-                                        checked={searchKPI.kindCalendar === 'month'}
-                                        onChange={this.handleChange}
-                                    />
-                                </Form.Field>
-                                   
-                                
+                                <Form.Group>
+                                    <Form.Field control={Radio} name='radioGroup' label='Daily' value='day' checked={searchKPI.kindCalendar === 'day'} onChange={this.handleChange} />
+                                    <Form.Field control={Radio} name='radioGroup' label='Weekly' value='week' checked={searchKPI.kindCalendar === 'week'} onChange={this.handleChange} />
+                                    <Form.Field control={Radio} name='radioGroup' label='Monthly' value='month' checked={searchKPI.kindCalendar === 'month'} onChange={this.handleChange} />
+                                </Form.Group>
                             </Form>
+                            </div>
                         </Grid.Column>
                     
-                        <Grid.Column width={13}>
-                            <label>* 기타 통계 입니다.</label>
-                            <br/>
-                            <label>* 태국 과 베트남만 지원 합니다.</label>
-                            <br/>
-                            <br/>
-
-                            <Divider section />
-                                <label>1. TOP 50 Sales Items</label>
-                                <br/><br/>
-                                <div className="table-controls">
-                                    <button id="download-csv">Download CSV</button>
-                                </div>
-                                <div id="tabulator_saleItems"></div>
-                                
-                            <Divider section />
+                        <Grid.Column width={16}>
+                            <div id="tabulator_saleItems"></div>
+                            <br />
+                            <div className="table-controls">
+                                <button id="download-csv" class="ui yellow button">Download CSV</button>
+                            </div>
 
                         </Grid.Column>
                     </Grid.Row>

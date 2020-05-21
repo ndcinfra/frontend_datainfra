@@ -912,18 +912,17 @@ export default class NewKpiState {
         } else {
 
             try {
-
-                console.log("before call: ", this.searchKPI);
-
+                console.log("before call 0: ", this.searchKPI);
                 const response = await KpiAPI.getItemSaleKPI(this.searchKPI);
-
-                console.log("after call: ", response.data.data);
+                console.log("after call 1: ", response.data.data);
 
                 //csv
                 //trigger download of data.csv file
                 $("#download-csv").click(function(){
                     table.download("csv", "data.csv");
                 });
+
+                console.log("after call 2: ", response.data.data);
 
                 /* table */
                 var table = new Tabulator("#tabulator_saleItems", {
@@ -968,9 +967,16 @@ export default class NewKpiState {
                             formatter: function(cell, formatterParams) {
                                 return numeral(cell.getValue()).format('0,0');
                             }
-                        }
+                        },
+                        {
+                            title: "Amount",
+                            field: "amount",
+                            align: "center",
+                            formatter: function(cell, formatterParams) {
+                                return numeral(cell.getValue()).format('0,0');
+                            }
+                        },
                     ],
-                
                 });
         
                 table.setData(response.data.data);

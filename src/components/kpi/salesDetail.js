@@ -73,6 +73,7 @@ class SalesDetail extends Component {
         const countryOptions = [
             { key: 'th', value: 'THAILAND', flag: 'th', text: 'Thailand' },
             { key: 'vn', value: 'VIETNAM', flag: 'vn', text: 'Vietnam' },
+            { key: 'jp', value: 'JAPAN', flag: 'jp', text: 'Japan' },
         ]
 
         return(

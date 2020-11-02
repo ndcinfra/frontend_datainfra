@@ -77,6 +77,7 @@ class UserKpi extends Component {
             { key: 'cn', value: 'CHINA', flag: 'cn', text: 'China' },
             { key: 'jp', value: 'JAPAN', flag: 'jp', text: 'Japan' },
             { key: 'tw', value: 'TAIWAN', flag: 'tw', text: 'Taiwan' },
+            { key: 'na', value: 'NAMERICA', flag: 'na', text: 'NAmerica' },
         ]
 
         return(

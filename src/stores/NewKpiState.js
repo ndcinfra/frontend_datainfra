@@ -54,8 +54,8 @@ export default class NewKpiState {
         } else {
             var myChart = echarts.init(document.getElementById('chart'));
 
-            var legend = ['china', 'japan', 'korea',  'taiwan', 'thailand', 'vietnam', 'total']
-            var color = ['#2f4554', '#0ef9e2', '#5af70c', '#108ce5', '#ca8622', '#D1B2FF', '#CCA63D', '#6e7074']
+            var legend = ['china', 'japan', 'korea',  'taiwan', 'thailand', 'vietnam', 'NAmerica', 'total']
+            var color = ['#2f4554', '#0ef9e2', '#5af70c', '#108ce5', '#ca8622', '#D1B2FF', '#CCA63D', '#FF48FF', '#6e7074']
 
              // series
             var lseries = new Object();
@@ -81,10 +81,10 @@ export default class NewKpiState {
                     text = 'New registered users (신규등록유저)';
                     break;
                 case 'nad':
-                    text = 'Revenue Korea - ₩ (한국수익)';
+                    text = 'Revenue Korea - ₩ (예상나딕수익)';
                     break;
             }
-
+2
             // specify chart configuration item and data
             var option = {
                 title: {
@@ -278,8 +278,6 @@ export default class NewKpiState {
                             //width: 200,
                             //headerFilter:true,
                         },
-                        
-                        /*
                         {
                             title: "North America",
                             //formatter: "rownum",
@@ -292,7 +290,6 @@ export default class NewKpiState {
                             //width: 200,
                             //headerFilter:true,
                         },
-                        */
                         {
                             title: "Thailand",
                             //formatter: "rownum",

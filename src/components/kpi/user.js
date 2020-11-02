@@ -71,13 +71,13 @@ class UserKpi extends Component {
         const { option, searchKPI, loading } = this.store;
 
         const countryOptions = [
+            { key: 'kr', value: 'KOREA', flag: 'kr', text: 'Korea' },
+            { key: 'jp', value: 'JAPAN', flag: 'jp', text: 'Japan' },
+            { key: 'cn', value: 'CHINA', flag: 'cn', text: 'China' },
+            { key: 'na', value: 'NAMERICA', flag: 'na', text: 'NAmerica' },
+            { key: 'tw', value: 'TAIWAN', flag: 'tw', text: 'Taiwan' },
             { key: 'th', value: 'THAILAND', flag: 'th', text: 'Thailand' },
             { key: 'vn', value: 'VIETNAM', flag: 'vn', text: 'Vietnam' },
-            { key: 'kr', value: 'KOREA', flag: 'kr', text: 'Korea' },
-            { key: 'cn', value: 'CHINA', flag: 'cn', text: 'China' },
-            { key: 'jp', value: 'JAPAN', flag: 'jp', text: 'Japan' },
-            { key: 'tw', value: 'TAIWAN', flag: 'tw', text: 'Taiwan' },
-            { key: 'na', value: 'NAMERICA', flag: 'na', text: 'NAmerica' },
         ]
 
         return(

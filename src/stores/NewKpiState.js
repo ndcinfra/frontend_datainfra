@@ -54,8 +54,8 @@ export default class NewKpiState {
         } else {
             var myChart = echarts.init(document.getElementById('chart'));
 
-            var legend = ['china', 'japan', 'korea',  'taiwan', 'thailand', 'vietnam', 'NAmerica', 'total']
-            var color = ['#2f4554', '#0ef9e2', '#5af70c', '#108ce5', '#ca8622', '#D1B2FF', '#CCA63D', '#FF48FF', '#6e7074']
+            var legend = ['korea',  'china', 'japan', 'Namerica', 'taiwan', 'thailand', 'vietnam', 'total']
+            var color = ['#2f4554', '#0ef9e2', '#5af70c', '#108ce5', '#ca8622', '#D1B2FF', '#CCA63D', '#6e7074'] //, '#FF48FF'
 
              // series
             var lseries = new Object();

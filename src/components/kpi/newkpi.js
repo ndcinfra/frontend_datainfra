@@ -97,7 +97,7 @@ class NewKpi extends Component {
                                     <li class="content">이 데이터는 취소/환불/보상 등의 내용은 반영되지 않은 데이터입니다. (취합 시작일 : 2019-03-22)</li>
                                     <li class="content">타 국가의 경우 고정 환율 또는 취합일 환율을 적용해서 원화로 계산 된 데이터 입니다.</li>
                                     <li class="content">Invalid date는 세로 합계 금액이고, 세로 금액 합계와 Monthly등 조회 등은 Revenue / New Users 등 3개 메뉴만 가능합니다.</li>
-                                    <li class="content">데이터 취합 시간 - 한국 10:30, 중국 13:30, 기타 09:00 이전</li>
+                                    <li class="content">데이터 취합 시간 - 한국 10:30, 중국 13:30, 기타 09:30 이전</li>
                                 </ul>
                             </div>
                         </Grid.Column>

@@ -71,10 +71,10 @@ class SalesDetail extends Component {
         const { option, searchKPI, loading } = this.store;
 
         const countryOptions = [
-            { key: 'th', value: 'THAILAND', flag: 'th', text: 'Thailand' },
-            { key: 'vn', value: 'VIETNAM', flag: 'vn', text: 'Vietnam' },
             { key: 'jp', value: 'JAPAN', flag: 'jp', text: 'Japan' },
             { key: 'na', value: 'NAMERICA', flag: 'na', text: 'NAmerica' },
+            { key: 'th', value: 'THAILAND', flag: 'th', text: 'Thailand' },
+            { key: 'vn', value: 'VIETNAM', flag: 'vn', text: 'Vietnam' },
         ]
 
         return(
